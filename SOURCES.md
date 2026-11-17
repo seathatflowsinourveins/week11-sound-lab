@@ -1,0 +1,41 @@
+# Class sources and technical decisions
+
+Checked November 16, 2026, America/New_York. Raw retrieval metadata and hashes stay in the local private evidence folder, outside this deployment.
+
+## Current assignment
+
+Primary assignment: [Mimi 07, Week 11](https://github.com/ITPNYU/ICM-2026-Media/wiki/Homework-Mimi-07#week-11). Wiki HEAD `7cffd6b331387ed75be2c465670c74bf061b535d`; raw Mimi text SHA-256 `f4e4d7c5f206ff1987d94416062f0403c78e6acc0bf443342be9471f080905df`.
+
+The current section-specific assignment asks for a paired 60-second algorithmic sound piece without visuals, repeatable performance, at least two iterations, three timed observations, a spreadsheet and a collaboration/process blog. The example supplies a baseline plus two revisions. The learner must contribute their own listening, collaboration and creative revisions. If using random/noise, the class requires randomSeed(0)/noiseSeed(0). This score does not use either function.
+
+The [Mimi 07 spreadsheet](https://docs.google.com/spreadsheets/d/1TqhNlu4AAmWvD0IfCbzUodEX8H8MopFPTgSQbzteJak/edit?usp=sharing) is the section-specific destination. The local old Next-Assignment snapshot has a different generic spreadsheet and asks for three iterations. A web-crawled page was stale and still began at Week 10; direct raw GitHub HTTP retrieval returned 200 and the current Week 11 text. This contrary evidence is why the live Mimi section takes precedence.
+
+The assignment says “due next week.” The [section schedule](https://github.com/ITPNYU/ICM-2026-Media/blob/main/sections/07_Mimi.md), blob `169946e9602c181fba5e316d1483c6be4b9cce7d`, places sound on November 12 and next class on November 19, Thursday at 12:20 PM Eastern. The [syllabus](https://github.com/ITPNYU/ICM-2026-Media) says homework is due by next class unless specified otherwise. The displayed November 19 deadline is therefore an inference, labeled as such.
+
+[Sound Part 2](https://github.com/ITPNYU/ICM-2026-Media/blob/main/weeks/04_sound.md), captured blob `7dd1f0640e17a3f89ad81da4287ad03a7805285b`, supplies the maintained 2026 class examples. The older snapshot linked its 2024 counterpart. Class code is linked and credited, not republished as original work. The new melody, rhythm, arrangement and teaching prose are original examples. The scale uses the prior class table’s rounded ratios and a 262 Hz melody tonic (twice 131 Hz); this is not a claim of exact equal temperament.
+
+The preparation assignment still links the [2024 text tutorials](https://github.com/ITPNYU/ICM-2024-Media/blob/master/weeks/05_text.md#tutorials): strings, text analysis/word counting, and Markov chains/Ngrams. These remain labeled as next-class preparation.
+
+## Native approach and version checkpoint
+
+The existing study sites use native HTML/CSS/JavaScript with build-time Node and locally bundled p5. Retain this approach: no frontend framework, dependency installation, microphone permission, sound samples from third parties, backend or authentication is needed. Web Audio provides absolute note scheduling and envelopes directly. Compared with adding p5.sound, it avoids another sound runtime while keeping the algorithm readable and exportable as a complete p5 sketch. This is a scope/complexity decision, not a measured speed or learning-outcome claim.
+
+The optional p5 editor/local sketch bridge retains the verified class pin **p5 2.3.4**. npm latest at this checkpoint is **2.4.0**. Explicit hold: only noCanvas(), noLoop(), createP(), createButton() and mouseClicked() are used; no observed compatibility issue justifies changing the pin. Recheck when the class changes its runtime, one of these methods changes, or an observed compatibility issue warrants it; rerun applicable bridge/browser checks before adopting an update. The main lab and performance pages use native browser APIs and do not load p5 or p5.sound. Existing Week 10 remains unchanged.
+
+Current primary references: [p5 noCanvas](https://p5js.org/reference/p5/noCanvas/), [createButton](https://p5js.org/reference/p5/createButton/), [Web Audio specification](https://www.w3.org/TR/webaudio-1.1/), [AudioContext.resume](https://developer.mozilla.org/en-US/docs/Web/API/AudioContext/resume), [scheduled source start](https://developer.mozilla.org/en-US/docs/Web/API/AudioScheduledSourceNode/start), and [OfflineAudioContext](https://developer.mozilla.org/en-US/docs/Web/API/OfflineAudioContext). Context7 supplied maintained p5 source/documentation and Web Audio specification references. Source APIs in the vendored 2.3.4 bundle are checked separately from latest documentation.
+
+## Evidence boundaries
+
+Results are measured from the exact generated scores and mono PCM16 WAV files at 22,050 Hz. The build regenerates each score and WAV twice and compares them. Event counts, score hashes, WAV hashes, duration, sample peak and RMS are in results.json. A peak below 1 means the PCM samples do not clip; it does not imply a physical sound level. Theoretical overlap bounds are conservative sums of simultaneous voice gains.
+
+The PCM renderer uses a mathematical triangle; native Web Audio uses a band-limited oscillator. Their byte streams are not claimed identical. The optional browser check runs the actual native graph silently in OfflineAudioContext and compares repeated native renders within that browser. Speaker playback, perceptual quality, physical loudness, partner activity and learner listening logs are separate claims.
+
+Observed native-browser result: Chrome rendered all three nonempty scores without clipping and scheduled each for exactly 60 seconds. The 60.1-second offline buffer includes a 60 ms scheduling lead and 40 ms trailing room. Repeated native composition renders were **not byte-identical**: the strict check failed. In the detailed retry the largest sample difference was `1.4901161193847656e-8`, with RMS difference `3.7743419738814005e-10`; both renders had the same measured peak. This is below one PCM16 step (`1/32768`), but is preserved as a failed strict byte comparison. No cause is assumed. The exact event list and exported ideal PCM WAV passed their separate exact comparisons. Initial and detailed browser reports remain private evidence, and the on-page check exposes both the strict failure and measured difference.
+
+The first attempt to open an in-app browser reported it unavailable. Verification continued through the connected Chrome browser. Its extension-generated console errors were distinguished from this site's code; they did not establish a site failure. The complete bundled p5 sketch was separately opened and its real Play/Stop controls changed the displayed audio state. Device-specific audible quality has not been asserted.
+
+Deployment dependency checkpoint: the previous Week 10 action pins were older majors. Current official release/tag APIs supplied checkout v7.0.1 (`3d3c42e5aac5ba805825da76410c181273ba90b1`), setup-node v7.1.0 (`949feb2413d6458794dcd2491c4babbbce0c15c1`), upload-pages-artifact v5.0.0 (`fc324d3547104276b827a68afc52ff2a11cc49c9`), and deploy-pages v5.0.1 (`368f82528645a54fb793d4d04e342629a3f51346`). This new repository pins those revisions. Their live READMEs still showed older usage examples; input names were checked against the selected implementation. Node 22 builds are checked independently from the local Node 26.13 runtime.
+
+The illustrated four-section hero is a conceptual plan, not measured audio. The performance page has no canvas, waveform or animated visualization. Exported drafts keep missing learner work as explicit placeholders. The notebook performs no class uploads or external messages.
+
+Third-party notices: the project kit includes p5’s original license, and the original project code uses the included MIT license. Google Fonts serves DM Sans and Manrope; system fallbacks remain usable offline.

@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#101614">
+  <meta name="description" content="Learn Week 11 sound through three playable experiments, a sixty-second composition, clear code explanations and measured results.">
+  <title>Week 11 · A minute, made by rules</title>
+  <link rel="stylesheet" href="lab.css">
+  <script defer src="composer.js"></script><script defer src="transport.js"></script>
+  <script defer src="results.js"></script><script defer src="lab.js"></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to the composition</a>
+  <header class="site-header"><a class="wordmark" href="#">ICM <span>/ SOUND LAB</span></a>
+    <nav aria-label="Main"><a href="#experiments">Experiments</a><a href="#explain">Understand</a><a href="#results">Results</a><a href="#notebook">Your homework</a></nav>
+    <a class="week-link" href="https://seathatflowsinourveins.github.io/week10-sound-studio/">← Week 10</a>
+  </header>
+  <main id="main">
+    <section class="hero">
+      <div><p class="eyebrow">WEEK 11 · ALGORITHMIC SOUND</p><h1>A minute,<br>made by <em>rules.</em></h1>
+        <p class="intro">Give the computer a small musical idea. Let repetition, rhythm and change turn it into a 60-second composition.</p>
+        <div class="actions"><button class="primary" id="hero-play">Listen to the final piece <span aria-hidden="true">↗</span></button><a class="text-link" href="#experiments">Start with experiment 01 ↓</a></div>
+        <p class="small muted">Sound begins when you press Play. Every replay follows the same score.</p>
+      </div>
+      <div class="score-card" aria-label="Composition plan: four fifteen-second sections">
+        <div class="card-top"><span>THE COMPOSITION</span><span class="dot-label">READY TO LISTEN</span></div>
+        <div class="minute"><strong>60</strong><span>seconds<br>four small chapters</span></div>
+        <div class="score-art" aria-hidden="true">
+          <div class="score-grid"><span>01</span><i style="--n:20%"></i><i style="--n:35%"></i><i style="--n:25%"></i><i style="--n:45%"></i><i style="--n:20%"></i><i style="--n:35%"></i></div>
+          <div class="score-grid"><span>02</span><i style="--n:40%"></i><i style="--n:65%"></i><i style="--n:35%"></i><i style="--n:75%"></i><i style="--n:45%"></i><i style="--n:65%"></i></div>
+          <div class="score-grid"><span>03</span><i style="--n:75%"></i><i style="--n:55%"></i><i style="--n:90%"></i><i style="--n:65%"></i><i style="--n:85%"></i><i style="--n:70%"></i></div>
+          <div class="score-grid"><span>04</span><i style="--n:45%"></i><i style="--n:35%"></i><i style="--n:30%"></i><i style="--n:20%"></i><i style="--n:15%"></i><i style="--n:8%"></i></div>
+        </div>
+        <div class="timeline"><span>00 Seed</span><span>15 Growth</span><span>30 Density</span><span>45 Return</span></div>
+        <p class="small muted">An illustrated plan for the piece, rather than a microphone or waveform measurement.</p>
+        <a class="text-link" href="performance.html">Open the audio-only performance →</a>
+      </div>
+    </section>
+    <aside class="assignment"><div><p class="eyebrow">WHAT YOU'RE MAKING</p><p>A paired, 60-second sound piece with a repeatable algorithm. At least <strong>two revisions</strong>, <strong>three timed listens</strong>, and a process blog.</p></div><a href="https://github.com/ITPNYU/ICM-2026-Media/wiki/Homework-Mimi-07#week-11">Read the class assignment ↗</a></aside>
+
+    <section id="experiments" class="section">
+      <div class="section-heading"><div><p class="eyebrow">01 / TRY, CHANGE, COMPARE</p><h2>One idea. Three experiments.</h2></div><p>Listen in order. Each version changes a musical rule, so you can hear what the code is doing.</p></div>
+      <div class="experiment-grid" id="experiment-cards"></div>
+      <div class="player" aria-label="Experiment player">
+        <div><span class="eyebrow">NOW SELECTED</span><h3 id="player-title">03 · A minute that develops</h3><p id="player-hint" class="muted">Four sections give the same idea a beginning, development and ending.</p></div>
+        <div class="play-controls"><button id="play" class="primary">Play 60 seconds</button><button id="stop">Stop</button><span id="clock" class="clock" aria-label="Elapsed time">00:00 / 01:00</span></div>
+        <p id="play-status" class="small" role="status">Ready. The teaching page can show diagrams; the performance page contains sound controls only.</p>
+        <div class="player-links"><a id="wav-link" href="audio/composition.wav" download>Download this WAV ↓</a><a id="sketch-link" href="sketches/composition.js" download>Get this p5 sketch ↓</a><a href="performance.html">Audio-only performance ↗</a></div>
+      </div>
+      <div class="listen-for"><span class="eyebrow">LISTEN FOR</span><p id="listen-for">Does the last section feel connected to the first? What changes at 15, 30 and 45 seconds?</p></div>
+    </section>
+
+    <section id="explain" class="section">
+      <div class="section-heading"><div><p class="eyebrow">02 / UNDERSTAND THE RULES</p><h2>From code to something you hear.</h2></div><p>An algorithm is a set of instructions. Here it chooses when a note happens, how high it is, and how long it lasts.</p></div>
+      <div class="explain-layout"><div class="recipe-nav" role="group" aria-label="Choose a code explanation" id="recipe-nav"></div><article class="code-card"><p id="recipe-label" class="eyebrow"></p><h3 id="recipe-title"></h3><pre><code id="recipe-code"></code></pre><p id="recipe-meaning"></p><div class="example" id="recipe-example"></div><p class="small muted" id="recipe-connection"></p></article></div>
+      <details class="details"><summary>How the whole composition works, in ordinary language</summary><p>First, build a list of timed notes. At 120 beats per minute, each beat lasts half a second; each half-beat slot lasts a quarter of a second. Sixty seconds contains 240 slots. The score chooses which slots contain notes and which contain silence.</p><p>Each note stores its time, duration, frequency, waveform and gain. Melody is the higher line. Bass supplies a lower reference. Pulse is a short, low tone marking a rhythm. Small fades at the beginning and end of each note reduce abrupt clicks.</p><p>For the final version, the slot number also chooses a 15-second section. Each section changes the density, register or waveform. The score is generated before playback, then scheduled using the browser's audio clock. A slow visual frame cannot change the intended note timing.</p><p>The algorithm does not use random numbers or noise. Its fixed arrays and arithmetic produce the same note list on every replay, without needing randomSeed() or noiseSeed(). If you add randomness in p5, use randomSeed(0) and noiseSeed(0), as the assignment requests.</p><p>The p5 download uses noCanvas() and noLoop() for the audio-only presentation. Its sound engine uses the browser's native Web Audio oscillators. This makes a computational composition rather than a recording played unchanged.</p></details>
+      <details class="details"><summary>Make it your own: three small, testable changes</summary><ol><li>In composer.js (or the engine at the top of the downloaded sketch), change one entry in the pitch-ratio or melody array. Replay and describe the changed note.</li><li>Change one rhythm condition. For example, an event every fourth slot becomes every eighth slot. Count the events and hear the wider spacing.</li><li>Change a section's waveform or gain. Keep the note timings the same, so you compare sound character independently of rhythm.</li></ol><p>The code snippets above explain the ideas. The downloaded sketch contains the complete working implementation. After changing the rules, rebuild your score and repeat the timed listening process.</p></details>
+    </section>
+
+    <section id="results" class="section">
+      <div class="section-heading"><div><p class="eyebrow">03 / WHAT THE PROGRAM PRODUCED</p><h2>Results you can check.</h2></div><p>These numbers come from the generated scores and rendered audio files. Your listening judgments belong in the notebook below.</p></div>
+      <div class="table-wrap"><table><caption class="sr-only">Measured score and PCM rendering results for all three experiments</caption><thead><tr><th>Experiment</th><th>WAV length</th><th>Note events</th><th>Peak amplitude</th><th>Same score twice?</th></tr></thead><tbody id="result-rows"></tbody></table></div>
+      <p class="small muted">Peak is the largest absolute PCM sample on a 0–1 scale, measured at 22,050 Hz. A sample peak below 1 means this file did not clip. It does not predict speaker volume. The WAV renderer uses ideal wave shapes; native browser oscillators may differ slightly, especially for triangle waves.</p>
+      <div class="result-notes" id="result-notes"></div>
+      <details class="details"><summary>Verify the native browser audio engine</summary><p>This silent check renders the scheduled Web Audio graph using OfflineAudioContext, then repeats the final piece and compares its audio bytes. It does not turn on a microphone or play through your speakers.</p><button id="browser-check">Run browser audio checks</button> <button id="download-check" disabled>Download check report</button><pre id="browser-report" role="status">Not run in this browser yet.</pre><p class="small muted">A successful offline render proves the browser made samples. Only a listening session can establish what you hear on your device.</p></details>
+      <a class="text-link" href="results.json" download>Download full build measurements and hashes ↓</a>
+    </section>
+
+    <section id="notebook" class="section">
+      <div class="section-heading"><div><p class="eyebrow">04 / FINISH YOUR HOMEWORK</p><h2>Listen. Notice. Write it down.</h2></div><p>The example is ready to study and adapt. Complete the firsthand parts with your partner before submitting.</p></div>
+      <div class="notebook-layout">
+        <div class="notebook-main">
+          <div class="notebook-block"><h3>1. Listen together to class examples</h3><p class="muted">Pick 2–3 things you actually notice: a rhythm, a sound character, a change over time.</p><label for="class-notes">Our observations and ideas to explore</label><textarea id="class-notes" data-note="classNotes" rows="3" placeholder="Which example? What did you notice? What could you try?"></textarea><div class="resource-links"><a href="https://editor.p5js.org/icm4.0/sketches/n8dJlFNOB">Melody Maker ↗</a><a href="https://editor.p5js.org/icm4.0/sketches/NArBLGfRM">Harmony Maker ↗</a><a href="https://editor.p5js.org/icm4.0/sketches/FzyRXOvyy">Modulo Drum ↗</a></div></div>
+          <div class="notebook-block"><h3>2. Compare the iterations</h3><p class="muted">The example already contains a baseline and two revisions. Explain what you hear, then make and document your own changes.</p><div id="iteration-fields"></div></div>
+          <div class="notebook-block"><h3>3. Three complete listens, with timestamps</h3><p class="muted">Play the final piece from the start. Use a new run for each listen. Record what you notice at specific seconds; do not fill these from predictions.</p><div class="listen-controls"><label for="run">Listening session</label><select id="run"><option value="1">Run 1</option><option value="2">Run 2</option><option value="3">Run 3</option></select><button id="start-listen">Play final piece from 0s</button><button id="stamp">Insert current timestamp</button></div><label for="listening-notes" id="listening-label">Run 1 observations</label><textarea id="listening-notes" rows="5" placeholder="00s — What do you hear?&#10;15s — What changed?&#10;30s — What do you notice?&#10;45s — How does it end?"></textarea><p id="run-completion" class="small muted">No complete playback recorded for this run in this browser.</p></div>
+          <div class="notebook-block"><h3>4. Explain how you worked together</h3><label for="my-work">What I did individually</label><textarea id="my-work" data-note="myWork" rows="2"></textarea><label for="partner-work">What my partner did individually</label><textarea id="partner-work" data-note="partnerWork" rows="2"></textarea><label for="shared-work">What we did together</label><textarea id="shared-work" data-note="sharedWork" rows="2"></textarea><label for="decision">Which version are you presenting, and why?</label><textarea id="decision" data-note="decision" rows="2" placeholder="Your decision after listening and revising."></textarea></div>
+        </div>
+        <aside class="homework-card"><p class="eyebrow">YOUR SUBMISSION</p><h3>Bring the piece and the process.</h3><p>Expected next class: <strong>Thu, Nov 19 · 12:20 PM Eastern</strong>. This date is inferred from the section schedule; the assignment says “due next week.”</p><ul class="checklist"><li>Pair work + class example observations</li><li>A repeatable 60-second sound piece</li><li>At least two algorithm revisions</li><li>Three timed listening logs</li><li>Class spreadsheet entries</li><li>A blog with individual + shared work</li></ul><label for="sketch-url">Your saved p5 sketch URL</label><input id="sketch-url" data-note="sketchUrl" type="url" placeholder="https://editor.p5js.org/…"><label for="blog-url">Your published process blog URL</label><input id="blog-url" data-note="blogUrl" type="url" placeholder="https://…"><div class="stack"><button id="export-csv">Export spreadsheet CSV</button><button id="export-blog">Download blog draft</button><button id="export-progress">Export my notebook</button><label class="file-label">Import notebook<input type="file" id="import-progress" accept="application/json,.json"></label></div><p id="save-status" class="small muted" role="status">Notes save in this browser. Export to move them to another device.</p><a href="https://docs.google.com/spreadsheets/d/1TqhNlu4AAmWvD0IfCbzUodEX8H8MopFPTgSQbzteJak/edit?usp=sharing">Open Mimi 07 class spreadsheet ↗</a><p class="small muted">Exports prepare your material. They do not upload or submit it.</p></aside>
+      </div>
+      <div class="handoff"><div><p class="eyebrow">SAVE YOUR OWN SKETCH</p><h3>A complete example you can take apart.</h3><p>Download the project kit, or open the final sketch and paste it into a new p5 editor sketch. Use p5 2.3.4; no sound files or p5.sound add-on are needed. Save your own version and copy its URL into your submission.</p><a class="text-link" href="p5.html">Preview the complete p5 sketch ↗</a></div><div class="stack"><a class="button primary" href="week11-project-kit.zip" download>Download project kit ↓</a><a class="button" href="https://editor.p5js.org/">Open p5 editor ↗</a><a class="text-link" href="sketches/composition.js" download>Just the final sketch ↓</a></div></div>
+    </section>
+    <section id="resources" class="section compact"><p class="eyebrow">PREPARE FOR THE NEXT CLASS</p><h2>After sound, words.</h2><p>Watch the three assigned text tutorials: JavaScript String Object, Text Analysis and Word Counting, and Introduction to Markov Chains and Ngrams (about 40 minutes total).</p><div class="resource-links"><a href="https://github.com/ITPNYU/ICM-2024-Media/blob/master/weeks/05_text.md#tutorials">Three assigned text tutorials ↗</a><a href="https://github.com/ITPNYU/ICM-2026-Media/blob/main/weeks/04_sound.md">Sound Part 2 + all class examples ↗</a><a href="SOURCES.md">Sources and version decisions ↗</a></div></section>
+  </main>
+  <footer><span>ICM / WEEK 11 · Original teaching example</span><span>Class source checked November 16, 2026 · <a href="README.md">About this lab</a></span></footer>
+</body></html>

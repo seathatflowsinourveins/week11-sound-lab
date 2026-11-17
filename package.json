@@ -1,0 +1,12 @@
+{
+  "name": "week11-sound-lab",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A beginner's algorithmic sound composition, experiments, explanations and listening notebook.",
+  "engines": {"node": ">=22"},
+  "scripts": {
+    "test": "node --test *.test.cjs",
+    "build": "node scripts/build.cjs",
+    "start": "node scripts/serve.cjs"
+  }
+}
