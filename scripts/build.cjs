@@ -28,7 +28,6 @@ const kit=[['index.html',kitHTML],['sketch.js',entries.get('sketches/composition
 for(const [name,data]of entries)if(/^(audio|scores)\//.test(name))kit.push([name,data]);
 for(const e of engine.experiments)kit.push(['experiments/'+e.id+'.js',entries.get('sketches/'+e.id+'.js')]);
 entries.set('week11-project-kit.zip',zip(kit));
-entries.set('.nojekyll',Buffer.alloc(0));
 const release=hash(Buffer.concat([...entries].sort(([a],[b])=>a.localeCompare(b)).flatMap(([name,data])=>[Buffer.from(name+'\0'),data]))).slice(0,16);
 for(const file of ['index.html','performance.html','p5.html']){let html=entries.get(file).toString();for(const asset of ['lab.css','lab.js','performance.js','composer.js','transport.js','results.js','sketches/composition.js'])html=html.replaceAll('"'+asset+'"','"'+asset+'?v='+release+'"');entries.set(file,Buffer.from(html));}
 const manifest={release,checked:'2026-11-16',p5:'2.3.4',files:[...entries].map(([name,data])=>({path:name,bytes:data.length,sha256:hash(data)})).sort((a,b)=>a.path.localeCompare(b.path))};
