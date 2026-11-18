@@ -18,7 +18,7 @@
   ];
   let current;
   let frame;
-  let playingNote = false;
+  let playback = 'excerpt';
 
   function create(tag, text, className) {
     const node = document.createElement(tag);
@@ -50,23 +50,29 @@
     },
     (state, detail) => {
       cancelAnimationFrame(frame);
+      const playingNote = playback === 'note';
       inspector.audioState(state, playingNote, detail);
+      comparison.audioState(state, playback === 'practice', detail);
       const busy = state === 'pending' || state === 'playing';
       element('play').disabled = busy;
       element('stop').disabled = !busy;
-      const trackCursor = state === 'playing' && !playingNote && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const trackCursor = state === 'playing' && playback === 'excerpt' && !matchMedia('(prefers-reduced-motion: reduce)').matches;
       element('plot-area').classList.toggle('playing', trackCursor);
       const messages = { playing: playingNote ? 'Playing one note' : 'Playing', pending: 'Starting…', ended: playingNote ? 'Note finished.' : 'Excerpt finished.' };
-      element('status').textContent = messages[state] ?? detail;
+      element('status').textContent = playback === 'practice' ? '' : messages[state] ?? detail;
       if (trackCursor) drawCursor();
     }
   );
   const inspector = NoteInspector.createInspector(element('note-inspector'), solo => {
-    playingNote = true;
+    playback = 'note';
     player.play(solo);
   }, () => {
-    if (playingNote && ['pending', 'playing'].includes(player.state)) player.stop('Stopped.');
+    if (playback === 'note' && ['pending', 'playing'].includes(player.state)) player.stop('Stopped.');
   });
+  const comparison = PracticeComparison(element('comparison'), clip => {
+    playback = 'practice';
+    player.play(clip);
+  }, () => player.stop('Stopped.'));
 
   function drawScore(score, stop) {
     const [from, until] = stop.window;
@@ -130,6 +136,7 @@
     player.stop('');
     const { experiment, experimentIndex, stop, stepIndex } = next;
     if (current?.experiment !== experiment) {
+      comparison.render(experiment.id);
       const stopLinks = experiment.stops.map(item => link('#' + experiment.id + '/' + item.id, item.label));
       element('stops').replaceChildren(...stopLinks);
     }
@@ -158,6 +165,7 @@
     element('previous').hidden = index === 0;
     element('previous').href = itinerary[Math.max(0, index - 1)].hash;
     const after = itinerary[index + 1];
+    element('homework-handoff').hidden = Boolean(after);
     element('next').href = after?.hash ?? 'index.html#notebook';
     element('next').textContent = !after ? 'Continue to your homework →'
       : after.experiment !== experiment ? 'Next experiment →' : 'Next step →';
@@ -165,11 +173,14 @@
   }
 
   element('play').addEventListener('click', () => {
-    playingNote = false;
+    playback = 'excerpt';
     const score = scores.get(current.experiment.id);
     player.play(makeExcerpt(score, ...current.stop.window));
   });
   element('stop').addEventListener('click', () => player.stop('Stopped.'));
+  document.querySelector('details.practice').addEventListener('toggle', event => {
+    if (!event.currentTarget.open && playback === 'practice' && ['playing','pending'].includes(player.state)) player.stop('Stopped.');
+  });
   window.addEventListener('hashchange', () => { if (location.hash !== '#work') render(true); });
   window.addEventListener('pagehide', () => player.stop(''));
   document.addEventListener('visibilitychange', () => { if (document.hidden) player.stop(''); });

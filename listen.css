@@ -88,6 +88,9 @@ h2 { font-size: clamp(1.9rem, 3.8vw, 3.3rem); line-height: 1.04; }
 .practice { padding: .75rem 0; border-top: 1px solid var(--rule); }
 .practice summary { cursor: pointer; font-weight: 650; padding: .45rem 0; }
 .practice p { max-width: 68ch; margin: .4rem 0 .55rem; }
+.homework-handoff { border-left: 3px solid var(--accent); padding: .45rem 1rem; margin: 1rem 0; }
+.homework-handoff h3 { margin: 0 0 .25rem; font-size: 1rem; }
+.homework-handoff p { max-width: 70ch; color: var(--muted); }
 footer { border-top: 1px solid var(--rule); padding: 1rem 0 2rem; font-size: .85rem; }
 .skip { position: absolute; left: 1rem; top: -10rem; background: var(--paper); padding: .45rem; z-index: 2; }
 .skip:focus { top: .3rem; }

@@ -15,7 +15,7 @@ const state = {
   line: initial.line,
   slot: initial.slot ?? 0
 };
-let playingNote = false;
+let playback = 'excerpt';
 const previews = createTransport(
   { makeScore: request => request.score, playScore: SoundLab.playScore },
   () => {
@@ -24,22 +24,23 @@ const previews = createTransport(
     return new Audio();
   },
   (status, detail) => {
+    const playingNote = playback === 'note';
     inspector.audioState(status, playingNote, detail);
-    $('audio-status').textContent = status === 'playing' ? detail.label : status === 'ended' ? (playingNote ? 'Note finished.' : 'Excerpt finished.') : detail;
+    comparison.audioState(status, playback === 'practice', detail);
+    $('audio-status').textContent = playback === 'practice' ? '' : status === 'playing' ? detail.label : status === 'ended' ? (playingNote ? 'Note finished.' : 'Excerpt finished.') : detail;
     $('play').disabled = status === 'pending' || status === 'playing';
   }
 );
 const inspector = NoteInspector.createInspector($('note-inspector'), (solo, note) => {
-  playingNote = true;
+  playback = 'note';
   previews.play({ score: solo, label: 'Playing the ' + note.voice + ' note from ' + note.time + ' seconds.' });
 }, () => {
-  if (playingNote && ['pending', 'playing'].includes(previews.state)) previews.stop('Stopped.');
+  if (playback === 'note' && ['pending', 'playing'].includes(previews.state)) previews.stop('Stopped.');
 });
-const practices = [
-  'In the pulse branch, change step % 8 to step % 4. Play the original and your change. Write how the silence between notes changed.',
-  'In the rhythm branch, change the melody positions from [0, 3, 6] to [0, 4]. Compare the spacing while the bass and pulse stay in place.',
-  'In Density, change the melody waveform from triangle to sine. Compare 30–45 seconds and describe how the tone changed.'
-];
+const comparison = PracticeComparison($('comparison'), (score, label) => {
+  playback = 'practice';
+  previews.play({ score, label });
+}, () => stopAudio());
 function currentPosition() {
   const position = { lesson: lesson().id, chapter: chapters[state.chapter][0], line: state.line };
   if (state.slot !== 0) position.slot = state.slot;
@@ -103,11 +104,14 @@ function setIllustration(title, boxes, caption) {
   $('flow').replaceChildren(...content);
   $('reason').textContent = caption;
 }
-function inspectAtLine(notesHere) {
+function isFadeLine(line) {
+  return (line >= 109 && line <= 117) || line === 195 || (line >= 198 && line <= 201);
+}
+function inspectAtLine(notesHere, tone) {
   const i=state.slot,t=timeAt(i),line=state.line,s=score(),id=lesson().id;
   const section=Math.floor(i/60);
-  const tone=notesHere.find(e=>e.voice==='melody')||notesHere[0]||s.events[0];
-  const before=s.events.filter(e=>e.time<t);
+  const current=s.sections.find(part=>t>=part.start&&t<part.end);
+  const noteContext = tone ? 'At ' + format(t) + 's, the ' + tone.voice + (tone.time === t ? ' starts now' : ' is still sounding from ' + format(tone.time) + 's') + '. ' : '';
   if(rules[line]){
     const result=matchingRule(rules[line]);
     const truth=result.inBranch ? (result.passes?'Start '+result.voice:'Skip '+result.voice) : 'Line skipped';
@@ -120,22 +124,56 @@ function inspectAtLine(notesHere) {
     setIllustration('Does this line start a note?',[[i+' % '+result.divisor,'Divide and keep the remainder'],[String(result.remainder),'Matches: '+result.allowed.join(', ')],[truth,'What this line does',true]], why);
     return;
   }
-  if(line===8||line===9||line===44||line===70){
+  if(line===8||line===9){
+    setIllustration('Two ways to count the same second', [
+      ['0.25 s','Time between possible starts'], ['4 slots','In one second'], ['22,050 samples','In one second of the WAV',true]
+    ], 'This score lasts '+s.duration+' seconds. Slot '+i+' begins at '+format(t)+'s. The WAV stores the shape of the sound between slots.');
+    return;
+  }
+  if(line===44||line===70){
     setIllustration(line===44?'Initialize → check → advance':'Slots on the score clock',[[String(i),'Current slot'],[format(t)+'s','Slot × 0.25s'],[i===239?'Stop at 240':'Step '+(i+1),'What the loop does next',true]],'The clock grid has a position for each slot. The loop prepares all 240 slots before audio playback.');
     return;
   }
-  if(line===34||line===35||line===36||line===37||line===38){
+  if(line===34||line===35){
     const result=notesHere.length?format(t)+'s':'No local time';
     setIllustration('Does the code create a time?', [
       [String(i), 'Slot number'],
       [i + ' × 0.25 = ' + format(t) + 's', 'Where the slot sits'],
       [result, notesHere.length ? notesHere.length + ' new ' + (notesHere.length === 1 ? 'call' : 'calls') + ' to add()' : 'add() was skipped', true]
     ], notesHere.length
-      ? 'Each call gets its own time = ' + format(t) + '. Open another slot to compare them.'
+      ? 'Each call gets its own time = ' + format(t) + '. That assignment stays fixed until this call ends. A later call creates a separate time.'
       : 'This slot has a place on the grid, but no new note starts here. Nothing calls add(), so this line creates no local time.');
     return;
   }
-  if([10,11,33,39,40,41,42,43].includes(line)){
+  if ([36,37,38].includes(line)) {
+    if (!notesHere.length) {
+      setIllustration('No call to add() here', [[String(i),'Current slot'],['0','New note objects'],[current.title,'Section at the marker',true]],
+        'No voice starts at '+format(t)+'s. '+(tone ? 'The '+tone.voice+' already has its settings and section tag from '+format(tone.time)+'s ('+tone.section+').' : 'All voices are quiet.'));
+      return;
+    }
+    const count = notesHere.length;
+    if (line === 36) setIllustration('Store each new note', notesHere.map(note => [
+      note.voice, format(note.duration)+'s · '+format(note.frequency)+' Hz · gain '+note.gain+' · '+note.wave,true
+    ]), 'The array receives '+count+' new '+(count===1?'object':'objects')+'. Math.min limits the duration to the time left before 60s.');
+    else if (line === 37) setIllustration('Tag the note where it begins', [
+      [format(t)+'s','Note start'],[current.start+'–'+current.end+'s','Section containing the start'],[current.title,'Section stored on each new note',true]
+    ], 'The start belongs to this section even if the sound carries into the next one.');
+    else setIllustration('Finish the call', [[String(count),'Calls at this slot'],[notesHere.map(note=>note.voice).join(', '),'Objects saved'],['Return','Continue the calling rule',true]],
+      'Each call ends here. Its note object stays in events so the player can read it later.');
+    return;
+  }
+  if (line === 32 || line === 33) {
+    setIllustration('Before the first slot', [['[]','Empty event list'],['0','Melody counter'],['Slot 0','First position to visit',true]],
+      'This setup runs once each time makeScore() builds a score. The slot selector lets you inspect the completed result.');
+    return;
+  }
+  if (line === 42) {
+    const pitch=pitchAt(s,i);
+    setIllustration('Count calls to melody()', [[String(pitch.count),'Counter before this slot'],[pitch.called?'+1':'+0',pitch.called?'One melody() call':'Line skipped'],[String(pitch.count+Number(pitch.called)),'Counter after this slot',true]],
+      pitch.directFinal ? 'The last tonic calls add() directly, so the melody counter stays at its previous value.' : 'Only melody() advances the counter. Bass, pulse and empty slots leave it in place.');
+    return;
+  }
+  if([10,11,39,40,41,43].includes(line)){
     const pitch = pitchAt(s, i);
     if (pitch.directFinal) {
       setIllustration('The ending uses a fixed pitch', [
@@ -151,8 +189,19 @@ function inspectAtLine(notesHere) {
       : 'The highlighted entries show the pitch this lookup would produce. No new melody note uses it at this slot.');
     return;
   }
-  if([29,30,31,37,52,54,58,59,63,64,68].includes(line)){
-    const current=s.sections.find(part=>t>=part.start&&t<part.end);
+  if([54,58,59,63,64,68].includes(line)) {
+    const target = [54,58].includes(line) ? 1 : [59,63].includes(line) ? 2 : 3;
+    const part = ['Seed','Growth','Density','Return'][target];
+    const inside = id === 'composition' && section === target;
+    setIllustration('Follow the '+part+' block', [[current.title,'Section at this slot'],[part,'Section for this code'],[inside?'Inside this block':'Block skipped','At '+format(t)+'s',true]],
+      inside ? 'The rules inside this block check which voices should start.' : 'This block adds no notes at the selected slot.');
+    return;
+  }
+  if([29,30,31,52].includes(line)){
+    if ((line === 30 || line === 52) && id !== 'composition' || line === 31 && id === 'composition') {
+      setIllustration('This branch is skipped', [[id,'Selected experiment'],[current.title,'Actual section'],['Skipped','This line',true]], 'The score uses the other section layout.');
+      return;
+    }
     setIllustration('Slot → time → section',[[String(i),'Slot in the full timeline'],[format(t)+'s','Start position on the grid'],[current.title,current.start+' to '+current.end+' seconds',true]], id==='composition'?i+' ÷ 60 = '+format(i/60)+'. Math.floor() gives section '+section+'.':'This experiment uses one section spanning the whole minute.');
     return;
   }
@@ -160,20 +209,46 @@ function inspectAtLine(notesHere) {
     setIllustration('Check the last note',[[String(i),'Current slot'],[String(i===236&&id==='composition'),'Slot 236 in composition?'],[i===236&&id==='composition'?'262 Hz':'Skipped','Final note rule',true]],'Slot 236 means 236 × 0.25 = 59 seconds. The final tone lasts one second.');
     return;
   }
-  if((line>=109&&line<=117)||(line>=195&&line<=201)){
+  if (line >= 165 && line <= 170) {
+    setIllustration('Set up the whole score', [['10s','Example browser clock'],['10.06s','Score starts after 60 ms'],['70.06s','End of this 60-second score',true]],
+      'The master gain connects every voice to the output. It starts at 1 and drops to 0 at the end. These times apply to the whole score at every slot.');
+    return;
+  }
+  if ((isFadeLine(line) || line >= 190) && !tone) {
+    setIllustration('All voices are quiet', [[String(i),'Selected slot'],[format(t)+'s','Time in the score'],['No note','At the marker',true]],
+      'No note starts or carries into this slot. Select a slot with a note to see its waveform, fades and scheduled times.');
+    return;
+  }
+  if(isFadeLine(line)){
     const attack=Math.min(.008,tone.duration/4),release=Math.min(.035,tone.duration/4);
-    setIllustration('Attack → hold → release',[[format(attack*1000)+' ms','Raise gain from zero'],[String(tone.gain),'Hold the note gain'],[format(release*1000)+' ms','Return to silence',true]],'Illustrated with a '+tone.voice+' note lasting '+format(tone.duration)+' seconds'+(notesHere.length?' from this slot.':' from the opening of this score.'));
+    setIllustration('Attack → hold → release',[[format(attack*1000)+' ms','Raise gain from zero'],[String(tone.gain),'Hold the note gain'],[format(release*1000)+' ms','Return to silence',true]],noteContext+'It lasts '+format(tone.duration)+'s. At the marker you are '+format(t-tone.time)+'s into the note, and its gain is '+format(tone.gain*SoundLab.envelopeAt(t-tone.time,tone.duration))+'.');
     return;
   }
-  if(line>=165&&line<=204){
-    setIllustration('Schedule on the audio clock',[['10.06s','Example start after scheduling lead'],[format(tone.time)+'s','Note offset within the score'],[format(10.06+tone.time)+'s','Absolute audio start',true]],'Example audio clock begins at 10 seconds. The note’s own clock position gets added to score start. Its '+tone.wave+' source is shaped by gain and routed to the mix.');
+  if(line===196||line===197){
+    setIllustration('Set this oscillator',[[tone.voice,'Voice'],[tone.wave,'Waveform',line===196],[format(tone.frequency)+' Hz','Pitch',line===197]],noteContext+'The player sets this waveform and frequency when the oscillator starts.');
     return;
   }
-  if([27,28,45,47,51,69].includes(line)){
+  if(line>=190&&line<=204){
+    const at=10.06+tone.time;
+    setIllustration('Schedule on the audio clock',[[format(tone.time)+'s','Offset in the score'],[format(at)+'s','Browser clock at note start',true],[format(at+tone.duration)+'s','Browser clock at note end']],
+      noteContext+'If score zero is 10.06s on the browser clock, add the note offset to get its start, then add its duration to get its end.');
+    return;
+  }
+  if([45,47,51].includes(line)){
+    const branch = {45:'pulse',47:'rhythm',51:'composition'}[line];
+    setIllustration('Choose an experiment branch',[[id,'Selected experiment'],[branch,'Branch on this line'],[id===branch?'Enter':'Skip','What happens',true]],
+      'Only the '+branch+' experiment uses the rules in this block.');
+    return;
+  }
+  if([27,28,69].includes(line)){
     setIllustration('Choose an experiment branch',[[id,'The selected experiment id'],[lesson().label,'Branch used for this score'],[String(s.events.length),'Total note events',true]],'This function checks the id before creating the headings and events. One branch supplies the rules for this experiment.');
     return;
   }
-  setIllustration('State of the note schedule',[[String(before.length),'Events before this slot'],[String(notesHere.length),'Note starts in this slot'],[String(before.length+notesHere.length),'Starts through the current slot',true]],'The score contains '+s.events.length+' note events altogether. '+(notesHere.length?'This slot contains '+notesHere.map(e=>e.voice).join(', ')+'.':'There are no starts here. A prior note may still be sounding.'));
+  if ([71,72,73].includes(line)) {
+    const opening = s.events.filter(note=>note.time===0).map(note=>note.voice).join(', ');
+    setIllustration('The complete score',[[String(s.events.length),'Events after all 240 slots'],[opening,'First events in sorted order'],[s.duration+'s','Duration returned to the player',true]],
+      'After the loop, sort by start time. Voices that start together sort by name. The function returns this complete schedule once.');
+  }
 }
 function renderGrid({ slot, time, events, continuing }) {
   const grid = $('grid');
@@ -244,7 +319,7 @@ function renderGrid({ slot, time, events, continuing }) {
   $('events').replaceChildren(...readouts);
   inspector.show(piece, time, rules[state.line]?.[3], barButtons);
 }
-function renderExtraVisual(notesHere) {
+function renderExtraVisual(note) {
   const root=$('focus-visual'),line=state.line,slot=state.slot;
   root.replaceChildren();
   function example(e,label,description,kind) {
@@ -259,7 +334,7 @@ function renderExtraVisual(notesHere) {
     if(kind)item.classList.add(kind);
     return item;
   }
-  if(line===34||line===35||line===36||line===38){
+  if(line>=34&&line<=38){
     const slots=lesson().id==='composition'?[0,1,236]:lesson().id==='rhythm'?[0,1,4]:[0,1,8];
     const group=newElement('div',undefined,'compare-grid');
     for(const e of slots) {
@@ -269,7 +344,7 @@ function renderExtraVisual(notesHere) {
     root.append(group);
     return;
   }
-  if ([10, 11, 33, 39, 40, 41, 42, 43].includes(line)) {
+  if ([10, 11, 39, 40, 41, 43].includes(line)) {
     const pitch = pitchAt(score(), slot);
     if (pitch.directFinal) return;
     for (const [label, values, selected] of [['MOTIF', pitch.motif, pitch.index], ['RATIOS', pitch.ratios, pitch.degree]]) {
@@ -314,8 +389,7 @@ function renderExtraVisual(notesHere) {
     root.append(newElement('p',label,'caption'),group);
     return;
   }
-  if((line>=109&&line<=117)||(line>=195&&line<=201)){
-    const note=notesHere.find(e=>e.voice==='melody')||notesHere[0]||score().events[0];
+  if(isFadeLine(line) && note){
     const enter=Math.min(.008,note.duration/4),exit=Math.min(.035,note.duration/4);
     const chart=newElement('div',undefined,'envelope-chart');
     const shape=newElement('div',undefined,'envelope-shape');
@@ -323,9 +397,11 @@ function renderExtraVisual(notesHere) {
     shape.style.setProperty('--hold',100*(note.duration-exit)/note.duration+'%');
     chart.setAttribute('role','img');
     chart.setAttribute('aria-label','Gain rises over '+format(enter*1000)+' milliseconds, holds, then returns to zero over '+format(exit*1000)+' milliseconds.');
-    chart.append(shape);
+    const marker = newElement('i', undefined, 'envelope-marker');
+    marker.style.left = 100 * (timeAt(slot) - note.time) / note.duration + '%';
+    chart.append(shape,marker);
     const labels=newElement('div',undefined,'envelope-labels');
-    labels.append(newElement('span','0s'),newElement('span','Fade in · hold · fade out'),newElement('span',format(note.duration)+'s'));
+    labels.append(newElement('span',format(note.time)+'s'),newElement('span','Marker at '+format(timeAt(slot))+'s'),newElement('span',format(note.time+note.duration)+'s'));
     root.append(chart,labels);
   }
 }
@@ -358,8 +434,9 @@ function renderDetail() {
   }));
   $('slot-back').disabled=i===0;
   $('slot-next').disabled=i===239;
-  inspectAtLine(notesHere);
-  renderExtraVisual(notesHere);
+  const tone = WalkthroughModel.noteAtMarker(score(), info.time, rules[line]?.[3]);
+  inspectAtLine(notesHere,tone);
+  renderExtraVisual(tone);
   renderGrid(info);
 }
 function renderLines() {
@@ -414,7 +491,8 @@ function renderLesson() {
       : [['Opening · 0–8s','all']];
   $('mix').replaceChildren(...options.map(([label,value])=>{const option=newElement('option',label);option.value=value;return option;}));
   $('listen-guidance').textContent = lesson().guide;
-  $('practice-text').textContent = practices[state.lesson];
+  $('practice-text').textContent = WEEK11_PRACTICES[lesson().id].homework;
+  comparison.render(lesson().id);
   $('sketch-link').href = 'sketches/' + lesson().id + '.js';
   renderLines();
   renderDetail();
@@ -423,7 +501,7 @@ function stopAudio(message = 'Stopped.') {
   previews.stop(message);
 }
 function playAudio() {
-  playingNote = false;
+  playback = 'excerpt';
   const option = $('mix').value;
   const start = state.lesson === 2 ? Number(option) : 0;
   const end = Math.min(60, start + 8);
@@ -448,7 +526,12 @@ $('slot-back').onclick=()=>setSlot(state.slot-1);
 $('slot-next').onclick=()=>setSlot(state.slot+1);
 $('play').onclick=playAudio;
 $('stop').onclick=()=>stopAudio();
-$('mix').addEventListener('change',()=>stopAudio('Preview selected'));
+$('mix').addEventListener('change',()=>{
+  stopAudio('Preview selected');
+  $('listen-guidance').textContent = state.lesson === 2 && $('mix').value === '45'
+    ? 'This excerpt plays notes that start in Return. The first starts at 46s. In the full piece, the previous melody rings from 44.75s to 45.05s.'
+    : lesson().guide;
+});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)stopAudio('Stopped when the preview was hidden');});
 window.addEventListener('pagehide',()=>stopAudio('Ready'));
 $('full-source').textContent=source.map((line,index)=>String(index+1).padStart(3)+'  '+line).join('\n');

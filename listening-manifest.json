@@ -132,6 +132,11 @@
       "name": "Repeating melody",
       "question": "When does a note start?",
       "homework": "Change step % 8 to step % 4 in the baseline sketch. Predict the new gap between starts, then play both versions and record what you hear.",
+      "practice": {
+        "line": 46, "before": "step % 8", "after": "step % 4", "window": [0, 4],
+        "question": "If a note starts every fourth slot, how long will you wait between notes?",
+        "result": "Eight quarter-second slots put the starts 2 seconds apart. Four slots put them 1 second apart. Each note still lasts 0.6 seconds."
+      },
       "stops": [
         {
           "id": "first",
@@ -193,7 +198,12 @@
       "id": "rhythm",
       "name": "Interlocking rhythm",
       "question": "How do three parts fit together?",
-      "homework": "Find [0, 3, 6] in the downloaded rhythm sketch and replace it with [0, 4]. Compare where the melody lands against the low pulse.",
+      "homework": "Try the two versions here, then find [0, 3, 6] in your rhythm sketch and replace it with [0, 4]. Record where the melody lands against the low pulse.",
+      "practice": {
+        "line": 48, "before": "[0, 3, 6]", "after": "[0, 4]", "window": [0, 2],
+        "question": "Which version puts a melody note on each low pulse?",
+        "result": "The original melody starts at 0, 0.75 and 1.5 seconds. The edit puts it at 0 and 1 second, together with both low pulses. Listen for that alignment."
+      },
       "stops": [
         {
           "id": "together",
@@ -260,6 +270,11 @@
       "name": "Four-part composition",
       "question": "How does a minute of music change?",
       "homework": "Try a sine melody in Density in place of triangle. Compare 30–45 seconds. With your partner, record the timestamp and a word for the change you actually hear.",
+      "practice": {
+        "line": 60, "before": "'triangle'", "after": "'sine'", "window": [30, 32],
+        "question": "Can you hear the melody change color while the rhythm stays in place?",
+        "result": "Both versions use the same pitches, start times and gains. The triangle wave has extra harmonics. The sine wave has a single frequency, so the melody can sound smoother."
+      },
       "stops": [
         {
           "id": "seed",

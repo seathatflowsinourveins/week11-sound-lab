@@ -135,6 +135,7 @@ p{max-width:64ch}
 .section-meter button[aria-pressed=true]{border-color:var(--amber);color:var(--amber)}
 .section-meter i{display:block;background:var(--mint);height:5px;border-radius:2px;width:var(--fill)}
 .envelope-chart{height:54px;background:linear-gradient(to bottom,var(--raised),transparent);position:relative;border-bottom:1px solid var(--line)}
+.envelope-marker{position:absolute;top:0;bottom:0;width:2px;background:#f1bc8d}
 .envelope-shape{position:absolute;inset:5px 0 0;background:var(--mint);clip-path:polygon(0 100%,var(--attack) 10%,var(--hold) 10%,100% 100%);opacity:.58}
 .envelope-labels{display:flex;justify-content:space-between;font:.67rem var(--mono);color:var(--muted);margin-top:.32rem}
 .beat-strip{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:.3rem}

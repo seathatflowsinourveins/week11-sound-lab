@@ -91,6 +91,30 @@ test('the live lesson content and the standalone design manifest are identical',
   assert.deepEqual(JSON.parse(embedded[1]), JSON.parse(read('listening-manifest.json')));
 });
 
+test('the six practice clips play the stated edit and preserve the other voices', () => {
+  const context = {};
+  vm.runInNewContext(read('practice-clips.js').toString(), context);
+  const practices = JSON.parse(JSON.stringify(context.WEEK11_PRACTICES));
+  const { makeExcerpt } = require('./walkthrough-model.js');
+  for (const { id } of engine.experiments) {
+    const { clips: [original, edited], window } = practices[id];
+    assert.deepEqual(original, makeExcerpt(engine.makeScore(id), ...window));
+    assert.equal(edited.duration, original.duration);
+    assert.deepEqual(edited.events.filter(n => n.voice !== 'melody'), original.events.filter(n => n.voice !== 'melody'));
+    const melody = clip => clip.events.filter(n => n.voice === 'melody');
+    if (id === 'composition') {
+      assert.ok(melody(original).every(n => n.wave === 'triangle'));
+      assert.deepEqual(melody(edited), melody(original).map(note => ({ ...note, wave: 'sine' })));
+    } else {
+      assert.deepEqual(melody(edited).map(n => n.time), id === 'pulse' ? [0,1,2,3] : [0,1]);
+      assert.deepEqual(melody(original).map(n => n.time), id === 'pulse' ? [0,2] : [0,.75,1.5]);
+    }
+    const pcm = engine.renderPCM(edited);
+    assert.ok(pcm.some(sample => sample !== 0));
+    assert.notDeepEqual(pcm, engine.renderPCM(original));
+  }
+});
+
 test('the design guide covers every lesson, code chapter and credited design repository', () => {
   const guide = JSON.parse(read('listening-manifest.json'));
   const html = read('design.html').toString();
