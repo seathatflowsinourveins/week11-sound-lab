@@ -2,11 +2,13 @@
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Week 11 · Read the score</title>
 <link rel="stylesheet" href="walkthrough.css">
+<link rel="stylesheet" href="study.css">
 <script defer src="composer.js"></script>
 <script defer src="transport.js"></script>
 <script defer src="walkthrough-source.js"></script>
 <script defer src="walkthrough-data.js"></script>
 <script defer src="walkthrough-model.js"></script>
+<script defer src="note-inspector.js"></script>
 <script defer src="walkthrough.js"></script>
 </head>
 <body><a class="skip" href="#main">Skip to the walkthrough</a><header class="bar"><div class="shell"><a href="index.html">Week 11 sound lab</a><span class="muted">Week 11 walkthrough</span></div></header>
@@ -16,15 +18,15 @@
 <div class="plan"><label for="chapter">Code chapter</label><select id="chapter"></select><span id="chapter-summary" class="small muted"></span></div>
 <section class="desk" aria-label="Code and side-by-side explanation">
  <div class="pane code-pane"><div class="pane-head"><h3>Source code</h3><span id="progress" class="small muted"></span></div><div id="lines" class="line-stack desktop-source" role="group" aria-label="Source lines"></div><div class="buttons"><button id="previous" type="button">Previous line</button><button class="primary" id="next" type="button">Next line</button></div><details class="mobile-source"><summary>Browse all lines in this chapter</summary><div id="mobile-lines" class="line-stack" role="group" aria-label="Source lines"></div></details></div>
- <div class="pane"><h2 id="meaning" tabindex="-1"></h2><div class="code-focus"><span id="source-number"></span><code id="selected-code"></code></div><p class="detail-copy" id="plain"></p>
+ <div class="pane detail-pane"><h2 id="meaning" tabindex="-1"></h2><div class="code-focus"><span id="source-number"></span><code id="selected-code"></code></div><p class="detail-copy" id="plain"></p>
  <div class="slot-tools"><div class="slot-inline"><label for="slot">Inspect a time slot</label><input id="slot" type="number" min="0" max="239" step="1" value="8"><button id="slot-back" type="button" aria-label="Previous time slot">−1 slot</button><button id="slot-next" type="button" aria-label="Next time slot">+1 slot</button></div><div id="examples" class="buttons" aria-label="Example time slots"></div></div>
  <div class="diagram"><h3 id="diagram-title"></h3><div id="flow" class="flow"></div><p class="caption" id="reason" aria-live="polite"></p><div id="focus-visual" class="focus-visual"></div></div>
  <p class="slot-result" id="slot-result"></p>
  <details class="tokens"><summary>Read each symbol and argument</summary><dl id="tokens"></dl><p id="connection"></p></details></div>
-</section>
-<section class="score" aria-labelledby="score-title"><header class="score-header"><h2 id="score-title">What’s sounding?</h2><p class="small muted" id="score-summary"></p></header>
+<section class="score desk-score" aria-labelledby="score-title"><header class="score-header"><h2 id="score-title">What’s sounding?</h2><p class="small muted" id="score-summary"></p></header>
 <p class="score-key small muted"><span><b class="legend-dot" aria-hidden="true"></b> Note starts</span><span><b class="legend-bar" aria-hidden="true"></b> Note keeps sounding</span></p>
-<div class="score-grid" id="grid"></div><ul class="events-list" id="events"></ul></section>
+<div class="score-grid" id="grid"></div><ul class="events-list" id="events"></ul>
+<div class="note-inspector" id="note-inspector"></div></section></section>
 <section class="listen" aria-labelledby="listen-title"><div><h3 id="listen-title">Hear the real score</h3><p id="listen-guidance"></p><p id="audio-status" role="status"></p></div><div class="buttons"><label class="small" for="mix">Preview</label><select id="mix"></select><button type="button" class="primary" id="play">Play excerpt</button><button type="button" id="stop">Stop</button></div></section>
 <section class="listen practice" aria-labelledby="practice-title">
   <div><h3 id="practice-title">Try one change</h3><p id="practice-text"></p></div>

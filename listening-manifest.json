@@ -1,10 +1,25 @@
 {
   "schemaVersion": 1,
   "title": "Week 11 guided listen",
-  "reviewed": "2026-11-17",
+  "reviewed": "2026-11-18",
   "score": "composer.js",
   "releaseManifest": "release.json",
+  "design": {
+    "pages": ["listen.html", "walkthrough.html"],
+    "theme": "Dark charcoal with named voice lanes",
+    "voices": {"melody": "#bcdd9e", "bass": "#75cccc", "pulse": "#e9aa8f"},
+    "scoreOverview": "The guided listen shows all 60 seconds on each experiment card. Read the rows as melody, bass and pulse. Each mark spans an actual note.",
+    "selection": "The dashed line marks the guided step. Click a note bar or choose a note from the labeled list. An outline marks the selected note.",
+    "audition": "Hear this note plays its original frequency, duration, gain and waveform through the lab transport.",
+    "waveform": {"renderer": "SoundLab.renderPCM", "sampleRateHz": 22050, "detailMilliseconds": 20, "amplitudeLimits": [-0.12, 0.12], "fullView": "Sample extrema per pixel for the full duration. The trace shows the ideal PCM export for this isolated note."}
+  },
   "references": [
+    {
+      "name": "TradingView Lightweight Charts",
+      "source": "https://github.com/tradingview/lightweight-charts/blob/c29c51e1e5bc61981da5832c97797cb8283d120f/website/examples/tooltips-and-legends/tracking-tooltip.js",
+      "license": "Apache-2.0",
+      "use": "The readout follows a selected data point. A persistent note selection supports clicking, tapping and a keyboard-operated list."
+    },
     {
       "name": "Diagram Design",
       "source": "https://github.com/cathrynlavery/diagram-design/blob/f6db0decea96de66b901331a0f79a8d4b147ebae/skills/diagram-design/references/type-swimlane.md",
@@ -16,7 +31,9 @@
       "source": "https://github.com/katspaugh/wavesurfer.js/blob/eef9057e391698370e1a58788646432a562d63a5/src/plugins/regions.ts",
       "example": "https://github.com/katspaugh/wavesurfer.js/blob/eef9057e391698370e1a58788646432a562d63a5/examples/regions.js",
       "test": "https://github.com/katspaugh/wavesurfer.js/blob/eef9057e391698370e1a58788646432a562d63a5/src/__tests__/regions.test.ts",
-      "use": "Every excerpt has a labeled start and end. Replay returns to the start of that window."
+      "zoomExample": "https://github.com/katspaugh/wavesurfer.js/blob/eef9057e391698370e1a58788646432a562d63a5/examples/zoom.js",
+      "renderTests": "https://github.com/katspaugh/wavesurfer.js/blob/eef9057e391698370e1a58788646432a562d63a5/src/__tests__/renderer-utils.test.ts",
+      "use": "Each excerpt has a labeled start and end. Two labeled time scales let learners compare the wave shape with the duration of one note."
     },
     {
       "name": "Strudel",

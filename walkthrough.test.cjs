@@ -5,6 +5,32 @@ const fs = require('node:fs');
 const SoundLab = require('./composer.js');
 const load = () => require('./walkthrough-model.js');
 
+test('the note inspector follows starts, held notes, silence and overlapping voices', () => {
+  const { noteAtMarker } = load();
+  const pulse = SoundLab.makeScore('pulse');
+  assert.equal(noteAtMarker(pulse, .25), pulse.events[0]);
+  assert.equal(noteAtMarker(pulse, .75), null);
+  const rhythm = SoundLab.makeScore('rhythm');
+  assert.equal(noteAtMarker(rhythm, 0, 'bass').voice, 'bass');
+  assert.equal(noteAtMarker(rhythm, 1).voice, 'pulse');
+  assert.equal(noteAtMarker(rhythm, 1, 'melody').time, .75);
+  const composition = SoundLab.makeScore('composition');
+  assert.equal(noteAtMarker(composition, 31, 'melody').time, 31);
+});
+
+test('solo playback and the illustration use one original note with a local zero start', () => {
+  const { isolateNote } = load();
+  const score = SoundLab.makeScore('composition');
+  const ending = score.events.find(event => event.time === 59);
+  const solo = isolateNote(score, ending);
+  assert.equal(solo.duration, ending.duration);
+  assert.deepEqual(solo.events, [{ ...ending, time: 0 }]);
+  assert.equal(ending.time, 59);
+  const samples = SoundLab.renderPCM(solo);
+  assert.equal(samples.length, 22050);
+  assert.ok(samples.some(sample => sample !== 0));
+});
+
 test('a listening checkpoint opens the precise source line and slot', () => {
   const { resolvePosition, positionHash } = load();
   const position = { lesson: 'pulse', chapter: 'add', line: 35, slot: 1 };

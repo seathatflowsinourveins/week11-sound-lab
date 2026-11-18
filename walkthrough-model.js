@@ -100,5 +100,15 @@
     return { id: score.id, duration: end - start, bpm: score.bpm, events };
   }
 
-  return { resolvePosition, positionHash, moveLine, inspectSlot, voiceAt, pitchAt, layoutVoice, makeExcerpt };
+  function noteAtMarker(score, time, voice) {
+    const { starts, continuing } = voiceAt(score, null, time);
+    return starts.find(note => note.voice === voice) || continuing.find(note => note.voice === voice)
+      || starts.find(note => note.voice === 'melody') || starts[0] || continuing[0] || null;
+  }
+
+  function isolateNote(score, note) {
+    return { id: score.id, bpm: score.bpm, duration: note.duration, events: [{ ...note, time: 0 }] };
+  }
+
+  return { resolvePosition, positionHash, moveLine, inspectSlot, voiceAt, pitchAt, layoutVoice, makeExcerpt, noteAtMarker, isolateNote };
 });

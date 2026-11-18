@@ -12,12 +12,13 @@
     }))
   );
   const voices = [
-    ['melody', 'Melody', '#cceca7'],
-    ['bass', 'Bass', '#91d8d1'],
-    ['pulse', 'Pulse', '#efac87']
+    ['melody', 'Melody'],
+    ['bass', 'Bass'],
+    ['pulse', 'Pulse']
   ];
   let current;
   let frame;
+  let playingNote = false;
 
   function create(tag, text, className) {
     const node = document.createElement(tag);
@@ -49,15 +50,23 @@
     },
     (state, detail) => {
       cancelAnimationFrame(frame);
+      inspector.audioState(state, playingNote, detail);
       const busy = state === 'pending' || state === 'playing';
       element('play').disabled = busy;
       element('stop').disabled = !busy;
-      element('plot-area').classList.toggle('playing', state === 'playing');
-      const messages = { playing: 'Playing', pending: 'Starting…', ended: 'Excerpt finished.' };
+      const trackCursor = state === 'playing' && !playingNote && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+      element('plot-area').classList.toggle('playing', trackCursor);
+      const messages = { playing: playingNote ? 'Playing one note' : 'Playing', pending: 'Starting…', ended: playingNote ? 'Note finished.' : 'Excerpt finished.' };
       element('status').textContent = messages[state] ?? detail;
-      if (state === 'playing') drawCursor();
+      if (trackCursor) drawCursor();
     }
   );
+  const inspector = NoteInspector.createInspector(element('note-inspector'), solo => {
+    playingNote = true;
+    player.play(solo);
+  }, () => {
+    if (playingNote && ['pending', 'playing'].includes(player.state)) player.stop('Stopped.');
+  });
 
   function drawScore(score, stop) {
     const [from, until] = stop.window;
@@ -74,14 +83,16 @@
     }
     element('timeline').replaceChildren(...axis);
     const lanes = [];
-    for (const [voice, name, color] of voices) {
+    const barButtons = new Map();
+    for (const [voice, name] of voices) {
       const row = create('div', null, 'score-row');
       const lane = create('div', null, 'lane');
       const { bars, tracks } = layoutVoice(score, voice, from, until);
       lane.style.height = (tracks > 1 ? 3 : 2.25) + 'rem';
-      lane.style.setProperty('--voice', color);
+      lane.style.setProperty('--voice', 'var(--voice-' + voice + ')');
       for (const bar of bars) {
-        const mark = create('span', null, 'bar-note');
+        const mark = inspector.noteButton(bar.note, 'bar-note');
+        barButtons.set(bar.note, mark);
         mark.style.left = percent(bar.start) + '%';
         mark.style.width = (percent(bar.end) - percent(bar.start)) + '%';
         mark.style.top = 100 * (bar.track + .5) / tracks + '%';
@@ -99,11 +110,14 @@
     const summary = 'Slot ' + stop.slot + ' at ' + time + 's · ' + (parts.join(', ') || 'all voices quiet') + '.';
     element('marked').textContent = summary;
     element('plot').setAttribute('aria-label', 'Score from ' + from + ' to ' + until + ' seconds. ' + summary);
+    inspector.show(score, time, WalkthroughData.rules[stop.line]?.[3], barButtons);
   }
 
   const experimentLinks = experiments.map((experiment, index) => {
     const anchor = link('#' + experiment.id + '/' + experiment.stops[0].id, null, 'experiment');
-    anchor.append(create('strong', (index + 1) + '. ' + experiment.name), create('small', experiment.question));
+    const piece = scores.get(experiment.id);
+    anchor.append(create('strong', (index + 1) + '. ' + experiment.name), create('small', experiment.question),
+      NoteInspector.scoreOverview(piece), create('span', piece.events.length + ' notes · 60 s', 'overview-count'));
     return anchor;
   });
   element('experiments').replaceChildren(...experimentLinks);
@@ -139,6 +153,7 @@
     element('practice').textContent = experiment.homework;
     element('sketch').href = 'sketches/' + experiment.id + '.js';
     element('play').textContent = '▶ Play ' + stop.window[0] + '–' + stop.window[1] + 's';
+    element('clip-title').textContent = 'Score · ' + stop.window[0] + '–' + stop.window[1] + ' s';
     drawScore(scores.get(experiment.id), stop);
     element('previous').hidden = index === 0;
     element('previous').href = itinerary[Math.max(0, index - 1)].hash;
@@ -150,6 +165,7 @@
   }
 
   element('play').addEventListener('click', () => {
+    playingNote = false;
     const score = scores.get(current.experiment.id);
     player.play(makeExcerpt(score, ...current.stop.window));
   });

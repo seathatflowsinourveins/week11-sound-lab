@@ -6,18 +6,20 @@
   <meta name="description" content="Hear three Week 11 sound experiments, one code line and one short listening example at a time.">
   <title>Guided listen · Week 11 sound lab</title>
   <link rel="stylesheet" href="listen.css">
+  <link rel="stylesheet" href="study.css">
   <script defer src="composer.js"></script>
   <script defer src="transport.js"></script>
   <script defer src="walkthrough-source.js"></script>
   <script defer src="walkthrough-data.js"></script>
   <script defer src="walkthrough-model.js"></script>
+  <script defer src="note-inspector.js"></script>
   <script defer src="listen.js"></script>
 </head>
 <body>
   <a class="skip" href="#work">Skip to the listening example</a>
   <header class="mast"><nav class="wrap" aria-label="Week 11"><a href="index.html">Week 11 sound lab</a><a href="walkthrough.html">Line-by-line reader ↗</a></nav></header>
   <main class="wrap">
-    <div class="intro"><h1>Listen to the score</h1><p>Pick an experiment. Play a few seconds. Follow the notes from left to right as you listen.</p></div>
+    <div class="intro"><h1>Listen to the score</h1><p>Pick an experiment and press Play. Each overview shows melody, bass and pulse from top to bottom.</p></div>
     <nav class="experiments" id="experiments" aria-label="Choose an experiment"></nav>
     <section id="work" tabindex="-1" aria-labelledby="title">
       <nav id="stops" class="stops" aria-label="Steps in this experiment"></nav>
@@ -27,13 +29,15 @@
           <h2 id="title" tabindex="-1"></h2>
           <div class="line"><a id="deep" href="walkthrough.html"></a><code id="code"></code></div>
           <p id="explanation"></p>
+          <div class="listening-cue"><strong>Listen for</strong><p id="listen-for"></p></div>
         </div>
         <figure class="score">
-          <figcaption><strong>Listen for</strong><span id="listen-for"></span></figcaption>
-          <div class="plot" role="img" id="plot"><div class="timeline" id="timeline"></div><div class="plot-area" id="plot-area"></div></div>
+          <figcaption><strong id="clip-title">Score</strong><span>Select a bar to inspect a note.</span></figcaption>
+          <div class="plot" role="group" id="plot"><div class="timeline" id="timeline"></div><div class="plot-area" id="plot-area"></div></div>
           <div class="key"><span><i class="key-note" aria-hidden="true"></i>Note length</span><span><i class="key-time" aria-hidden="true"></i>Time in this step</span></div>
           <p id="marked" class="marked"></p>
           <div class="transport"><button id="play" type="button">Play excerpt</button><button id="stop" type="button" disabled>Stop</button><span id="status" role="status"></span></div>
+          <div class="note-inspector" id="note-inspector"></div>
         </figure>
       </div>
       <nav class="pager" aria-label="Move through listening steps"><a id="previous" href="#">← Previous step</a><a id="next" href="#">Next step →</a></nav>

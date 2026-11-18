@@ -1,4 +1,4 @@
-:root{color-scheme:dark;--bg:#101719;--panel:#182225;--raised:#222e31;--ink:#eef3ec;--muted:#bdc9c5;--line:#485858;--green:#d5edb3;--mint:#acded2;--amber:#ffd19b;--black:#111a14;--code:#101a1d;--sans:Manrope,system-ui,sans-serif;--mono:"IBM Plex Mono",Consolas,monospace}
+:root{color-scheme:dark;--bg:#0b0f12;--panel:#151d21;--raised:#243033;--ink:#edf2ed;--muted:#b7c5c3;--line:#3c4a4e;--green:#bcdd9e;--mint:#83cfc8;--amber:#ffcf82;--black:#111a14;--code:#101619;--sans:"DM Sans",system-ui,sans-serif;--mono:"IBM Plex Mono",Consolas,monospace}
 *{box-sizing:border-box}
 body{margin:0;color:var(--ink);background:var(--bg);font:15px/1.58 var(--sans)}
 a{color:var(--green);text-underline-offset:4px}
@@ -75,6 +75,17 @@ p{max-width:64ch}
 .note-bar{position:absolute;left:var(--start);width:calc(var(--end) - var(--start));top:calc(var(--track-center) - .275rem);height:.55rem;border-radius:2px;background:var(--mint);opacity:.6}
 .note-bar.is-sounding{background:var(--amber);opacity:1}
 .note-bar.has-onset::before{content:'';position:absolute;left:0;top:-.08rem;width:.7rem;height:.7rem;border-radius:50%;background:inherit}
+.note-lane::before { pointer-events: none; }
+.note-lane .note-bar { padding: 0; min-height: 0; border: 0; background: var(--lane-ink); }
+.note-lane .note-bar::after { content: ''; position: absolute; inset: -.32rem 0; }
+.note-lane .note-bar[aria-pressed=true], .note-lane .note-bar:hover { outline: 1px solid white; outline-offset: 2px; opacity: 1; }
+.desk .desk-score { margin: 0; border: 0; border-top: 1px solid var(--line); border-radius: 0; min-width: 0; background: var(--code); }
+@media (min-width:821px) {
+  .desk { grid-template-areas: "code detail" "score detail"; grid-template-rows: auto 1fr; }
+  .code-pane { grid-area: code; }
+  .detail-pane { grid-area: detail; }
+  .desk .desk-score { grid-area: score; border-right: 1px solid var(--line); }
+}
 .note-settings{color:var(--muted)}
 .quick-start{margin:.7rem 0 0;font-size:.8rem}
 .slot-result{margin:.7rem 0 0;padding:.65rem .8rem;border-left:3px solid var(--amber);background:var(--raised);font-size:.86rem}

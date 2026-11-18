@@ -1,11 +1,11 @@
 :root {
-  color-scheme: light;
-  --paper: #f7f5ee;
-  --ink: #182824;
-  --muted: #4e6159;
-  --rule: #c2cbc0;
-  --accent: #2b6651;
-  --score: #17342d;
+  color-scheme: dark;
+  --paper: #0b0f12;
+  --ink: #edf2ed;
+  --muted: #abbab7;
+  --rule: #394548;
+  --accent: #bcdd9e;
+  --score: #151d21;
   --mono: "IBM Plex Mono", Consolas, monospace;
   font: 16px/1.5 "DM Sans", system-ui, sans-serif;
   color: var(--ink);
@@ -16,38 +16,42 @@ body, h1, h2, p, figure { margin: 0; }
 a { color: var(--accent); text-underline-offset: .22em; }
 button { font: inherit; cursor: pointer; }
 button:disabled { opacity: .5; cursor: default; }
-:focus-visible { outline: 3px solid #ad4e19; outline-offset: 3px; }
+:focus-visible { outline: 3px solid #ffcf82; outline-offset: 3px; }
 [hidden] { display: none !important; }
 .wrap { width: min(calc(100% - 3rem), 76rem); margin-inline: auto; }
 .mast { border-bottom: 1px solid var(--rule); }
 .mast nav, footer, .pager, .transport { display: flex; align-items: center; justify-content: space-between; gap: .8rem; flex-wrap: wrap; }
 .mast a { display: inline-block; padding: .8rem 0; color: var(--ink); font-size: .88rem; }
 .mast a:first-child { font-weight: 750; text-decoration: none; }
-.intro { margin: clamp(1.4rem, 4vw, 3rem) 0 1.4rem; display: flex; align-items: end; justify-content: space-between; gap: 2rem; }
+.intro { margin: clamp(1.4rem, 3vw, 2.4rem) 0 1.3rem; display: flex; align-items: end; justify-content: space-between; gap: 2rem; }
 h1, h2 { font-family: Baskervville, Georgia, serif; font-weight: 500; letter-spacing: -.045em; text-wrap: balance; }
 h1 { font-size: clamp(2.7rem, 5.8vw, 5rem); line-height: 1.04; }
 .intro p { max-width: 32ch; color: var(--muted); }
 .experiments { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); border-block: 1px solid var(--rule); }
 .experiment { min-width: 0; padding: .85rem 1rem; color: var(--ink); display: grid; gap: .2rem; text-decoration: none; box-shadow: inset 0 -3px transparent; }
 .experiment + .experiment { border-left: 1px solid var(--rule); }
-.experiment[aria-current] { background: #e2e9d9; box-shadow: inset 0 -3px var(--accent); }
-.experiment:hover, .stops a:hover, .pager a:hover { background-color: #e5eadf; }
+.experiment[aria-current] { background: #1b2928; box-shadow: inset 0 -3px var(--accent); }
+.experiment:hover, .stops a:hover, .pager a:hover { background-color: #202b2e; }
 .experiment strong { font-size: clamp(.95rem, 1.8vw, 1.2rem); }
 .experiment small { color: var(--muted); font-size: .84rem; }
 .stops { display: flex; flex-wrap: wrap; gap: .15rem .5rem; margin: 1.35rem 0; }
 .stops a { padding: .55rem .75rem; border-radius: 3px; min-height: 42px; color: var(--ink); font-size: .91rem; }
-.stops a[aria-current] { color: var(--paper); background: var(--score); text-decoration: none; }
+.stops a[aria-current] { color: #e5efdd; background: #293932; text-decoration: none; box-shadow: inset 0 0 0 1px #6f8c73; }
 .work-grid { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 6fr); align-items: start; gap: clamp(1rem, 3vw, 3rem); }
 .reader { padding: .5rem 0; }
 .meta, .line a, .axis, .lane-name, .marked { font: .79rem/1.5 var(--mono); }
 .meta { color: var(--muted); margin-bottom: .5rem; }
 h2 { font-size: clamp(1.9rem, 3.8vw, 3.3rem); line-height: 1.04; }
-.line { border-left: 3px solid var(--accent); background: #e9eee3; margin: 1.2rem 0 .9rem; padding: .75rem .85rem; }
+.line { border-left: 3px solid var(--accent); background: #162022; margin: 1.2rem 0 .9rem; padding: .75rem .85rem; }
 .line a { font-weight: 700; }
 .line code { display: block; overflow-wrap: anywhere; font: .93rem/1.65 var(--mono); margin-top: .25rem; }
 .reader > p:last-child { max-width: 52ch; }
-.score { color-scheme: dark; background: var(--score); color: #f7f9ef; border-radius: .6rem; padding: clamp(1rem, 2.4vw, 1.8rem); }
-.score figcaption { display: grid; gap: .3rem; }
+.score { background: var(--score); color: var(--ink); border: 1px solid var(--rule); border-radius: .55rem; padding: clamp(.9rem, 2vw, 1.5rem); }
+.score figcaption { display: flex; align-items: baseline; justify-content: space-between; gap: .25rem 1rem; flex-wrap: wrap; }
+.score figcaption span { font-size: .83rem; color: var(--muted); }
+.listening-cue { border-top: 1px solid var(--rule); margin-top: 1rem; padding-top: .75rem; }
+.listening-cue strong { color: var(--accent); }
+.listening-cue p { margin-top: .2rem; }
 .score figcaption strong { color: #d5ecaa; }
 .plot { --gutter: 3.5rem; margin: 1.2rem 0 .65rem; }
 .timeline { margin-left: var(--gutter); margin-bottom: .3rem; position: relative; height: 1.4rem; }
@@ -66,13 +70,18 @@ h2 { font-size: clamp(1.9rem, 3.8vw, 3.3rem); line-height: 1.04; }
 .marked { color: #ffdb9e; }
 .key, .key span { display: flex; align-items: center; flex-wrap: wrap; gap: .3rem; }
 .key { gap: .25rem 1rem; color: #d2dfd5; font-size: .78rem; margin-bottom: .25rem; }
-.key-note { width: 1.1rem; height: .3rem; background: #cceca7; border-radius: .2rem; }
+.key-note { width: 1.1rem; height: .3rem; background: var(--voice-melody); border-radius: .2rem; }
 .key-time { height: .9rem; border-left: 2px dashed #ffcf82; }
 .transport { justify-content: flex-start; margin-top: 1rem; gap: .45rem; }
 .transport button { min-height: 44px; border: 1px solid #8caa99; padding: .5rem .9rem; border-radius: .25rem; background: transparent; color: #fff; }
 .transport button:first-child { background: #e0efb6; border-color: #e0efb6; color: #203328; font-weight: 700; }
 .transport span { color: #d2dfd5; font-size: .83rem; }
 .score :focus-visible { outline-color: #ffcf82; }
+.score-overview { display: block; width: 100%; height: 1.65rem; margin-top: .55rem; }
+.overview-count { color: var(--muted); font: .72rem/1.5 var(--mono); }
+.bar-note { padding: 0; border: 0; cursor: pointer; }
+.bar-note::after { content: ""; position: absolute; inset: -.4rem 0; }
+.bar-note[aria-pressed=true], .bar-note:hover { outline: 1px solid #fff; outline-offset: 2px; }
 .pager { justify-content: flex-end; margin: 1.25rem 0; }
 .pager a { padding: .55rem .85rem; border: 1px solid var(--rule); border-radius: .25rem; }
 .pager a:last-child { border-color: var(--accent); font-weight: 700; }
@@ -91,6 +100,7 @@ footer { border-top: 1px solid var(--rule); padding: 1rem 0 2rem; font-size: .85
   .wrap { width: calc(100% - 1.5rem); }
   .experiment { padding: .65rem .4rem; }
   .experiment small { display: none; }
+  .overview-count { font-size: .63rem; }
   .experiment strong { font-size: .88rem; }
   .stops { gap: .15rem; margin: .65rem 0; }
   .stops a { padding-inline: .45rem; }

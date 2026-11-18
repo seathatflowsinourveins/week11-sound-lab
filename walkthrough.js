@@ -15,6 +15,7 @@ const state = {
   line: initial.line,
   slot: initial.slot ?? 0
 };
+let playingNote = false;
 const previews = createTransport(
   { makeScore: request => request.score, playScore: SoundLab.playScore },
   () => {
@@ -23,10 +24,17 @@ const previews = createTransport(
     return new Audio();
   },
   (status, detail) => {
-    $('audio-status').textContent = status === 'playing' ? detail.label : status === 'ended' ? 'Excerpt finished.' : detail;
+    inspector.audioState(status, playingNote, detail);
+    $('audio-status').textContent = status === 'playing' ? detail.label : status === 'ended' ? (playingNote ? 'Note finished.' : 'Excerpt finished.') : detail;
     $('play').disabled = status === 'pending' || status === 'playing';
   }
 );
+const inspector = NoteInspector.createInspector($('note-inspector'), (solo, note) => {
+  playingNote = true;
+  previews.play({ score: solo, label: 'Playing the ' + note.voice + ' note from ' + note.time + ' seconds.' });
+}, () => {
+  if (playingNote && ['pending', 'playing'].includes(previews.state)) previews.stop('Stopped.');
+});
 const practices = [
   'In the pulse branch, change step % 8 to step % 4. Play the original and your change. Write how the silence between notes changed.',
   'In the rhythm branch, change the melody positions from [0, 3, 6] to [0, 4]. Compare the spacing while the bass and pulse stay in place.',
@@ -198,10 +206,12 @@ function renderGrid({ slot, time, events, continuing }) {
     axis.append(control);
   }
   grid.append(newElement('span', 'Time (s)', 'score-voice'), axis);
+  const barButtons = new Map();
   for (const voice of ['melody', 'bass', 'pulse']) {
     if (!piece.events.some(note => note.voice === voice)) continue;
     const lane = newElement('div', undefined, 'note-lane');
-    lane.setAttribute('role', 'img');
+    lane.setAttribute('role', 'group');
+    lane.style.setProperty('--lane-ink', 'var(--voice-' + voice + ')');
     const at = voiceAt(piece, voice, time);
     const summary = [at.starts.length && 'starts now', at.continuing.length && 'continues from an earlier slot'].filter(Boolean);
     lane.setAttribute('aria-label', voice + ' at ' + format(time) + ' seconds: ' + (summary.join(' and ') || 'quiet'));
@@ -209,7 +219,8 @@ function renderGrid({ slot, time, events, continuing }) {
     const { bars, tracks } = layoutVoice(piece, voice, firstTime, lastTime);
     lane.style.setProperty('--tracks', tracks);
     for (const {start, end, note, track, hasOnset} of bars) {
-      const bar = newElement('span', undefined, 'note-bar');
+      const bar = inspector.noteButton(note, 'note-bar');
+      barButtons.set(note, bar);
       bar.style.setProperty('--start', percentage(start));
       bar.style.setProperty('--end', percentage(end));
       bar.style.setProperty('--track-center', (track + 0.5) * 100 / tracks + '%');
@@ -231,6 +242,7 @@ function renderGrid({ slot, time, events, continuing }) {
   if (!events.length) readouts.unshift(newElement('li', 'No new note starts here.'));
   if (!events.length && !continuing.length) readouts.push(newElement('li', 'All voices are quiet at this moment.'));
   $('events').replaceChildren(...readouts);
+  inspector.show(piece, time, rules[state.line]?.[3], barButtons);
 }
 function renderExtraVisual(notesHere) {
   const root=$('focus-visual'),line=state.line,slot=state.slot;
@@ -411,6 +423,7 @@ function stopAudio(message = 'Stopped.') {
   previews.stop(message);
 }
 function playAudio() {
+  playingNote = false;
   const option = $('mix').value;
   const start = state.lesson === 2 ? Number(option) : 0;
   const end = Math.min(60, start + 8);
