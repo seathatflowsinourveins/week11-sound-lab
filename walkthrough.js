@@ -58,7 +58,8 @@ function button(text, fn) {
   return item;
 }
 function restoreFocus(container, key) {
-  for (const item of container.children) if (item.dataset.key === String(key)) { item.focus({preventScroll:true}); break; }
+  const target = [...container.querySelectorAll('[data-key]')].find(item => item.dataset.key === String(key));
+  if (target) target.focus({ preventScroll: true });
 }
 function setSlot(value, focusExample) {
   if (!Number.isFinite(value)) value = state.slot;
@@ -126,7 +127,8 @@ function inspectAtLine(notesHere) {
   }
   if([10,11,33,39,40,41,42,43].includes(line)){
     const usesHelper=notesHere.some(event=>event.voice==='melody')&&!isDirectFinal;
-    setIllustration('Motif → scale → pitch',[[String(melodyBefore),'Melody calls before this slot'],[originalDegree+' + '+shift+' = '+degree,'Motif index plus shift, wrapped'],[format(262*ratios[degree])+' Hz','Pitch choice for the next call',true]],usesHelper?'melody() runs here, creates this note, then adds one to note.':isDirectFinal?'The final 262 Hz tone is added directly. The motif is bypassed for this slot.':'No melody() call at this slot. The displayed calculation shows what the next melody call would use here.');
+    const calculation = '(' + originalDegree + ' + ' + shift + ') % ' + ratios.length + ' = ' + degree;
+    setIllustration('Motif → scale → pitch',[[melodyBefore+' % 8 = '+melodyBefore%8,'Index into the motif'],[calculation,'Motif value plus shift, wrapped'],[format(262*ratios[degree])+' Hz','Pitch choice for the next call',true]],usesHelper?'melody() runs here, creates this note, then adds one to note.':isDirectFinal?'The final 262 Hz tone is added directly. The motif is bypassed for this slot.':'No melody() call at this slot. The displayed calculation shows what the next melody call would use here.');
     return;
   }
   if([29,30,31,37,52,54,58,59,63,64,68].includes(line)){
@@ -178,8 +180,12 @@ function renderGrid(notesHere) {
 function renderExtraVisual(notesHere) {
   const root=$('focus-visual'),line=state.line,slot=state.slot;
   root.replaceChildren();
-  function example(e,label,description,group,kind) {
-    const item=button('',()=>{setSlot(e);restoreFocus(group,e);});
+  function example(e,label,description,kind) {
+    const item=button('',()=>{
+      setSlot(e);
+      // Updating the slot redraws the illustration. Focus its replacement control.
+      restoreFocus(root,e);
+    });
     item.dataset.key=e;
     item.setAttribute('aria-pressed',String(e===slot));
     item.append(newElement('strong',label),newElement('small',description));
@@ -191,7 +197,7 @@ function renderExtraVisual(notesHere) {
     const group=newElement('div',undefined,'compare-grid');
     for(const e of slots) {
       const calls=score().events.filter(event=>event.time===timeAt(e)).length;
-      group.append(example(e,'Slot '+e,calls?calls+' '+(calls===1?'call':'calls')+' · time = '+format(timeAt(e))+'s':'Skipped · no local time',group));
+      group.append(example(e,'Slot '+e,calls?calls+' '+(calls===1?'call':'calls')+' · time = '+format(timeAt(e))+'s':'Skipped · no local time'));
     }
     root.append(group);
     return;
@@ -202,7 +208,7 @@ function renderExtraVisual(notesHere) {
     const peak=Math.max(...sections.map(section=>section.eventCount));
     for(const section of sections){
       const e=section.start*4;
-      const item=example(e,section.title,section.start+'s · '+section.eventCount+' starts',group);
+      const item=example(e,section.title,section.start+'s · '+section.eventCount+' starts');
       const bar=newElement('i');
       bar.style.setProperty('--fill',Math.round(100*section.eventCount/peak)+'%');
       bar.setAttribute('aria-hidden','true');
@@ -220,7 +226,7 @@ function renderExtraVisual(notesHere) {
     const active=rules[line] ? matchingRule(rules[line]).voice : null;
     for(let e=first;e<first+8;e++){
       const hit=score().events.some(n=>n.time===timeAt(e)&&(!active||n.voice===active));
-      group.append(example(e,e,hit?'note':'—',group,hit?'hit':null));
+      group.append(example(e,e,hit?'note':'—',hit?'hit':null));
     }
     if(active)label+=' · '+active+' starts';
     root.append(newElement('p',label,'caption'),group);
@@ -354,20 +360,33 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden)stopAudio('
 window.addEventListener('pagehide',()=>stopAudio('Ready'));
 $('full-source').textContent=source.map((line,index)=>String(index+1).padStart(3)+'  '+line).join('\n');
 renderLesson();
+rememberPosition();
+
+document.querySelector('.skip').addEventListener('click', event => {
+  event.preventDefault();
+  $('main').focus({ preventScroll: true });
+  $('main').scrollIntoView();
+});
 
 
 window.addEventListener('hashchange', () => {
   if (location.hash === '#main') return;
   const next = resolvePosition(location.hash, currentPosition());
   const lessonIndex = lessons.findIndex(lesson => lesson.id === next.lesson);
-  if (lessonIndex !== state.lesson) {
+  const changedLesson = lessonIndex !== state.lesson;
+  if (changedLesson) {
     stopAudio('Ready.');
     state.slot = 0;
   }
   state.lesson = lessonIndex;
   state.chapter = chapters.findIndex(chapter => chapter[0] === next.chapter);
   state.line = next.line;
-  renderLesson();
+  if (changedLesson) renderLesson();
+  else {
+    $('chapter').value = String(state.chapter);
+    renderLines();
+    renderDetail();
+  }
   rememberPosition();
 });
 

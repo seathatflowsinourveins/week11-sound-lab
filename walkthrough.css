@@ -123,6 +123,7 @@ p{max-width:64ch}
 .skip{position:fixed;left:1rem;top:-10rem;padding:.6rem .8rem;color:var(--black);background:var(--green);z-index:10}
 .skip:focus{top:1rem}
 .practice a{font-size:.84rem;margin-right:.6rem}
+.primary:hover{background:var(--green);text-decoration:underline;text-underline-offset:.2em}
 .practice .buttons{gap:.8rem}
 @media(max-width:525px){.grid .tick{overflow-wrap:anywhere}
 .line-row{min-height:44px}
