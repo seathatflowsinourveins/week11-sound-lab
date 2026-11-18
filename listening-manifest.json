@@ -15,19 +15,47 @@
   },
   "references": [
     {
+      "name": "Perspective",
+      "source": "https://github.com/perspective-dev/perspective/blob/d235a268bc424b7d4d2da9b12aa287650e5103a7/docs/md/explanation/view/config/grouping_and_pivots.md",
+      "test": "https://github.com/perspective-dev/perspective/blob/d235a268bc424b7d4d2da9b12aa287650e5103a7/rust/perspective-js/test/js/group_by.spec.js",
+      "feature": "Compare note counts",
+      "demo": "design.html#experiments",
+      "use": "Read one row per experiment and one column per voice. Each cell counts notes that start in the generated score."
+    },
+    {
+      "name": "UI/UX Pro Max",
+      "source": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill/blob/e59ff376a41f7ca47b7541ad5c116495cbade3ee/.claude/skills/ui-ux-pro-max/SKILL.md",
+      "feature": "Choose a note by keyboard",
+      "demo": "listen.html#rhythm/pitch",
+      "use": "A labeled list gives keyboard and touch users another way to select the same notes shown as narrow bars. Focus and selection have visible outlines."
+    },
+    {
+      "name": "Anthropic frontend-design",
+      "source": "https://github.com/anthropics/skills/blob/41bbe19d1a1a7eaab5e7bb9050a417e5c6cffc8f/skills/frontend-design/SKILL.md",
+      "feature": "Read code beside the score",
+      "demo": "listen.html#pulse/first",
+      "use": "The score has its own dark panel. Different typefaces distinguish the lesson title, instructions and executable code."
+    },
+    {
       "name": "TradingView Lightweight Charts",
+      "feature": "Select a note",
+      "demo": "listen.html#rhythm/between",
       "source": "https://github.com/tradingview/lightweight-charts/blob/c29c51e1e5bc61981da5832c97797cb8283d120f/website/examples/tooltips-and-legends/tracking-tooltip.js",
       "license": "Apache-2.0",
       "use": "The readout follows a selected data point. A persistent note selection supports clicking, tapping and a keyboard-operated list."
     },
     {
       "name": "Diagram Design",
+      "feature": "Read the three voice lanes",
+      "demo": "listen.html#rhythm/together",
       "source": "https://github.com/cathrynlavery/diagram-design/blob/f6db0decea96de66b901331a0f79a8d4b147ebae/skills/diagram-design/references/type-swimlane.md",
       "example": "https://github.com/cathrynlavery/diagram-design/blob/f6db0decea96de66b901331a0f79a8d4b147ebae/skills/diagram-design/assets/example-swimlane.html",
       "use": "Each voice has a named row. The rows share one time scale so simultaneous notes line up."
     },
     {
       "name": "wavesurfer.js",
+      "feature": "Compare waveform time scales",
+      "demo": "listen.html#composition/return",
       "source": "https://github.com/katspaugh/wavesurfer.js/blob/eef9057e391698370e1a58788646432a562d63a5/src/plugins/regions.ts",
       "example": "https://github.com/katspaugh/wavesurfer.js/blob/eef9057e391698370e1a58788646432a562d63a5/examples/regions.js",
       "test": "https://github.com/katspaugh/wavesurfer.js/blob/eef9057e391698370e1a58788646432a562d63a5/src/__tests__/regions.test.ts",
@@ -37,20 +65,65 @@
     },
     {
       "name": "Strudel",
+      "feature": "Find two overlapping notes",
+      "demo": "listen.html#composition/density",
       "source": "https://codeberg.org/uzu/strudel/src/commit/cac73dc558a689ef877354ab6ce53edc2c06f80b/packages/draw/pianoroll.mjs",
       "use": "The position of a note shows when it starts. The width shows how long it sounds."
     },
     {
       "name": "Algorithm Visualizer",
+      "feature": "Trace the pitch lookup",
+      "demo": "walkthrough.html#rhythm/pitch/40/3",
       "source": "https://github.com/algorithm-visualizer/tracers.js/blob/4db510da800039a9f544e02d32b454428f682c8f/src/Array1DTracer.ts",
       "test": "https://github.com/algorithm-visualizer/tracers.js/blob/4db510da800039a9f544e02d32b454428f682c8f/test/Array1DTracer.js",
       "use": "The detailed code reader highlights the two array entries used to choose a melody pitch."
     },
     {
       "name": "Observable Plot",
+      "feature": "Inspect a held note",
+      "demo": "walkthrough.html#pulse/add/35/1",
       "source": "https://github.com/observablehq/plot/blob/2245188895e95ef2043f0ad12c2f900d6e48ef1a/src/interactions/pointer.js",
       "test": "https://github.com/observablehq/plot/blob/2245188895e95ef2043f0ad12c2f900d6e48ef1a/test/pointer-test.js",
       "use": "The code reader shows the actual score events at the selected time."
+    }
+  ],
+  "designGuide": "design.html",
+  "credits": [
+    {
+      "title": "Teaching and accessibility",
+      "items": [
+        {"name":"Learnable Programming","use":"Bret Victor’s essay informed the worked values beside each selected line. Line 35 shows how a slot becomes a start time.","source":"https://worrydream.com/LearnableProgramming/"},
+        {"name":"Python Tutor","use":"The JavaScript visualizer informed the previous-line and next-line controls.","source":"https://pythontutor.com/javascript.html"},
+        {"name":"W3C reflow guidance","use":"The desktop code-and-score view stacks on small screens. Browser checks exercise both study pages at 320 and 390 pixels.","source":"https://www.w3.org/WAI/WCAG22/Understanding/reflow.html"}
+      ]
+    },
+    {
+      "title": "Sound, sketches and class materials",
+      "items": [
+        {"name":"seathatflowsinourveins/week11-sound-lab","use":"The original composer generates the notes and WAV samples. The transport schedules playback. The inspector draws the waveform from the selected note’s samples.","source":"https://github.com/seathatflowsinourveins/week11-sound-lab","links":[["Composer","composer.js"],["Playback","transport.js"],["Note inspector","note-inspector.js"],["Audio-only piece","performance.html"]]},
+        {"name":"processing/p5.js","use":"The sketch page and download kit bundle p5 2.3.4 for the Play and Stop controls. The study pages use native browser audio and canvas.","source":"https://github.com/processing/p5.js/blob/61cf6e4e11017b39a0ad84a1d7948f4e94860e67/package.json","links":[["Open the p5 sketch","p5.html"],["Bundled license","vendor/p5-LICENSE.txt"]]},
+        {"name":"ITPNYU/ICM-2026-Media","use":"The Mimi 07 assignment sets the 60-second performance, revisions and listening logs. Sound Part 2 supplies the class examples.","source":"https://github.com/ITPNYU/ICM-2026-Media/blob/37fecdd2b96443d176c38c36c2fa88fadc3713b9/weeks/04_sound.md","links":[["Mimi 07 assignment","https://github.com/ITPNYU/ICM-2026-Media/wiki/Homework-Mimi-07#week-11"],["Homework notebook","index.html#notebook"]]},
+        {"name":"ITPNYU/ICM-2024-Media","use":"The assigned text tutorials prepare students for the class after Week 11.","source":"https://github.com/ITPNYU/ICM-2024-Media/blob/5b66d5c9043c64f58c6cec644e0ff6339a726047/weeks/05_text.md#tutorials"},
+        {"name":"Web Audio API","use":"The browser supplies the oscillators, gain ramps and audio clock used to perform the score.","source":"https://www.w3.org/TR/webaudio-1.1/"}
+      ]
+    },
+    {
+      "title": "Design and release practice",
+      "items": [
+        {"name":"SOTA Taste design skill","use":"This local authoring skill guided the shared scales, compact comparison table and revision-specific source links."},
+        {"name":"obra/superpowers","use":"Version 7.0.1 supplied the design, review and verification workflows used while building and publishing the lab.","source":"https://github.com/obra/superpowers/blob/2ce8aa15d05bd57213e6f746f953aafb7ded7a8b/skills/verification-before-completion/SKILL.md"},
+        {"name":"GitHub Pages workflow","use":"The release checks out the project, sets up Node, tests and builds the site, uploads the artifact and deploys it to Pages.","source":"https://github.com/seathatflowsinourveins/week11-sound-lab/blob/3ef318dc4f1e9b44358f972c7a670ee1d783a6f3/.github/workflows/pages.yml","links":[["actions/checkout","https://github.com/actions/checkout/tree/3d3c42e5aac5ba805825da76410c181273ba90b1"],["actions/setup-node","https://github.com/actions/setup-node/tree/949feb2413d6458794dcd2491c4babbbce0c15c1"],["actions/upload-pages-artifact","https://github.com/actions/upload-pages-artifact/tree/fc324d3547104276b827a68afc52ff2a11cc49c9"],["actions/deploy-pages","https://github.com/actions/deploy-pages/tree/368f82528645a54fb793d4d04e342629a3f51346"]]}
+      ]
+    },
+    {
+      "title": "Other designs considered",
+      "items": [
+        {"name":"googlecreativelab/chrome-music-lab","use":"Historical reference for hands-on music teaching.","source":"https://github.com/googlecreativelab/chrome-music-lab/tree/e54bb414908da2b6286a6ad6431a5fcf8b68dc3f"},
+        {"name":"Nutlope/hallmark","use":"A comparison point for the initial design checklist.","source":"https://github.com/Nutlope/hallmark/blob/04977e15f3dfd6ee4b74c887dac3eb52665d6c92/skills/hallmark/SKILL.md"},
+        {"name":"meta/astryx","use":"A React design system considered during the layout decision.","source":"https://github.com/meta/astryx/blob/01b75141fcfb7a0e3c8dfa4dcc8c66b5eba38746/README.md"},
+        {"name":"google-labs-code/stitch-skills","use":"An alternative screen-design workflow reviewed during planning.","source":"https://github.com/google-labs-code/stitch-skills/blob/0337446dadde6f8c94210444e2aa9d546126480f/README.md"},
+        {"name":"VoltAgent/awesome-claude-design","use":"A catalog of design specifications reviewed while comparing authoring workflows.","source":"https://github.com/VoltAgent/awesome-claude-design/blob/8f746b5bbb69cc7544fa850c126a71f754091951/README.md"}
+      ]
     }
   ],
   "experiments": [

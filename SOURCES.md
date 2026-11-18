@@ -1,5 +1,7 @@
 # Class sources and technical decisions
 
+The [design notes](design.html) connect the credited repositories to live illustrations. The [lesson manifest](listening-manifest.json) records the exact source revisions, including the UI/UX Pro Max and Anthropic skill references from the initial design. The experiment table applies Perspective’s grouped-view pattern to the original score summaries and renders as native HTML. [Perspective grouping guide](https://github.com/perspective-dev/perspective/blob/d235a268bc424b7d4d2da9b12aa287650e5103a7/docs/md/explanation/view/config/grouping_and_pivots.md)
+
 ## Walkthrough illustration references
 
 The dark score inspector uses a persistent selection and labeled time scales. Its waveform comes from the original composer's isolated-note PCM export at 22,050 samples per second. The short view shows the first 20 milliseconds. The whole-note view retains the sample extremes across each pixel column. The existing Web Audio transport plays the selected note with its original settings. These small score windows fit native canvas and browser controls. Recheck that choice if the score becomes editable or includes recorded tracks. Reference designs include TradingView Lightweight Charts (Apache-2.0) and wavesurfer.js. [Tracking tooltip source](https://github.com/tradingview/lightweight-charts/blob/c29c51e1e5bc61981da5832c97797cb8283d120f/website/examples/tooltips-and-legends/tracking-tooltip.js) · [Waveform zoom example](https://github.com/katspaugh/wavesurfer.js/blob/eef9057e391698370e1a58788646432a562d63a5/examples/zoom.js)

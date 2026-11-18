@@ -6,6 +6,8 @@
 
 A continuation of the Week 10 sound studio: three playable experiments, an original 60-second algorithmic composition, six plain-language code explanations, measured score/audio results, and a browser-local homework notebook. The class performance has no canvas or animated visualization.
 
+[Design notes and repositories](https://seathatflowsinourveins.github.io/week11-sound-lab/design.html) maps each source to a live illustration and indexes every listening stop and code chapter. Build-time rendering uses the lesson manifest and original score counts.
+
 ## Acceptance
 
 All three scores produce exactly 60 seconds of nonempty, unclipped PCM audio. Repeated generation produces the same event list and identical WAV bytes. The baseline and two revisions are playable independently. The final score changes across four 15-second sections and ends by 60 seconds. Stop, navigation and page hiding cancel playback, including a start still awaiting audio readiness. Native browser rendering is checked separately from PCM synthesis. Partner work, class-example observations, three timed listening notes and subjective judgments remain learner entries.

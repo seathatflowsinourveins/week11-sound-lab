@@ -5,7 +5,7 @@ const read=name=>fs.readFileSync(path.join(root,name));
 const hash=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 const publicFiles=['index.html','lab.css','lab.js','performance.html','performance.js','p5.html','composer.js','transport.js','README.md','SOURCES.md','LICENSE','vendor/p5.min.js','vendor/p5-LICENSE.txt','walkthrough.html','walkthrough.css','walkthrough-data.js','walkthrough-model.js','walkthrough.js'];
 const entries=new Map(publicFiles.map(name=>[name,read(name)]));
-for (const name of ['listen.html','listen.css','listen.js','study.css','note-inspector.js','listening-manifest.json']) entries.set(name, read(name));
+for (const name of ['listen.html','listen.css','listen.js','study.css','note-inspector.js','listening-manifest.json','design.css']) entries.set(name, read(name));
 const listeningManifest = JSON.parse(entries.get('listening-manifest.json'));
 const manifestElement = '<script id="guide-manifest" type="application/json">';
 const guidedPage = entries.get('listen.html').toString().replace(manifestElement,
@@ -31,6 +31,8 @@ for(const experiment of engine.experiments){
   entries.set('sketches/'+experiment.id+'.js',Buffer.from(sketch));
 }
 entries.set('results.json',Buffer.from(JSON.stringify(results,null,2)+'\n'));
+const renderDesignGuide = require('./design-guide.cjs');
+entries.set('design.html', renderDesignGuide(read('design.html').toString(), listeningManifest, results));
 entries.set('results.js',Buffer.from('globalThis.BUILD_RESULTS = '+JSON.stringify(results)+';\n'));
 const kitHTML='<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Week 11 audio-only composition</title><script src="vendor/p5.min.js"></script><style>body{background:#101614;color:#edf2e9;font:16px system-ui;padding:32px}button{font:inherit;margin:8px;padding:12px}button:focus-visible{outline:3px solid #cae9ad}</style></head><body><script src="sketch.js"></script></body></html>\n';
 const kitReadme='WEEK 11 — A MINUTE, MADE BY RULES\n\nAn original teaching example, not evidence of your partner work or listening.\n\nONLINE P5 EDITOR:\n1. Create a NEW sketch at https://editor.p5js.org/\n2. Use p5 2.3.4. Paste sketch.js into the editor’s sketch.js.\n3. No additional sound library or sound assets are needed.\n4. Run, then press Play. Stop cancels every scheduled note.\n5. Save your own version; keep its URL for your class submission.\n\nLOCAL:\nServe this folder with an HTTP server and open index.html.\nThe supplied vendor/p5.min.js is pinned to 2.3.4.\n\nWHAT TO CHANGE:\nRATIOS changes the available pitches. MOTIF changes their order.\nSTEP is 0.25 seconds. The 240-step loop creates a 60-second score.\nThe section conditions control density, register and timbre.\nSmall envelope fades reduce sudden note edges.\nThe score uses no random() or noise(), so fixed rules produce the same notes.\n\nFILES:\nsketch.js — complete final p5 sketch including the sound engine and controls\nexperiments/ — baseline plus two revisions, each a complete sketch\nscores/ — exact note lists\naudio/ — synthesized 60-second WAV exports\nresults.json — measured PCM statistics and SHA-256 hashes\n\nFINISH YOUR HOMEWORK:\nListen with your partner, make and document your own revisions,\ncomplete three timestamped listening logs, update the correct Mimi 07\nspreadsheet, and write your individual/shared process in your blog.\nThe study site has blank personal fields and export tools.\n';
@@ -39,8 +41,8 @@ for(const [name,data]of entries)if(/^(audio|scores)\//.test(name))kit.push([name
 for(const e of engine.experiments)kit.push(['experiments/'+e.id+'.js',entries.get('sketches/'+e.id+'.js')]);
 entries.set('week11-project-kit.zip',zip(kit));
 const release=hash(Buffer.concat([...entries].sort(([a],[b])=>a.localeCompare(b)).flatMap(([name,data])=>[Buffer.from(name+'\0'),data]))).slice(0,16);
-const pages = ['index.html', 'performance.html', 'p5.html', 'walkthrough.html', 'listen.html'];
-const assets = ['lab.css','lab.js','performance.js','composer.js','transport.js','results.js','sketches/composition.js','walkthrough.css','walkthrough-source.js','walkthrough-data.js','walkthrough-model.js','walkthrough.js','listen.css','listen.js','study.css','note-inspector.js'];
+const pages = ['index.html', 'performance.html', 'p5.html', 'walkthrough.html', 'listen.html', 'design.html'];
+const assets = ['lab.css','lab.js','performance.js','composer.js','transport.js','results.js','sketches/composition.js','walkthrough.css','walkthrough-source.js','walkthrough-data.js','walkthrough-model.js','walkthrough.js','listen.css','listen.js','study.css','note-inspector.js','design.css'];
 for (const page of pages) {
   let html = entries.get(page).toString();
   for (const asset of assets) {

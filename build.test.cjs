@@ -91,9 +91,41 @@ test('the live lesson content and the standalone design manifest are identical',
   assert.deepEqual(JSON.parse(embedded[1]), JSON.parse(read('listening-manifest.json')));
 });
 
+test('the design guide covers every lesson, code chapter and credited design repository', () => {
+  const guide = JSON.parse(read('listening-manifest.json'));
+  const html = read('design.html').toString();
+  const destinations = new Set([...html.matchAll(/href="([^"]+)"/g)].map(match => match[1].replace(/\?v=[a-f0-9]{16}$/, '')));
+  const { chapters } = require('./walkthrough-data.js');
+  for (const experiment of guide.experiments) {
+    for (const stop of experiment.stops) assert.ok(html.includes('href="listen.html#' + experiment.id + '/' + stop.id + '"'));
+    const { voices, eventCount } = engine.summarize(engine.makeScore(experiment.id));
+    const row = html.match(new RegExp('<tr data-experiment="' + experiment.id + '">([\\s\\S]+?)</tr>'))[1];
+    assert.deepEqual([...row.matchAll(/<td>(\d+)<\/td>/g)].map(match => Number(match[1])),
+      [voices.melody, voices.bass, voices.pulse, eventCount]);
+  }
+  for (const [chapter] of chapters) assert.ok(html.includes('data-chapter="' + chapter + '"'));
+  for (const ref of guide.references) {
+    assert.ok(destinations.has(ref.source), ref.name);
+    assert.ok(destinations.has(ref.demo), ref.name);
+    const revision = ref.source.match(/\/([0-9a-f]{40})\//)[1];
+    assert.ok(html.includes(' · ' + revision.slice(0, 8) + '</a>'), ref.name + ' displayed revision');
+  }
+  for (const group of guide.credits) {
+    assert.ok(html.includes('<summary>' + group.title + '</summary>'));
+    for (const item of group.items) {
+      assert.ok(html.includes(item.name), item.name);
+      if (item.source) assert.ok(destinations.has(item.source), item.name);
+      for (const [, href] of item.links || []) assert.ok(destinations.has(href), item.name + ' ' + href);
+    }
+  }
+  for (const file of ['listen.html', 'walkthrough.html']) assert.ok(read(file).toString().includes('href="design.html"'));
+});
+
 test('Every local HTML asset and navigation destination resolves inside the delivered site', () => {
   assert.equal(built.status, 0, built.stderr);
-  for (const filename of ['index.html', 'performance.html', 'walkthrough.html', 'listen.html']) {
+  const guide = JSON.parse(read('listening-manifest.json'));
+  const { resolvePosition, positionHash } = require('./walkthrough-model.js');
+  for (const filename of ['index.html', 'performance.html', 'walkthrough.html', 'listen.html', 'design.html']) {
     const html = read(filename).toString('utf8');
     const references = [...html.matchAll(/\b(?:src|href)\s*=\s*["']([^"']+)["']/gi)].map(match => match[1]);
     assert.ok(references.length > 0);
@@ -104,6 +136,14 @@ test('Every local HTML asset and navigation destination resolves inside the deli
       assert.ok(target.startsWith(dist + path.sep), 'Local path leaves deployment: ' + reference);
       assert.ok(fs.existsSync(target) && fs.statSync(target).isFile(), filename + ' has a missing local target: ' + reference);
       if (parsed.hash && path.extname(target) === '.html') {
+        if (target.endsWith('listen.html') && parsed.hash.includes('/')) {
+          assert.ok(guide.experiments.some(exp => exp.stops.some(stop => parsed.hash === '#' + exp.id + '/' + stop.id)), reference);
+          continue;
+        }
+        if (target.endsWith('walkthrough.html') && parsed.hash.includes('/')) {
+          assert.equal(positionHash(resolvePosition(parsed.hash)), parsed.hash, reference);
+          continue;
+        }
         const destination = fs.readFileSync(target, 'utf8');
         const ids = [...destination.matchAll(/\bid\s*=\s*["']([^"']+)["']/gi)].map(match => match[1]);
         assert.ok(ids.includes(decodeURIComponent(parsed.hash.slice(1))), 'Missing destination anchor: ' + reference);
