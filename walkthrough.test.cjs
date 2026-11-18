@@ -87,7 +87,17 @@ test('pitch illustration follows the real motif, including wrap and the direct e
   const composition = SoundLab.makeScore('composition');
   assert.equal(pitchAt(composition, 236).directFinal, true);
   assert.equal(pitchAt(composition, 236).called, false);
+  assert.equal(pitchAt(composition, 236).frequency, 262);
   for (const event of composition.events.filter(item => item.voice === 'melody' && item.time !== 59)) {
     assert.equal(pitchAt(composition, event.time * 4).frequency, event.frequency);
   }
+});
+
+test('the duration illustration separates overlapping notes in one voice', () => {
+  const { layoutVoice } = load();
+  const composition = SoundLab.makeScore('composition');
+  const { bars, tracks } = layoutVoice(composition, 'melody', 31, 31.25);
+  assert.equal(tracks, 2);
+  assert.deepEqual(bars.map(bar => [bar.note.time, bar.end, bar.track, bar.hasOnset]),
+    [[30.75, 31.05, 0, false], [31, 31.25, 1, true]]);
 });

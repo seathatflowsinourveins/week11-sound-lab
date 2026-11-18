@@ -62,8 +62,26 @@
     const shift = score.id === 'composition' && time >= 30 && time < 45 ? 2 : 0;
     const degree = (motifValue + shift) % ratios.length;
     const ratio = ratios[degree];
-    const called = !directFinal && events.some(event => event.voice === 'melody');
-    return { motif, ratios, count, index, motifValue, shift, degree, ratio, called, directFinal, frequency: 262 * ratio };
+    const melody = events.find(event => event.voice === 'melody');
+    const called = !directFinal && Boolean(melody);
+    const frequency = directFinal ? melody.frequency : 262 * ratio;
+    return { motif, ratios, count, index, motifValue, shift, degree, ratio, called, directFinal, frequency };
+  }
+
+  function layoutVoice(score, voice, from, until) {
+    const trackEnds = [];
+    const bars = [];
+    for (const note of score.events) {
+      if (note.voice !== voice) continue;
+      const end = Math.min(until, note.time + note.duration);
+      const start = Math.max(from, note.time);
+      if (end <= start) continue;
+      let track = trackEnds.findIndex(time => time <= start);
+      if (track < 0) track = trackEnds.length;
+      trackEnds[track] = end;
+      bars.push({ note, start, end, track, hasOnset: note.time >= from });
+    }
+    return { bars, tracks: Math.max(1,trackEnds.length) };
   }
 
   function makeExcerpt(score, start, end, voice = null) {
@@ -77,5 +95,5 @@
     return { id: score.id, duration: end - start, bpm: score.bpm, events };
   }
 
-  return { resolvePosition, positionHash, moveLine, inspectSlot, voiceAt, pitchAt, makeExcerpt };
+  return { resolvePosition, positionHash, moveLine, inspectSlot, voiceAt, pitchAt, layoutVoice, makeExcerpt };
 });

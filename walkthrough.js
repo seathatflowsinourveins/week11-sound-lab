@@ -1,7 +1,7 @@
 (function () {
 'use strict';
 const { chapters, lessons, rows, rules } = WalkthroughData;
-const { inspectSlot, voiceAt, pitchAt, makeExcerpt, resolvePosition, positionHash, moveLine } = WalkthroughModel;
+const { inspectSlot, voiceAt, pitchAt, layoutVoice, makeExcerpt, resolvePosition, positionHash, moveLine } = WalkthroughModel;
 const $ = id => document.getElementById(id);
 const model = Object.fromEntries(lessons.map(l=>[l.id,SoundLab.makeScore(l.id)]));
 const source = WALKTHROUGH_SOURCE.split(/\r?\n/);
@@ -74,11 +74,11 @@ function jumpLine(number, fromList) {
   rememberPosition();
   if (fromList) restoreFocus(fromList,number);
 }
-function matchingRule(rule) {
+function matchingRule(rule, slot = state.slot) {
   const [id, divisor, allowed, voice, section, cutoff] = rule;
-  const remainder = state.slot % divisor;
-  const inBranch=lesson().id===id && (section===undefined || Math.floor(state.slot/60)===section);
-  const passes = inBranch && allowed.includes(remainder) && (cutoff===undefined || state.slot<cutoff);
+  const remainder = slot % divisor;
+  const inBranch=lesson().id===id && (section===undefined || Math.floor(slot/60)===section);
+  const passes = inBranch && allowed.includes(remainder) && (cutoff===undefined || slot<cutoff);
   return {remainder,divisor,allowed,voice,inBranch,passes};
 }
 function setIllustration(title, boxes, caption) {
@@ -126,13 +126,18 @@ function inspectAtLine(notesHere) {
   }
   if([10,11,33,39,40,41,42,43].includes(line)){
     const pitch = pitchAt(s, i);
+    if (pitch.directFinal) {
+      setIllustration('The ending uses a fixed pitch', [
+        [String(i), 'Slot for the last note'], ['add()', 'Called directly'], [format(pitch.frequency) + ' Hz', 'Pitch written in the code', true]
+      ], 'The final note uses the pitch on line 67. The motif and ratio lookup are skipped.');
+      return;
+    }
     setIllustration('How does the code pick the pitch?', [
       [pitch.count + ' % ' + pitch.motif.length + ' = ' + pitch.index, 'Position in MOTIF'],
       [pitch.motifValue + (pitch.shift ? ' + ' + pitch.shift + ' → ' + pitch.degree : ''), 'Position in RATIOS'],
       ['262 × ' + pitch.ratio + ' = ' + format(pitch.frequency) + ' Hz', 'Result of the lookup', true]
     ], pitch.called ? 'The highlighted entries produce the melody note starting at this slot.'
-      : pitch.directFinal ? 'The ending uses a fixed 262 Hz pitch. This lookup is skipped here.'
-        : 'The highlighted entries show the pitch this lookup would produce. No new melody note uses it at this slot.');
+      : 'The highlighted entries show the pitch this lookup would produce. No new melody note uses it at this slot.');
     return;
   }
   if([29,30,31,37,52,54,58,59,63,64,68].includes(line)){
@@ -191,21 +196,21 @@ function renderGrid({ slot, time, events, continuing }) {
   }
   grid.append(newElement('span', 'Time (s)', 'score-voice'), axis);
   for (const voice of ['melody', 'bass', 'pulse']) {
-    const voiceEvents = piece.events.filter(note => note.voice === voice);
-    if (voiceEvents.length === 0) continue;
+    if (!piece.events.some(note => note.voice === voice)) continue;
     const lane = newElement('div', undefined, 'note-lane');
     lane.setAttribute('role', 'img');
     const at = voiceAt(piece, voice, time);
     const summary = [at.starts.length && 'starts now', at.continuing.length && 'continues from an earlier slot'].filter(Boolean);
     lane.setAttribute('aria-label', voice + ' at ' + format(time) + ' seconds: ' + (summary.join(' and ') || 'quiet'));
     lane.style.setProperty('--cursor', percentage(time));
-    for (const note of voiceEvents) {
-      const end = note.time + note.duration;
-      if (note.time >= lastTime || end <= firstTime) continue;
+    const { bars, tracks } = layoutVoice(piece, voice, firstTime, lastTime);
+    lane.style.setProperty('--tracks', tracks);
+    for (const {start, end, note, track, hasOnset} of bars) {
       const bar = newElement('span', undefined, 'note-bar');
-      bar.style.setProperty('--start', percentage(Math.max(firstTime, note.time)));
-      bar.style.setProperty('--end', percentage(Math.min(lastTime, end)));
-      if (note.time >= firstTime) bar.classList.add('has-onset');
+      bar.style.setProperty('--start', percentage(start));
+      bar.style.setProperty('--end', percentage(end));
+      bar.style.setProperty('--track-center', (track + 0.5) * 100 / tracks + '%');
+      if (hasOnset) bar.classList.add('has-onset');
       if (note.time <= time && time < end) bar.classList.add('is-sounding');
       lane.append(bar);
     }
@@ -251,6 +256,7 @@ function renderExtraVisual(notesHere) {
   }
   if ([10, 11, 33, 39, 40, 41, 42, 43].includes(line)) {
     const pitch = pitchAt(score(), slot);
+    if (pitch.directFinal) return;
     for (const [label, values, selected] of [['MOTIF', pitch.motif, pitch.index], ['RATIOS', pitch.ratios, pitch.degree]]) {
       root.append(newElement('p', label + ' · position ' + selected, 'caption'));
       const strip = newElement('ol', undefined, 'lookup-strip');
@@ -285,13 +291,11 @@ function renderExtraVisual(notesHere) {
   if(rules[line] || [9,44,70].includes(line)){
     const group=newElement('div',undefined,'beat-strip');
     const first=Math.floor(slot/8)*8;
-    let label='Eight adjacent slots';
-    const active=rules[line] ? matchingRule(rules[line]).voice : null;
+    const label = rules[line] ? 'Eight slots for this rule' : 'Eight adjacent slots';
     for(let e=first;e<first+8;e++){
-      const hit=score().events.some(n=>n.time===timeAt(e)&&(!active||n.voice===active));
+      const hit = rules[line] ? matchingRule(rules[line], e).passes : score().events.some(note => note.time === timeAt(e));
       group.append(example(e,e,hit?'note':'—',hit?'hit':null));
     }
-    if(active)label+=' · '+active+' starts';
     root.append(newElement('p',label,'caption'),group);
     return;
   }
@@ -330,7 +334,7 @@ function renderDetail() {
     if(at<0)continue;
     $('tokens').append(newElement('dt',pair.slice(0,at).trim()),newElement('dd',pair.slice(at+1)));
   }
-  $('slot').value=String(i);
+  if ($('slot').valueAsNumber !== i) $('slot').value = String(i);
   $('examples').replaceChildren(...lesson().examples.map(j=>{
     const item=button('Slot '+j,()=>setSlot(j,true));
     item.dataset.key=j;
@@ -420,6 +424,10 @@ $('chapter').addEventListener('change',()=>{state.chapter=Number($('chapter').va
 $('previous').onclick=()=>navigate(-1);
 $('next').onclick=()=>navigate(1);
 $('slot').addEventListener('change',()=>setSlot($('slot').valueAsNumber));
+$('slot').addEventListener('input', () => {
+  const value = $('slot').valueAsNumber;
+  if (Number.isInteger(value) && value >= 0 && value < 240) setSlot(value);
+});
 $('slot-back').onclick=()=>setSlot(state.slot-1);
 $('slot-next').onclick=()=>setSlot(state.slot+1);
 $('play').onclick=playAudio;
@@ -436,9 +444,7 @@ document.querySelector('.skip').addEventListener('click', event => {
   $('main').focus({ preventScroll: true });
   $('main').scrollIntoView();
 });
-
-
-window.addEventListener('hashchange', () => {
+function followRoute() {
   if (location.hash === '#main') return;
   const next = resolvePosition(location.hash, currentPosition());
   const lessonIndex = lessons.findIndex(lesson => lesson.id === next.lesson);
@@ -457,6 +463,17 @@ window.addEventListener('hashchange', () => {
     renderDetail();
   }
   rememberPosition();
+}
+window.addEventListener('hashchange', followRoute);
+document.querySelector('.quick-start').addEventListener('click', event => {
+  const link = event.target.closest('a');
+  if (!link || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+  event.preventDefault();
+  if (location.hash !== link.hash) {
+    history.pushState(null, '', link.hash);
+    followRoute();
+  }
+  $('meaning').focus();
 });
 
 })();
