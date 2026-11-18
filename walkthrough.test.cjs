@@ -57,3 +57,37 @@ test('excerpts use only in-range onsets, preserve the ending, and filter voices'
   assert.throws(() => makeExcerpt(composition,59,61), RangeError);
   assert.throws(() => makeExcerpt(composition,2,1), RangeError);
 });
+
+test('score illustrations distinguish a note starting, continuing, and already ended', () => {
+  const { inspectSlot, voiceAt } = load();
+  const pulse = SoundLab.makeScore('pulse');
+  assert.deepEqual([0, 1, 2, 3, 8].map(slot => {
+    const { events, continuing } = inspectSlot(pulse, slot);
+    return [events.length, continuing.length];
+  }), [[1, 0], [0, 1], [0, 1], [0, 0], [1, 0]]);
+  const composition = SoundLab.makeScore('composition');
+  const boundary = inspectSlot(composition, 180);
+  assert.deepEqual(boundary.events, []);
+  assert.equal(boundary.continuing[0].section, 'Density');
+  assert.deepEqual(voiceAt({ events: [{ time: 0, duration: 0.25, voice: 'pulse' }] }, 'pulse', 0.25),
+    { starts: [], continuing: [] });
+});
+
+test('pitch illustration follows the real motif, including wrap and the direct ending note', () => {
+  const { pitchAt } = load();
+  const pulse = SoundLab.makeScore('pulse');
+  const source = fs.readFileSync(__dirname + '/composer.js', 'utf8');
+  const motif = JSON.parse(source.match(/const MOTIF = (\[[^\]]+\]);/)[1]);
+  const ratios = JSON.parse(source.match(/const RATIOS = (\[[^\]]+\]);/)[1]);
+  assert.deepEqual(pitchAt(pulse, 8).motif, motif);
+  assert.deepEqual(pitchAt(pulse, 8).ratios, ratios);
+  const second = pitchAt(pulse, 8);
+  assert.deepEqual([second.index, second.motifValue, second.frequency, second.called], [1, 2, 327.5, true]);
+  assert.equal(pitchAt(pulse, 64).index, 0);
+  const composition = SoundLab.makeScore('composition');
+  assert.equal(pitchAt(composition, 236).directFinal, true);
+  assert.equal(pitchAt(composition, 236).called, false);
+  for (const event of composition.events.filter(item => item.voice === 'melody' && item.time !== 59)) {
+    assert.equal(pitchAt(composition, event.time * 4).frequency, event.frequency);
+  }
+});

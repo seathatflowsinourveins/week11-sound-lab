@@ -7,6 +7,9 @@
   const { chapters, lessons } = data;
   const positions = chapters.flatMap(([chapter, , lines]) => lines.map(line => ({ chapter, line })));
   const voices = ['melody', 'bass', 'pulse'];
+  // These values are checked against the exact composer source in walkthrough.test.cjs.
+  const motif = Object.freeze([0, 2, 4, 2, 1, 3, 2, 0]);
+  const ratios = Object.freeze([1, 1.125, 1.25, 1.34, 1.5, 1.67, 1.875, 2]);
 
   function isPosition(value) {
     return value && lessons.some(lesson => lesson.id === value.lesson)
@@ -35,8 +38,32 @@
   function inspectSlot(score, value) {
     const slot = Number.isFinite(value) ? Math.min(239, Math.max(0, Math.floor(value))) : 0;
     const time = slot / 4;
-    const events = score.events.filter(event => event.time === time);
-    return { slot, time, events };
+    const { starts, continuing } = voiceAt(score, null, time);
+    return { slot, time, events: starts, continuing };
+  }
+
+  function voiceAt(score, voice, time) {
+    const starts = [], continuing = [];
+    for (const event of score.events) {
+      if (voice !== null && voice !== event.voice) continue;
+      if (event.time === time) starts.push(event);
+      else if (event.time < time && time < event.time + event.duration) continuing.push(event);
+    }
+    return { starts, continuing };
+  }
+
+  function pitchAt(score, slot) {
+    const { time, events } = inspectSlot(score, slot);
+    const directFinal = score.id === 'composition' && time === 59;
+    const count = score.events.filter(event => event.voice === 'melody' && event.time < time
+      && !(score.id === 'composition' && event.time === 59)).length;
+    const index = count % motif.length;
+    const motifValue = motif[index];
+    const shift = score.id === 'composition' && time >= 30 && time < 45 ? 2 : 0;
+    const degree = (motifValue + shift) % ratios.length;
+    const ratio = ratios[degree];
+    const called = !directFinal && events.some(event => event.voice === 'melody');
+    return { motif, ratios, count, index, motifValue, shift, degree, ratio, called, directFinal, frequency: 262 * ratio };
   }
 
   function makeExcerpt(score, start, end, voice = null) {
@@ -50,5 +77,5 @@
     return { id: score.id, duration: end - start, bpm: score.bpm, events };
   }
 
-  return { resolvePosition, positionHash, moveLine, inspectSlot, makeExcerpt };
+  return { resolvePosition, positionHash, moveLine, inspectSlot, voiceAt, pitchAt, makeExcerpt };
 });

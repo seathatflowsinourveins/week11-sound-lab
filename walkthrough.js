@@ -1,7 +1,7 @@
 (function () {
 'use strict';
 const { chapters, lessons, rows, rules } = WalkthroughData;
-const { inspectSlot, makeExcerpt, resolvePosition, positionHash, moveLine } = WalkthroughModel;
+const { inspectSlot, voiceAt, pitchAt, makeExcerpt, resolvePosition, positionHash, moveLine } = WalkthroughModel;
 const $ = id => document.getElementById(id);
 const model = Object.fromEntries(lessons.map(l=>[l.id,SoundLab.makeScore(l.id)]));
 const source = WALKTHROUGH_SOURCE.split(/\r?\n/);
@@ -74,7 +74,6 @@ function jumpLine(number, fromList) {
   rememberPosition();
   if (fromList) restoreFocus(fromList,number);
 }
-function currentNotes() { return inspectSlot(score(), state.slot).events; }
 function matchingRule(rule) {
   const [id, divisor, allowed, voice, section, cutoff] = rule;
   const remainder = state.slot % divisor;
@@ -98,16 +97,16 @@ function inspectAtLine(notesHere) {
   const section=Math.floor(i/60);
   const tone=notesHere.find(e=>e.voice==='melody')||notesHere[0]||s.events[0];
   const before=s.events.filter(e=>e.time<t);
-  const isDirectFinal=id==='composition'&&i===236;
-  const melodyBefore=before.filter(e=>e.voice==='melody'&&!(id==='composition'&&e.time===59)).length;
-  const originalDegree=[0,2,4,2,1,3,2,0][melodyBefore%8];
-  const shift=id==='composition'&&section===2?2:0;
-  const degree=(originalDegree+shift)%8;
-  const ratios=[1,1.125,1.25,1.34,1.5,1.67,1.875,2];
   if(rules[line]){
     const result=matchingRule(rules[line]);
-    const truth=result.inBranch ? (result.passes?'Add '+result.voice:'Skip '+result.voice) : 'Outside branch';
-    setIllustration('Condition → decision → score',[[i+' % '+result.divisor,'Calculate the remainder'],[String(result.remainder),'Allowed: '+result.allowed.join(', ')],[truth,'Result of this line',true]], notesHere.length?'At this slot the full score starts '+notesHere.map(e=>e.voice).join(', ')+'.':'At this slot the full score adds no sounds.');
+    const truth=result.inBranch ? (result.passes?'Start '+result.voice:'Skip '+result.voice) : 'Line skipped';
+    const why = !result.inBranch
+      ? 'This line is for a different experiment or section.'
+      : result.passes ? 'The remainder matches. This line starts a new ' + result.voice + ' note.'
+        : result.allowed.includes(result.remainder)
+          ? 'The remainder matches, but this line has already reached its cutoff.'
+          : 'The remainder does not match. This line adds no new ' + result.voice + ' note.';
+    setIllustration('Does this line start a note?',[[i+' % '+result.divisor,'Divide and keep the remainder'],[String(result.remainder),'Matches: '+result.allowed.join(', ')],[truth,'What this line does',true]], why);
     return;
   }
   if(line===8||line===9||line===44||line===70){
@@ -116,19 +115,24 @@ function inspectAtLine(notesHere) {
   }
   if(line===34||line===35||line===36||line===37||line===38){
     const result=notesHere.length?format(t)+'s':'No local time';
-    setIllustration('Inside add()', [
-      [String(i), notesHere.length ? 'Passed into add() as step' : 'Inspected slot without an add() call'],
-      [i + ' × 0.25', 'Grid time calculation'],
-      [result, notesHere.length ? notesHere.length + ' separate ' + (notesHere.length === 1 ? 'call' : 'calls') : 'No notes at this slot', true]
+    setIllustration('Does the code create a time?', [
+      [String(i), 'Slot number'],
+      [i + ' × 0.25 = ' + format(t) + 's', 'Where the slot sits'],
+      [result, notesHere.length ? notesHere.length + ' new ' + (notesHere.length === 1 ? 'call' : 'calls') + ' to add()' : 'add() was skipped', true]
     ], notesHere.length
-      ? 'Each call creates its own time and stores ' + format(t) + ' seconds in its note object.'
-      : 'The grid still has a position at ' + format(t) + ' seconds. The note rules skip this slot, so no call creates a local time.');
+      ? 'Each call gets its own time = ' + format(t) + '. Open another slot to compare them.'
+      : 'This slot has a place on the grid, but no new note starts here. Nothing calls add(), so this line creates no local time.');
     return;
   }
   if([10,11,33,39,40,41,42,43].includes(line)){
-    const usesHelper=notesHere.some(event=>event.voice==='melody')&&!isDirectFinal;
-    const calculation = '(' + originalDegree + ' + ' + shift + ') % ' + ratios.length + ' = ' + degree;
-    setIllustration('Motif → scale → pitch',[[melodyBefore+' % 8 = '+melodyBefore%8,'Index into the motif'],[calculation,'Motif value plus shift, wrapped'],[format(262*ratios[degree])+' Hz','Pitch choice for the next call',true]],usesHelper?'melody() runs here, creates this note, then adds one to note.':isDirectFinal?'The final 262 Hz tone is added directly. The motif is bypassed for this slot.':'No melody() call at this slot. The displayed calculation shows what the next melody call would use here.');
+    const pitch = pitchAt(s, i);
+    setIllustration('How does the code pick the pitch?', [
+      [pitch.count + ' % ' + pitch.motif.length + ' = ' + pitch.index, 'Position in MOTIF'],
+      [pitch.motifValue + (pitch.shift ? ' + ' + pitch.shift + ' → ' + pitch.degree : ''), 'Position in RATIOS'],
+      ['262 × ' + pitch.ratio + ' = ' + format(pitch.frequency) + ' Hz', 'Result of the lookup', true]
+    ], pitch.called ? 'The highlighted entries produce the melody note starting at this slot.'
+      : pitch.directFinal ? 'The ending uses a fixed 262 Hz pitch. This lookup is skipped here.'
+        : 'The highlighted entries show the pitch this lookup would produce. No new melody note uses it at this slot.');
     return;
   }
   if([29,30,31,37,52,54,58,59,63,64,68].includes(line)){
@@ -155,27 +159,70 @@ function inspectAtLine(notesHere) {
   }
   setIllustration('State of the note schedule',[[String(before.length),'Events before this slot'],[String(notesHere.length),'Note starts in this slot'],[String(before.length+notesHere.length),'Starts through the current slot',true]],'The score contains '+s.events.length+' note events altogether. '+(notesHere.length?'This slot contains '+notesHere.map(e=>e.voice).join(', ')+'.':'There are no starts here. A prior note may still be sounding.'));
 }
-function renderGrid(notesHere) {
-  const grid=$('grid'),i=state.slot,t=timeAt(i),s=score();
-  const start=Math.min(231,Math.floor(i/8)*8), stop=start+8;
-  const voices=[...new Set(s.events.map(e=>e.voice))].sort((a,b)=>['melody','bass','pulse'].indexOf(a)-['melody','bass','pulse'].indexOf(b));
+function renderGrid({ slot, time, events, continuing }) {
+  const grid = $('grid');
+  const piece = score();
+  const firstSlot = Math.min(231, Math.max(0, slot - 4));
+  const firstTime = timeAt(firstSlot);
+  const lastTime = timeAt(firstSlot + 9);
+  const percentage = value => (value - firstTime) * 100 / (lastTime - firstTime) + '%';
   grid.replaceChildren();
-  function cell(text, style, active, label) {
-    const node=newElement('span',text,style+(active?' current':''));
-    if(label)node.setAttribute('aria-label',label);
-    grid.append(node);
+  const axis = newElement('div', undefined, 'score-axis');
+  axis.setAttribute('role', 'group');
+  axis.setAttribute('aria-label', 'Select time on the score. Use left and right arrows to move.');
+  function choose(next) {
+    setSlot(next);
+    restoreFocus(grid, state.slot);
   }
-  cell('Seconds','voice');
-  for(let j=start;j<=stop;j++)cell(timeAt(j).toFixed(2),'tick',j===i);
-  for(const voice of voices){
-    cell(voice,'voice');
-    for(let j=start;j<=stop;j++){
-      const has=s.events.some(e=>e.voice===voice&&e.time===timeAt(j));
-      cell(has?'●':'–',has?'hit':'rest',j===i,voice+' at '+format(timeAt(j))+' seconds, '+(has?'note starts':'no note starts'));
+  for (let offset = 0; offset < 9; offset++) {
+    const tick = firstSlot + offset;
+    const tickTime = timeAt(tick);
+    const control = button(format(tickTime), () => choose(tick));
+    control.dataset.key = tick;
+    control.tabIndex = tick === slot ? 0 : -1;
+    control.setAttribute('aria-pressed', String(tick === slot));
+    control.setAttribute('aria-label', 'Slot ' + tick + ', ' + format(tickTime) + ' seconds');
+    control.addEventListener('keydown', event => {
+      if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+      event.preventDefault();
+      choose(tick + (event.key === 'ArrowLeft' ? -1 : 1));
+    });
+    axis.append(control);
+  }
+  grid.append(newElement('span', 'Time (s)', 'score-voice'), axis);
+  for (const voice of ['melody', 'bass', 'pulse']) {
+    const voiceEvents = piece.events.filter(note => note.voice === voice);
+    if (voiceEvents.length === 0) continue;
+    const lane = newElement('div', undefined, 'note-lane');
+    lane.setAttribute('role', 'img');
+    const at = voiceAt(piece, voice, time);
+    const summary = [at.starts.length && 'starts now', at.continuing.length && 'continues from an earlier slot'].filter(Boolean);
+    lane.setAttribute('aria-label', voice + ' at ' + format(time) + ' seconds: ' + (summary.join(' and ') || 'quiet'));
+    lane.style.setProperty('--cursor', percentage(time));
+    for (const note of voiceEvents) {
+      const end = note.time + note.duration;
+      if (note.time >= lastTime || end <= firstTime) continue;
+      const bar = newElement('span', undefined, 'note-bar');
+      bar.style.setProperty('--start', percentage(Math.max(firstTime, note.time)));
+      bar.style.setProperty('--end', percentage(Math.min(lastTime, end)));
+      if (note.time >= firstTime) bar.classList.add('has-onset');
+      if (note.time <= time && time < end) bar.classList.add('is-sounding');
+      lane.append(bar);
     }
+    grid.append(newElement('span', voice, 'score-voice'), lane);
   }
-  $('score-summary').textContent='Slot '+i+' at '+format(t)+'s · '+notesHere.length+' '+(notesHere.length===1?'start':'starts')+' · ● note starts';
-  $('events').replaceChildren(...(notesHere.length?notesHere.map(e=>newElement('li',e.voice+': '+format(e.frequency)+' Hz · '+format(e.duration)+'s · '+e.wave+' · gain '+e.gain)):[newElement('li','No event starts in this slot.')]));
+  $('score-summary').textContent = 'Slot ' + slot + ' · ' + format(time) + 's';
+  const readouts = [
+    ...events.map(note => {
+      const item = newElement('li', 'Starts now: ' + note.voice + ' · ' + format(note.frequency) + ' Hz · lasts ' + format(note.duration) + 's');
+      item.append(newElement('span', ' · ' + note.wave + ' wave · gain ' + note.gain, 'note-settings'));
+      return item;
+    }),
+    ...continuing.map(note => newElement('li', 'Still sounding: ' + note.voice + ' · started at ' + format(note.time) + 's, ends at ' + format(note.time + note.duration) + 's'))
+  ];
+  if (!events.length) readouts.unshift(newElement('li', 'No new note starts here.'));
+  if (!events.length && !continuing.length) readouts.push(newElement('li', 'All voices are quiet at this moment.'));
+  $('events').replaceChildren(...readouts);
 }
 function renderExtraVisual(notesHere) {
   const root=$('focus-visual'),line=state.line,slot=state.slot;
@@ -200,6 +247,22 @@ function renderExtraVisual(notesHere) {
       group.append(example(e,'Slot '+e,calls?calls+' '+(calls===1?'call':'calls')+' · time = '+format(timeAt(e))+'s':'Skipped · no local time'));
     }
     root.append(group);
+    return;
+  }
+  if ([10, 11, 33, 39, 40, 41, 42, 43].includes(line)) {
+    const pitch = pitchAt(score(), slot);
+    for (const [label, values, selected] of [['MOTIF', pitch.motif, pitch.index], ['RATIOS', pitch.ratios, pitch.degree]]) {
+      root.append(newElement('p', label + ' · position ' + selected, 'caption'));
+      const strip = newElement('ol', undefined, 'lookup-strip');
+      strip.setAttribute('aria-label', label + ' positions and values');
+      for (const [index, value] of values.entries()) {
+        const item = newElement('li');
+        if (index === selected) item.setAttribute('aria-current', 'true');
+        item.append(newElement('small', String(index)), newElement('strong', String(value)));
+        strip.append(item);
+      }
+      root.append(strip);
+    }
     return;
   }
   if(lesson().id==='composition'&&[29,30,52,54,59,64,67].includes(line)){
@@ -249,7 +312,13 @@ function renderExtraVisual(notesHere) {
 }
 
 function renderDetail() {
-  const line=state.line,i=state.slot,entry=rows[line],notesHere=currentNotes();
+  const line=state.line,i=state.slot,entry=rows[line];
+  const info = inspectSlot(score(), i);
+  const notesHere = info.events;
+  const result = notesHere.length ? 'Starts now: ' + notesHere.map(note => note.voice).join(', ') + '.' : 'No new note starts.';
+  const tails = info.continuing.map(note => note.voice + ' from ' + format(note.time) + 's until ' + format(note.time + note.duration) + 's');
+  $('slot-result').textContent = 'At ' + format(info.time) + 's · ' + result
+    + (tails.length ? ' Still sounding: ' + tails.join(', ') + '.' : notesHere.length ? '' : ' All voices are quiet.');
   $('meaning').textContent=entry[0];
   $('source-number').textContent=line;
   $('selected-code').textContent=source[line-1].trim();
@@ -272,7 +341,7 @@ function renderDetail() {
   $('slot-next').disabled=i===239;
   inspectAtLine(notesHere);
   renderExtraVisual(notesHere);
-  renderGrid(notesHere);
+  renderGrid(info);
 }
 function renderLines() {
   const [, , lines] = chapters[state.chapter];

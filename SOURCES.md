@@ -1,5 +1,13 @@
 # Class sources and technical decisions
 
+## Walkthrough illustration references
+
+- [Strudel visual feedback](https://strudel.cc/learn/visual-feedback/) and its [piano-roll source](https://codeberg.org/uzu/strudel/src/commit/cac73dc558a689ef877354ab6ce53edc2c06f80b/packages/draw/pianoroll.mjs) suggest using a note's time and duration for its visual span. The walkthrough maps the actual score events to labeled voice lanes. A dot marks a start and its attached bar shows how long that note sounds.
+- [Algorithm Visualizer's array tracer](https://github.com/algorithm-visualizer/tracers.js/blob/4db510da800039a9f544e02d32b454428f682c8f/src/Array1DTracer.ts) and its [selection test](https://github.com/algorithm-visualizer/tracers.js/blob/4db510da800039a9f544e02d32b454428f682c8f/test/Array1DTracer.js) inform the two highlighted lookup rows for the motif and the pitch ratios.
+- [Observable Plot's pointer interaction](https://observablehq.github.io/plot/interactions/pointer) and its [tests](https://github.com/observablehq/plot/blob/2245188895e95ef2043f0ad12c2f900d6e48ef1a/test/pointer-test.js) suggest showing the details for the selected position. This small score uses native buttons with arrow keys, which also work without hover.
+
+[Chrome Music Lab](https://github.com/googlecreativelab/chrome-music-lab/tree/e54bb414908da2b6286a6ad6431a5fcf8b68dc3f) is a useful reference for hands-on music teaching. Its repository is archived. These are design references. The walkthrough keeps its native HTML, CSS, JavaScript and Web Audio implementation, with no added library or runtime service. The score and audio bridge pins are held. Recheck if the class changes the score format or runtime.
+
 Checked November 16, 2026, America/New_York. Raw retrieval metadata and hashes stay in the local private evidence folder, outside this deployment.
 
 ## Current assignment
