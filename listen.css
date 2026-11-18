@@ -1,0 +1,99 @@
+:root {
+  color-scheme: light;
+  --paper: #f7f5ee;
+  --ink: #182824;
+  --muted: #4e6159;
+  --rule: #c2cbc0;
+  --accent: #2b6651;
+  --score: #17342d;
+  --mono: "IBM Plex Mono", Consolas, monospace;
+  font: 16px/1.5 "DM Sans", system-ui, sans-serif;
+  color: var(--ink);
+  background: var(--paper);
+}
+* { box-sizing: border-box; }
+body, h1, h2, p, figure { margin: 0; }
+a { color: var(--accent); text-underline-offset: .22em; }
+button { font: inherit; cursor: pointer; }
+button:disabled { opacity: .5; cursor: default; }
+:focus-visible { outline: 3px solid #ad4e19; outline-offset: 3px; }
+[hidden] { display: none !important; }
+.wrap { width: min(calc(100% - 3rem), 76rem); margin-inline: auto; }
+.mast { border-bottom: 1px solid var(--rule); }
+.mast nav, footer, .pager, .transport { display: flex; align-items: center; justify-content: space-between; gap: .8rem; flex-wrap: wrap; }
+.mast a { display: inline-block; padding: .8rem 0; color: var(--ink); font-size: .88rem; }
+.mast a:first-child { font-weight: 750; text-decoration: none; }
+.intro { margin: clamp(1.4rem, 4vw, 3rem) 0 1.4rem; display: flex; align-items: end; justify-content: space-between; gap: 2rem; }
+h1, h2 { font-family: Baskervville, Georgia, serif; font-weight: 500; letter-spacing: -.045em; text-wrap: balance; }
+h1 { font-size: clamp(2.7rem, 5.8vw, 5rem); line-height: 1.04; }
+.intro p { max-width: 32ch; color: var(--muted); }
+.experiments { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); border-block: 1px solid var(--rule); }
+.experiment { min-width: 0; padding: .85rem 1rem; color: var(--ink); display: grid; gap: .2rem; text-decoration: none; box-shadow: inset 0 -3px transparent; }
+.experiment + .experiment { border-left: 1px solid var(--rule); }
+.experiment[aria-current] { background: #e2e9d9; box-shadow: inset 0 -3px var(--accent); }
+.experiment:hover, .stops a:hover, .pager a:hover { background-color: #e5eadf; }
+.experiment strong { font-size: clamp(.95rem, 1.8vw, 1.2rem); }
+.experiment small { color: var(--muted); font-size: .84rem; }
+.stops { display: flex; flex-wrap: wrap; gap: .15rem .5rem; margin: 1.35rem 0; }
+.stops a { padding: .55rem .75rem; border-radius: 3px; min-height: 42px; color: var(--ink); font-size: .91rem; }
+.stops a[aria-current] { color: var(--paper); background: var(--score); text-decoration: none; }
+.work-grid { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 6fr); align-items: start; gap: clamp(1rem, 3vw, 3rem); }
+.reader { padding: .5rem 0; }
+.meta, .line a, .axis, .lane-name, .marked { font: .79rem/1.5 var(--mono); }
+.meta { color: var(--muted); margin-bottom: .5rem; }
+h2 { font-size: clamp(1.9rem, 3.8vw, 3.3rem); line-height: 1.04; }
+.line { border-left: 3px solid var(--accent); background: #e9eee3; margin: 1.2rem 0 .9rem; padding: .75rem .85rem; }
+.line a { font-weight: 700; }
+.line code { display: block; overflow-wrap: anywhere; font: .93rem/1.65 var(--mono); margin-top: .25rem; }
+.reader > p:last-child { max-width: 52ch; }
+.score { color-scheme: dark; background: var(--score); color: #f7f9ef; border-radius: .6rem; padding: clamp(1rem, 2.4vw, 1.8rem); }
+.score figcaption { display: grid; gap: .3rem; }
+.score figcaption strong { color: #d5ecaa; }
+.plot { --gutter: 3.5rem; margin: 1.2rem 0 .65rem; }
+.timeline { margin-left: var(--gutter); margin-bottom: .3rem; position: relative; height: 1.4rem; }
+.axis { position: absolute; transform: translateX(-50%); color: #d0dbd4; white-space: nowrap; }
+.axis:first-child { transform: none; }
+.axis:last-child { transform: translateX(-100%); }
+.score-row { display: grid; grid-template-columns: var(--gutter) minmax(0,1fr); align-items: stretch; }
+.lane-name { align-self: center; color: #f3f3de; }
+.lane { position: relative; border-top: 1px solid #5f7a6c; background-image: repeating-linear-gradient(to right, #69847355 0 1px, transparent 1px var(--tick)); }
+.score-row:last-child .lane { border-bottom: 1px solid #5f7a6c; }
+.bar-note { position: absolute; height: .42rem; transform: translateY(-50%); border-radius: .22rem; background: var(--voice); }
+.bar-note::before { content: ""; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: .22rem; height: .8rem; border-radius: .15rem; background: var(--voice); }
+.lane::after, .plot-area.playing .lane::before { position: absolute; content: ""; inset-block: 0; z-index: 1; pointer-events: none; }
+.lane::after { left: var(--mark); border-left: 2px dashed #ffcf82; }
+.plot-area.playing .lane::before { left: var(--playhead); border-left: 2px solid #fff; }
+.marked { color: #ffdb9e; }
+.key, .key span { display: flex; align-items: center; flex-wrap: wrap; gap: .3rem; }
+.key { gap: .25rem 1rem; color: #d2dfd5; font-size: .78rem; margin-bottom: .25rem; }
+.key-note { width: 1.1rem; height: .3rem; background: #cceca7; border-radius: .2rem; }
+.key-time { height: .9rem; border-left: 2px dashed #ffcf82; }
+.transport { justify-content: flex-start; margin-top: 1rem; gap: .45rem; }
+.transport button { min-height: 44px; border: 1px solid #8caa99; padding: .5rem .9rem; border-radius: .25rem; background: transparent; color: #fff; }
+.transport button:first-child { background: #e0efb6; border-color: #e0efb6; color: #203328; font-weight: 700; }
+.transport span { color: #d2dfd5; font-size: .83rem; }
+.score :focus-visible { outline-color: #ffcf82; }
+.pager { justify-content: flex-end; margin: 1.25rem 0; }
+.pager a { padding: .55rem .85rem; border: 1px solid var(--rule); border-radius: .25rem; }
+.pager a:last-child { border-color: var(--accent); font-weight: 700; }
+.practice { padding: .75rem 0; border-top: 1px solid var(--rule); }
+.practice summary { cursor: pointer; font-weight: 650; padding: .45rem 0; }
+.practice p { max-width: 68ch; margin: .4rem 0 .55rem; }
+footer { border-top: 1px solid var(--rule); padding: 1rem 0 2rem; font-size: .85rem; }
+.skip { position: absolute; left: 1rem; top: -10rem; background: var(--paper); padding: .45rem; z-index: 2; }
+.skip:focus { top: .3rem; }
+@media (max-width: 760px) {
+  .intro { display: block; }
+  .intro p { margin-top: .6rem; max-width: 42ch; }
+  .work-grid { grid-template-columns: 1fr; gap: .7rem; }
+}
+@media (max-width: 520px) {
+  .wrap { width: calc(100% - 1.5rem); }
+  .experiment { padding: .65rem .4rem; }
+  .experiment small { display: none; }
+  .experiment strong { font-size: .88rem; }
+  .stops { gap: .15rem; margin: .65rem 0; }
+  .stops a { padding-inline: .45rem; }
+  .plot { --gutter: 3.25rem; }
+  .pager { justify-content: space-between; }
+}

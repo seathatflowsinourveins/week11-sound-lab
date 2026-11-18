@@ -1,0 +1,252 @@
+{
+  "schemaVersion": 1,
+  "title": "Week 11 guided listen",
+  "reviewed": "2026-11-17",
+  "score": "composer.js",
+  "releaseManifest": "release.json",
+  "references": [
+    {
+      "name": "Diagram Design",
+      "source": "https://github.com/cathrynlavery/diagram-design/blob/f6db0decea96de66b901331a0f79a8d4b147ebae/skills/diagram-design/references/type-swimlane.md",
+      "example": "https://github.com/cathrynlavery/diagram-design/blob/f6db0decea96de66b901331a0f79a8d4b147ebae/skills/diagram-design/assets/example-swimlane.html",
+      "use": "Each voice has a named row. The rows share one time scale so simultaneous notes line up."
+    },
+    {
+      "name": "wavesurfer.js",
+      "source": "https://github.com/katspaugh/wavesurfer.js/blob/eef9057e391698370e1a58788646432a562d63a5/src/plugins/regions.ts",
+      "example": "https://github.com/katspaugh/wavesurfer.js/blob/eef9057e391698370e1a58788646432a562d63a5/examples/regions.js",
+      "test": "https://github.com/katspaugh/wavesurfer.js/blob/eef9057e391698370e1a58788646432a562d63a5/src/__tests__/regions.test.ts",
+      "use": "Every excerpt has a labeled start and end. Replay returns to the start of that window."
+    },
+    {
+      "name": "Strudel",
+      "source": "https://codeberg.org/uzu/strudel/src/commit/cac73dc558a689ef877354ab6ce53edc2c06f80b/packages/draw/pianoroll.mjs",
+      "use": "The position of a note shows when it starts. The width shows how long it sounds."
+    },
+    {
+      "name": "Algorithm Visualizer",
+      "source": "https://github.com/algorithm-visualizer/tracers.js/blob/4db510da800039a9f544e02d32b454428f682c8f/src/Array1DTracer.ts",
+      "test": "https://github.com/algorithm-visualizer/tracers.js/blob/4db510da800039a9f544e02d32b454428f682c8f/test/Array1DTracer.js",
+      "use": "The detailed code reader highlights the two array entries used to choose a melody pitch."
+    },
+    {
+      "name": "Observable Plot",
+      "source": "https://github.com/observablehq/plot/blob/2245188895e95ef2043f0ad12c2f900d6e48ef1a/src/interactions/pointer.js",
+      "test": "https://github.com/observablehq/plot/blob/2245188895e95ef2043f0ad12c2f900d6e48ef1a/test/pointer-test.js",
+      "use": "The code reader shows the actual score events at the selected time."
+    }
+  ],
+  "experiments": [
+    {
+      "id": "pulse",
+      "name": "Repeating melody",
+      "question": "When does a note start?",
+      "homework": "Change step % 8 to step % 4 in the baseline sketch. Predict the new gap between starts, then play both versions and record what you hear.",
+      "stops": [
+        {
+          "id": "first",
+          "label": "First note",
+          "title": "Give the first note a start time",
+          "window": [
+            0,
+            4
+          ],
+          "slot": 0,
+          "chapter": "add",
+          "line": 35,
+          "starts": [
+            "melody"
+          ],
+          "holds": [],
+          "explanation": "A slot is a possible start on the score’s clock. Each slot lasts 0.25 seconds. At slot 0, add() calculates 0 × 0.25 and saves 0 as this note’s start time.",
+          "listen": "Press Play and listen for two separate notes. The first sounds for 0.6 seconds. The empty space after its bar is silence."
+        },
+        {
+          "id": "hold",
+          "label": "Same note",
+          "title": "Watch a slot pass without a new note",
+          "window": [
+            0,
+            4
+          ],
+          "slot": 1,
+          "chapter": "add",
+          "line": 35,
+          "starts": [],
+          "holds": [
+            "melody"
+          ],
+          "explanation": "At slot 1 the clock reads 0.25 seconds. The melody rule skips this slot, so the program never calls add() here. The first note keeps its original start time of 0.",
+          "listen": "Find the dashed marker at 0.25 seconds. It cuts through the first bar. You should hear one continuous tone there."
+        },
+        {
+          "id": "next",
+          "label": "Next note",
+          "title": "Give the next note its own time",
+          "window": [
+            0,
+            4
+          ],
+          "slot": 8,
+          "chapter": "add",
+          "line": 35,
+          "starts": [
+            "melody"
+          ],
+          "holds": [],
+          "explanation": "At slot 8 the rule calls add() again. This call calculates 8 × 0.25 = 2. Each call has its own const time. The first note keeps 0 and the second keeps 2.",
+          "listen": "Listen again. The second note begins two seconds after the first and sounds higher. Compare the two left edges in the melody row."
+        }
+      ]
+    },
+    {
+      "id": "rhythm",
+      "name": "Interlocking rhythm",
+      "question": "How do three parts fit together?",
+      "homework": "Find [0, 3, 6] in the downloaded rhythm sketch and replace it with [0, 4]. Compare where the melody lands against the low pulse.",
+      "stops": [
+        {
+          "id": "together",
+          "label": "Together",
+          "title": "Hear three notes start together",
+          "window": [
+            0,
+            2
+          ],
+          "slot": 0,
+          "chapter": "rules",
+          "line": 49,
+          "starts": [
+            "bass",
+            "melody",
+            "pulse"
+          ],
+          "holds": [],
+          "explanation": "The bass rule asks whether dividing the slot number by 16 leaves zero. Slot 0 passes. The melody and pulse have their own rules, and both also pass here.",
+          "listen": "Look down the three rows at 0 seconds. The short low pulse ends first. The bass continues after the brighter melody ends."
+        },
+        {
+          "id": "pitch",
+          "label": "Melody",
+          "title": "Follow the higher melody note",
+          "window": [
+            0,
+            2
+          ],
+          "slot": 3,
+          "chapter": "pitch",
+          "line": 41,
+          "starts": [
+            "melody"
+          ],
+          "holds": [],
+          "explanation": "At slot 3 the melody gets another turn. Its second pattern entry selects the pitch multiplier 1.25. The code multiplies 262 by 1.25 to get 327.5 Hz.",
+          "listen": "Listen for the higher melody note at 0.75 seconds. You can see space in the bass and pulse rows when it begins."
+        },
+        {
+          "id": "between",
+          "label": "Pulse",
+          "title": "Hear the pulse under a held melody",
+          "window": [
+            0,
+            2
+          ],
+          "slot": 4,
+          "chapter": "rules",
+          "line": 50,
+          "starts": [
+            "pulse"
+          ],
+          "holds": [
+            "melody"
+          ],
+          "explanation": "The % sign gives the remainder after division. At slot 4, 4 % 4 is zero, so this line adds a low pulse. The melody that started at 0.75 seconds lasts until 1.05.",
+          "listen": "Listen around one second. A short low tap enters just before the melody ends. The two bars overlap for 0.05 seconds."
+        }
+      ]
+    },
+    {
+      "id": "composition",
+      "name": "Four-part composition",
+      "question": "How does a minute of music change?",
+      "homework": "Try a sine melody in Density in place of triangle. Compare 30–45 seconds. With your partner, record the timestamp and a word for the change you actually hear.",
+      "stops": [
+        {
+          "id": "seed",
+          "label": "Seed",
+          "title": "Start with room between notes",
+          "window": [
+            0,
+            4
+          ],
+          "slot": 0,
+          "chapter": "rules",
+          "line": 53,
+          "starts": [
+            "melody"
+          ],
+          "holds": [],
+          "explanation": "Seed is the first 15 seconds. When the slot number divides evenly by 8, this line starts one smooth melody note. Eight slots take two seconds.",
+          "listen": "Listen for a single part with a long gap after each tone. Keep that spacing in mind as you move to Growth."
+        },
+        {
+          "id": "growth",
+          "label": "Growth",
+          "title": "Hear the rhythm fill in",
+          "window": [
+            14,
+            18
+          ],
+          "slot": 60,
+          "chapter": "rules",
+          "line": 55,
+          "starts": [
+            "melody",
+            "pulse"
+          ],
+          "holds": [],
+          "explanation": "At 15 seconds Growth begins. Its melody rule calls for a note every four slots, or once a second. A separate rule adds a short pulse on the same slots.",
+          "listen": "Listen from 14 seconds. A lone tone opens the clip. At 15 seconds a brighter melody and a low tap enter together. The bass joins at 16 seconds."
+        },
+        {
+          "id": "density",
+          "label": "Density",
+          "title": "Catch two melody notes overlapping",
+          "window": [
+            30,
+            34
+          ],
+          "slot": 124,
+          "chapter": "rules",
+          "line": 60,
+          "starts": [
+            "melody"
+          ],
+          "holds": [
+            "melody"
+          ],
+          "explanation": "In Density the melody can start on four positions in each eight-slot cycle. The notes at 30.75 and 31 seconds start a quarter-second apart. Each lasts 0.3 seconds.",
+          "listen": "Follow the melody row at 31 seconds. Two bars briefly overlap. Listen for the quick succession of pitches above the low rhythm."
+        },
+        {
+          "id": "return",
+          "label": "Return",
+          "title": "Hear the final note settle",
+          "window": [
+            56,
+            60
+          ],
+          "slot": 236,
+          "chapter": "rules",
+          "line": 67,
+          "starts": [
+            "melody"
+          ],
+          "holds": [],
+          "explanation": "Return starts at 45 seconds and leaves more room between notes. At slot 236 this line asks for one final note at 262 Hz. It begins at 59 seconds and lasts one second.",
+          "listen": "Listen for the bass and melody at 56 seconds. After the higher note at 58 seconds, the last tone drops in pitch and carries the piece to 60 seconds."
+        }
+      ]
+    }
+  ]
+}

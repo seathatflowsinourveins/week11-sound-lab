@@ -5,6 +5,42 @@ const fs = require('node:fs');
 const SoundLab = require('./composer.js');
 const load = () => require('./walkthrough-model.js');
 
+test('a listening checkpoint opens the precise source line and slot', () => {
+  const { resolvePosition, positionHash } = load();
+  const position = { lesson: 'pulse', chapter: 'add', line: 35, slot: 1 };
+  assert.equal(positionHash(position), '#pulse/add/35/1');
+  assert.deepEqual(resolvePosition(positionHash(position)), position);
+  assert.deepEqual(resolvePosition('#pulse/add/35/0'), { ...position, slot: 0 });
+  assert.notEqual(resolvePosition('#pulse/add/35/240').slot, 240);
+});
+
+test('every listening stop points to a taught line and plays its complete score window', () => {
+  const guide = require('./listening-manifest.json');
+  const { inspectSlot, makeExcerpt, resolvePosition, positionHash } = load();
+  const { chapters } = require('./walkthrough-data.js');
+  assert.deepEqual(guide.experiments.map(item => item.id), SoundLab.experiments.map(item => item.id));
+  for (const experiment of guide.experiments) {
+    const score = SoundLab.makeScore(experiment.id);
+    const ids = new Set();
+    for (const stop of experiment.stops) {
+      assert.ok(!ids.has(stop.id));
+      ids.add(stop.id);
+      const [from, until] = stop.window;
+      const info = inspectSlot(score, stop.slot);
+      assert.ok(info.time >= from && info.time < until);
+      assert.ok(chapters.find(([key]) => key === stop.chapter)[2].includes(stop.line));
+      const position = { lesson: experiment.id, chapter: stop.chapter, line: stop.line, slot: stop.slot };
+      assert.deepEqual(resolvePosition(positionHash(position)), position);
+      assert.deepEqual(info.events.map(note => note.voice).sort(), stop.starts);
+      assert.deepEqual(info.continuing.map(note => note.voice).sort(), stop.holds);
+      assert.equal(inspectSlot(score, from * 4).continuing.length, 0, 'Excerpt needs the entire first note');
+      const excerpt = makeExcerpt(score, from, until);
+      assert.ok(excerpt.events.length && excerpt.duration === until - from);
+    }
+  }
+  for (const reference of guide.references) assert.match(reference.source, /\/(blob|commit)\/[a-f0-9]{40}\//);
+});
+
 test('every authored score line selects real source and has a complete explanation', () => {
   const { chapters, rows } = require('./walkthrough-data.js');
   const source = fs.readFileSync(__dirname + '/composer.js', 'utf8').split(/\r?\n/);

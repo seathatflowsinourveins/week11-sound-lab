@@ -1,0 +1,161 @@
+(() => {
+  'use strict';
+
+  const element = id => document.getElementById(id);
+  const { experiments } = JSON.parse(element('guide-manifest').textContent);
+  const { layoutVoice, makeExcerpt, positionHash } = WalkthroughModel;
+  const source = WALKTHROUGH_SOURCE.split(/\r?\n/);
+  const scores = new Map(experiments.map(({ id }) => [id, SoundLab.makeScore(id)]));
+  const itinerary = experiments.flatMap((experiment, experimentIndex) =>
+    experiment.stops.map((stop, stepIndex) => ({
+      experiment, experimentIndex, stop, stepIndex, hash: '#' + experiment.id + '/' + stop.id
+    }))
+  );
+  const voices = [
+    ['melody', 'Melody', '#cceca7'],
+    ['bass', 'Bass', '#91d8d1'],
+    ['pulse', 'Pulse', '#efac87']
+  ];
+  let current;
+  let frame;
+
+  function create(tag, text, className) {
+    const node = document.createElement(tag);
+    if (text !== null) node.textContent = text;
+    if (className) node.className = className;
+    return node;
+  }
+
+  function link(hash, text, className) {
+    const anchor = create('a', text, className);
+    anchor.href = hash;
+    return anchor;
+  }
+
+  function drawCursor() {
+    if (player.state !== 'playing') return;
+    const [from, until] = current.stop.window;
+    const fraction = Math.min(1, player.elapsed() / (until - from));
+    element('plot-area').style.setProperty('--playhead', 100 * fraction + '%');
+    frame = requestAnimationFrame(drawCursor);
+  }
+
+  const player = createTransport(
+    { makeScore: score => score, playScore: SoundLab.playScore },
+    () => {
+      const Audio = window.AudioContext || window.webkitAudioContext;
+      if (!Audio) throw new Error('This browser cannot play the excerpt. The score is available to read.');
+      return new Audio();
+    },
+    (state, detail) => {
+      cancelAnimationFrame(frame);
+      const busy = state === 'pending' || state === 'playing';
+      element('play').disabled = busy;
+      element('stop').disabled = !busy;
+      element('plot-area').classList.toggle('playing', state === 'playing');
+      const messages = { playing: 'Playing', pending: 'Starting…', ended: 'Excerpt finished.' };
+      element('status').textContent = messages[state] ?? detail;
+      if (state === 'playing') drawCursor();
+    }
+  );
+
+  function drawScore(score, stop) {
+    const [from, until] = stop.window;
+    const time = stop.slot / 4;
+    const percent = value => 100 * (value - from) / (until - from);
+    const area = element('plot-area');
+    area.style.setProperty('--mark', percent(time) + '%');
+    area.style.setProperty('--tick', 100 * .25 / (until - from) + '%');
+    const axis = [];
+    for (let second = from; second <= until; second++) {
+      const tick = create('span', second + 's', 'axis');
+      tick.style.left = percent(second) + '%';
+      axis.push(tick);
+    }
+    element('timeline').replaceChildren(...axis);
+    const lanes = [];
+    for (const [voice, name, color] of voices) {
+      const row = create('div', null, 'score-row');
+      const lane = create('div', null, 'lane');
+      const { bars, tracks } = layoutVoice(score, voice, from, until);
+      lane.style.height = (tracks > 1 ? 3 : 2.25) + 'rem';
+      lane.style.setProperty('--voice', color);
+      for (const bar of bars) {
+        const mark = create('span', null, 'bar-note');
+        mark.style.left = percent(bar.start) + '%';
+        mark.style.width = (percent(bar.end) - percent(bar.start)) + '%';
+        mark.style.top = 100 * (bar.track + .5) / tracks + '%';
+        lane.append(mark);
+      }
+      row.append(create('span', name, 'lane-name'), lane);
+      lanes.push(row);
+    }
+    area.replaceChildren(...lanes);
+    const inspected = WalkthroughModel.inspectSlot(score, stop.slot);
+    const parts = [
+      ...inspected.events.map(event => event.voice + ' starts'),
+      ...inspected.continuing.map(event => event.voice + ' continues')
+    ];
+    const summary = 'Slot ' + stop.slot + ' at ' + time + 's · ' + (parts.join(', ') || 'all voices quiet') + '.';
+    element('marked').textContent = summary;
+    element('plot').setAttribute('aria-label', 'Score from ' + from + ' to ' + until + ' seconds. ' + summary);
+  }
+
+  const experimentLinks = experiments.map((experiment, index) => {
+    const anchor = link('#' + experiment.id + '/' + experiment.stops[0].id, null, 'experiment');
+    anchor.append(create('strong', (index + 1) + '. ' + experiment.name), create('small', experiment.question));
+    return anchor;
+  });
+  element('experiments').replaceChildren(...experimentLinks);
+
+  function render(moveFocus = false) {
+    const position = itinerary.findIndex(item => item.hash === location.hash);
+    const index = Math.max(0, position);
+    const next = itinerary[index];
+    if (next === current) return;
+    player.stop('');
+    const { experiment, experimentIndex, stop, stepIndex } = next;
+    if (current?.experiment !== experiment) {
+      const stopLinks = experiment.stops.map(item => link('#' + experiment.id + '/' + item.id, item.label));
+      element('stops').replaceChildren(...stopLinks);
+    }
+    current = next;
+    for (const [i, anchor] of experimentLinks.entries()) {
+      if (i === experimentIndex) anchor.setAttribute('aria-current', 'true');
+      else anchor.removeAttribute('aria-current');
+    }
+    for (const anchor of element('stops').children) {
+      if (anchor.hash === current.hash) anchor.setAttribute('aria-current', 'step');
+      else anchor.removeAttribute('aria-current');
+    }
+    document.title = stop.title + ' · Week 11 guided listen';
+    element('step-count').textContent = experiment.name + ' · Step ' + (stepIndex + 1) + ' of ' + experiment.stops.length;
+    element('title').textContent = stop.title;
+    element('code').textContent = source[stop.line - 1].trim();
+    element('deep').href = 'walkthrough.html' + positionHash({ lesson: experiment.id, chapter: stop.chapter, line: stop.line, slot: stop.slot });
+    element('deep').textContent = 'Explore line ' + stop.line + ' ↗';
+    element('explanation').textContent = stop.explanation;
+    element('listen-for').textContent = stop.listen;
+    element('practice').textContent = experiment.homework;
+    element('sketch').href = 'sketches/' + experiment.id + '.js';
+    element('play').textContent = '▶ Play ' + stop.window[0] + '–' + stop.window[1] + 's';
+    drawScore(scores.get(experiment.id), stop);
+    element('previous').hidden = index === 0;
+    element('previous').href = itinerary[Math.max(0, index - 1)].hash;
+    const after = itinerary[index + 1];
+    element('next').href = after?.hash ?? 'index.html#notebook';
+    element('next').textContent = !after ? 'Continue to your homework →'
+      : after.experiment !== experiment ? 'Next experiment →' : 'Next step →';
+    if (moveFocus) element('title').focus();
+  }
+
+  element('play').addEventListener('click', () => {
+    const score = scores.get(current.experiment.id);
+    player.play(makeExcerpt(score, ...current.stop.window));
+  });
+  element('stop').addEventListener('click', () => player.stop('Stopped.'));
+  window.addEventListener('hashchange', () => { if (location.hash !== '#work') render(true); });
+  window.addEventListener('pagehide', () => player.stop(''));
+  document.addEventListener('visibilitychange', () => { if (document.hidden) player.stop(''); });
+  render();
+})();

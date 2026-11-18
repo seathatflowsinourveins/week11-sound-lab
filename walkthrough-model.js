@@ -17,15 +17,20 @@
   }
 
   function resolvePosition(hash, saved) {
-    const route = /^#([a-z]+)\/([a-z]+)\/([1-9]\d{0,2})$/.exec(hash);
+    const route = /^#([a-z]+)\/([a-z]+)\/([1-9]\d{0,2})(?:\/(0|[1-9]\d{0,2}))?$/.exec(hash);
     const fromLink = route && { lesson: route[1], chapter: route[2], line: Number(route[3]) };
+    if (fromLink && route[4] !== undefined) fromLink.slot = Number(route[4]);
     const position = isPosition(fromLink) ? fromLink : saved;
-    if (isPosition(position)) return { lesson: position.lesson, chapter: position.chapter, line: position.line };
+    if (isPosition(position)) {
+      const result = { lesson: position.lesson, chapter: position.chapter, line: position.line };
+      if (Number.isInteger(position.slot) && position.slot >= 0 && position.slot < 240) result.slot = position.slot;
+      return result;
+    }
     return { lesson: lessons[0].id, ...positions[0] };
   }
 
-  function positionHash({ lesson, chapter, line }) {
-    return '#' + lesson + '/' + chapter + '/' + line;
+  function positionHash({ lesson, chapter, line, slot }) {
+    return '#' + lesson + '/' + chapter + '/' + line + (slot === undefined ? '' : '/' + slot);
   }
 
   function moveLine(position, direction) {

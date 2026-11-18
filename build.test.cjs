@@ -84,9 +84,16 @@ test('Three delivered WAV files and score records have verified duration, conten
   }
 });
 
+test('the live lesson content and the standalone design manifest are identical', () => {
+  const page = read('listen.html').toString();
+  const embedded = page.match(/<script id="guide-manifest" type="application\/json">(.+?)<\/script>/s);
+  assert.ok(embedded);
+  assert.deepEqual(JSON.parse(embedded[1]), JSON.parse(read('listening-manifest.json')));
+});
+
 test('Every local HTML asset and navigation destination resolves inside the delivered site', () => {
   assert.equal(built.status, 0, built.stderr);
-  for (const filename of ['index.html', 'performance.html', 'walkthrough.html']) {
+  for (const filename of ['index.html', 'performance.html', 'walkthrough.html', 'listen.html']) {
     const html = read(filename).toString('utf8');
     const references = [...html.matchAll(/\b(?:src|href)\s*=\s*["']([^"']+)["']/gi)].map(match => match[1]);
     assert.ok(references.length > 0);

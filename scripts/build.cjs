@@ -5,6 +5,12 @@ const read=name=>fs.readFileSync(path.join(root,name));
 const hash=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 const publicFiles=['index.html','lab.css','lab.js','performance.html','performance.js','p5.html','composer.js','transport.js','README.md','SOURCES.md','LICENSE','vendor/p5.min.js','vendor/p5-LICENSE.txt','walkthrough.html','walkthrough.css','walkthrough-data.js','walkthrough-model.js','walkthrough.js'];
 const entries=new Map(publicFiles.map(name=>[name,read(name)]));
+for (const name of ['listen.html','listen.css','listen.js','listening-manifest.json']) entries.set(name, read(name));
+const listeningManifest = JSON.parse(entries.get('listening-manifest.json'));
+const manifestElement = '<script id="guide-manifest" type="application/json">';
+const guidedPage = entries.get('listen.html').toString().replace(manifestElement,
+  () => manifestElement + JSON.stringify(listeningManifest).replaceAll('<', '\\u003c'));
+entries.set('listen.html', Buffer.from(guidedPage));
 const composer=entries.get('composer.js');
 const {composerSHA256}=require('../walkthrough-data.js');
 if(hash(composer)!==composerSHA256)throw Error('The composer changed. Review the walkthrough line explanations before updating its source checksum.');
@@ -33,8 +39,18 @@ for(const [name,data]of entries)if(/^(audio|scores)\//.test(name))kit.push([name
 for(const e of engine.experiments)kit.push(['experiments/'+e.id+'.js',entries.get('sketches/'+e.id+'.js')]);
 entries.set('week11-project-kit.zip',zip(kit));
 const release=hash(Buffer.concat([...entries].sort(([a],[b])=>a.localeCompare(b)).flatMap(([name,data])=>[Buffer.from(name+'\0'),data]))).slice(0,16);
-for(const file of ['index.html','performance.html','p5.html','walkthrough.html']){let html=entries.get(file).toString();for(const asset of ['lab.css','lab.js','performance.js','composer.js','transport.js','results.js','sketches/composition.js','walkthrough.css','walkthrough-source.js','walkthrough-data.js','walkthrough-model.js','walkthrough.js'])html=html.replaceAll('"'+asset+'"','"'+asset+'?v='+release+'"');entries.set(file,Buffer.from(html));}
-const manifest={release,checked:'2026-11-16',p5:'2.3.4',files:[...entries].map(([name,data])=>({path:name,bytes:data.length,sha256:hash(data)})).sort((a,b)=>a.path.localeCompare(b.path))};
+const pages = ['index.html', 'performance.html', 'p5.html', 'walkthrough.html', 'listen.html'];
+const assets = ['lab.css','lab.js','performance.js','composer.js','transport.js','results.js','sketches/composition.js','walkthrough.css','walkthrough-source.js','walkthrough-data.js','walkthrough-model.js','walkthrough.js','listen.css','listen.js'];
+for (const page of pages) {
+  let html = entries.get(page).toString();
+  for (const asset of assets) {
+    for (const attribute of ['src', 'href']) {
+      html = html.replaceAll(attribute + '="' + asset + '"', attribute + '="' + asset + '?v=' + release + '"');
+    }
+  }
+  entries.set(page, Buffer.from(html));
+}
+const manifest={release,checked:listeningManifest.reviewed,p5:'2.3.4',files:[...entries].map(([name,data])=>({path:name,bytes:data.length,sha256:hash(data)})).sort((a,b)=>a.path.localeCompare(b.path))};
 entries.set('release.json',Buffer.from(JSON.stringify(manifest,null,2)+'\n'));
 fs.mkdirSync(out,{recursive:true});
 function walk(dir){return fs.readdirSync(dir,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(path.join(dir,e.name)):[path.relative(out,path.join(dir,e.name)).split(path.sep).join('/')]);}

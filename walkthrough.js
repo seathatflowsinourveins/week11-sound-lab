@@ -13,7 +13,7 @@ const state = {
   lesson: lessons.findIndex(lesson => lesson.id === initial.lesson),
   chapter: chapters.findIndex(chapter => chapter[0] === initial.chapter),
   line: initial.line,
-  slot: 0
+  slot: initial.slot ?? 0
 };
 const previews = createTransport(
   { makeScore: request => request.score, playScore: SoundLab.playScore },
@@ -33,7 +33,9 @@ const practices = [
   'In Density, change the melody waveform from triangle to sine. Compare 30–45 seconds and describe how the tone changed.'
 ];
 function currentPosition() {
-  return { lesson: lesson().id, chapter: chapters[state.chapter][0], line: state.line };
+  const position = { lesson: lesson().id, chapter: chapters[state.chapter][0], line: state.line };
+  if (state.slot !== 0) position.slot = state.slot;
+  return position;
 }
 function rememberPosition() {
   const position = currentPosition();
@@ -65,6 +67,7 @@ function setSlot(value, focusExample) {
   if (!Number.isFinite(value)) value = state.slot;
   state.slot = inspectSlot(score(), value).slot;
   renderDetail();
+  rememberPosition();
   if (focusExample) restoreFocus($('examples'),state.slot);
 }
 function jumpLine(number, fromList) {
@@ -451,8 +454,8 @@ function followRoute() {
   const changedLesson = lessonIndex !== state.lesson;
   if (changedLesson) {
     stopAudio('Ready.');
-    state.slot = 0;
   }
+  state.slot = next.slot ?? 0;
   state.lesson = lessonIndex;
   state.chapter = chapters.findIndex(chapter => chapter[0] === next.chapter);
   state.line = next.line;
@@ -468,6 +471,7 @@ window.addEventListener('hashchange', followRoute);
 document.querySelector('.quick-start').addEventListener('click', event => {
   const link = event.target.closest('a');
   if (!link || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+  if (!link.getAttribute('href').startsWith('#')) return;
   event.preventDefault();
   if (location.hash !== link.hash) {
     history.pushState(null, '', link.hash);
