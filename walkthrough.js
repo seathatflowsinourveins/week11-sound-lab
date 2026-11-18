@@ -28,9 +28,10 @@ const previews = createTransport(
   (status, detail) => {
     const playingNote = playback === 'note';
     live.audioState(status);
+    melodyMap.audioState(status, playback === 'map', detail);
     inspector.audioState(status, playingNote, detail);
     comparison.audioState(status, playback === 'practice', detail);
-    $('audio-status').textContent = playback === 'practice' ? '' : status === 'playing' ? detail.label : status === 'ended' ? (playingNote ? 'Note finished.' : 'Excerpt finished.') : detail;
+    $('audio-status').textContent = ['practice','map'].includes(playback) ? '' : status === 'playing' ? detail.label : status === 'ended' ? (playingNote ? 'Note finished.' : 'Excerpt finished.') : detail;
     $('play').disabled = status === 'pending' || status === 'playing';
     $('stop').disabled = !$('play').disabled;
   }
@@ -57,6 +58,11 @@ const comparison = PracticeComparison($('comparison'), passage => {
   live.prepare(passage, $('live-practice'));
   previews.play(passage);
 }, () => stopAudio());
+const melodyMap = createMelodyMap($('melody-map'), model.pulse, passage => {
+  playback = 'map';
+  live.prepare(passage);
+  previews.play(passage);
+}, () => stopAudio(), () => previews.elapsed());
 function currentPosition() {
   const position = { lesson: lesson().id, chapter: chapters[state.chapter][0], line: state.line };
   if (state.slot !== 0) position.slot = state.slot;
@@ -472,6 +478,7 @@ function renderWorkflow({slot,time,events,continuing}) {
 }
 function renderDetail() {
   const line=state.line,i=state.slot,entry=rows[line];
+  melodyMap.show(lesson().id === 'pulse' && (line === 10 || line === 11));
   const info = inspectSlot(score(), i);
   renderWorkflow(followingSlot === null ? info : inspectSlot(score(),followingSlot));
   const notesHere = info.events;

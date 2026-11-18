@@ -5,6 +5,24 @@ const fs = require('node:fs');
 const SoundLab = require('./composer.js');
 const load = () => require('./walkthrough-model.js');
 
+test('editing a motif entry changes only its pitch and leaves the original score intact', () => {
+  const { melodyOpening, makeExcerpt, pitchAt } = load();
+  const pulse = SoundLab.makeScore('pulse');
+  const expected = makeExcerpt(pulse,0,8);
+  assert.deepEqual(melodyOpening(pulse),expected);
+  for (let i = 0; i < 4; i++) {
+    const { motif, ratios } = pitchAt(pulse,0);
+    for (const [value,ratio] of ratios.entries()) {
+      const numbers = motif.slice(0,4);
+      numbers[i] = value;
+      const edited = melodyOpening(pulse,numbers);
+      const notes = expected.events.map((note,index)=>index === i ? {...note,frequency:262*ratio} : note);
+      assert.deepEqual(edited,{...expected,events:notes});
+    }
+  }
+  assert.deepEqual(makeExcerpt(pulse,0,8),expected);
+});
+
 test('live notes follow the clip clock through holds, silence, overlaps and the last release', () => {
   const { playbackMoment, makeExcerpt, nearestPitch } = load();
   const piece = SoundLab.makeScore('pulse');

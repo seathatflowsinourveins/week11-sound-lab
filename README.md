@@ -6,6 +6,8 @@
 
 Use **Try one change** to compare the original sound with one edited line. Play the same passage twice, inspect the melody starts or waveform, then open **Check what changed**. Both the reader and the guided listen use clips built from the displayed edit to the original composer.
 
+On lines 10 and 11 of the repeating melody, **How four numbers become a melody** lets you change one of the opening four pitch choices. Each column shows its motif value, pitch and start time. Hear one note or play the four-note edit with its original rhythm.
+
 Press **Play excerpt** to follow the **Live note manifest**. The clock, white note outlines, sounding voices and next starts follow the scheduled audio. Expand **Note schedule** for exact start and end times, pitch and waveform. **From code to sound** follows the original mix from slot to rule to stored start to sound. Choose a stage to stop there and read its code. Choose **Full score · 0–60s** to follow the entire piece.
 
 A continuation of the Week 10 sound studio: three playable experiments, an original 60-second algorithmic composition, six plain-language code explanations, measured score/audio results, and a browser-local homework notebook. The class performance has no canvas or animated visualization.

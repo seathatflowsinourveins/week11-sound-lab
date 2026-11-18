@@ -12,12 +12,35 @@
 <script defer src="practice-clips.js"></script>
 <script defer src="practice.js"></script>
 <script defer src="live-notes.js"></script>
+<script defer src="melody-map.js"></script>
 <script defer src="walkthrough.js"></script>
 </head>
 <body><a class="skip" href="#main">Skip to the walkthrough</a><header class="bar"><div class="shell"><a href="index.html">Week 11 sound lab</a><a href="design.html">Design notes and repositories</a></div></header>
 <main class="shell" id="main" tabindex="-1"><div class="hero"><h1>Read the score, line by line</h1><p class="muted">Pick a line. Try a time slot. See what the code does and what you’d hear.</p>
 <nav class="quick-start" aria-label="Listening guide and common questions"><a href="listen.html"><strong>Start the guided listen →</strong></a><a href="#pulse/add/35">Why does <code>const time</code> change?</a><a href="#pulse/rules/46">Which slots start notes?</a><a href="#rhythm/pitch/40">How does the code pick a pitch?</a></nav></div>
 <nav class="selectors" id="experiments" aria-label="Experiments"></nav>
+<section id="melody-map" class="melody-map" aria-labelledby="map-title" hidden>
+  <header><h2 id="map-title" tabindex="-1">How four numbers become a melody</h2><p>Press <strong>Play four notes</strong>. Each number chooses a pitch. The rhythm starts one note every two seconds. Higher blocks show higher tones.</p></header>
+  <div class="melody-layout">
+    <div class="melody-sequence">
+      <h3 class="map-pattern-title">First four numbers in MOTIF</h3>
+      <div class="melody-plot" role="group" aria-label="Choose a note to inspect"></div>
+      <p class="map-key">Each block lasts 0.6 seconds. The space after it is quiet.</p>
+      <div class="map-player"><button type="button" class="primary" data-hear="phrase">Play four notes</button><button type="button" class="map-reset" disabled>Restore original</button></div>
+      <p class="map-playing" role="status"></p>
+    </div>
+    <div class="melody-detail">
+      <h3 class="map-note"></h3>
+      <label for="map-value">Number from <code>MOTIF</code></label> <select id="map-value"></select>
+      <p class="map-lookup"></p><details class="map-table"><summary>See the eight pitch choices</summary><table><tbody></tbody></table></details>
+      <p class="map-equation" aria-live="polite"></p>
+      <canvas class="map-wave" width="600" height="64" role="img"></canvas>
+      <p class="map-vibration"></p>
+      <button type="button" data-hear="solo">Hear this note</button>
+    </div>
+  </div>
+  <p class="map-exercise"><strong>Try one change.</strong> Select the second block, change its number from <code>2</code> to <code>0</code>, then play the four notes again. Do the first two now sound the same?</p>
+</section>
 <section class="playback-desk" aria-label="Hear the score and follow the notes">
   <div class="listen live-transport"><div><h2 id="listen-title">Hear the real score</h2><p id="listen-guidance"></p></div><div class="buttons"><label class="small" for="mix">Passage</label><select id="mix"></select><button type="button" class="primary" id="play">Play excerpt</button><button type="button" id="stop" disabled>Stop</button></div></div>
   <p id="audio-status" role="status"></p><div id="live-home"></div>

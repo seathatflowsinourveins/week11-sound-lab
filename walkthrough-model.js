@@ -126,5 +126,16 @@
     return ['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'][midi % 12] + (Math.floor(midi / 12) - 1);
   }
 
-  return { resolvePosition, positionHash, moveLine, inspectSlot, voiceAt, pitchAt, layoutVoice, makeExcerpt, noteAtMarker, isolateNote, playbackMoment, nearestPitch };
+  // Revoice the four existing pulse notes. Their rhythm, fades and levels come from the score.
+  function melodyOpening(pulse, degrees = motif.slice(0,4)) {
+    if (pulse.id !== 'pulse' || degrees.length !== 4 || !degrees.every(i => Number.isInteger(i) && i >= 0 && i < ratios.length)) {
+      throw new RangeError('Choose four pitch positions from the repeating melody.');
+    }
+    const clip = makeExcerpt(pulse, 0, 8);
+    const rootHz = clip.events[0].frequency;
+    clip.events.forEach((note,i) => { note.frequency = rootHz * ratios[degrees[i]]; });
+    return clip;
+  }
+
+  return { resolvePosition, positionHash, moveLine, inspectSlot, voiceAt, pitchAt, layoutVoice, makeExcerpt, noteAtMarker, isolateNote, playbackMoment, nearestPitch, melodyOpening };
 });

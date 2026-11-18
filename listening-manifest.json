@@ -17,6 +17,14 @@
   },
   "references": [
     {
+      "name": "Chrome Music Lab · Melody Maker",
+      "feature": "Hear a number become a pitch",
+      "demo": "walkthrough.html#pulse/time/11",
+      "source": "https://github.com/googlecreativelab/chrome-music-lab/blob/e54bb414908da2b6286a6ad6431a5fcf8b68dc3f/melodymaker/app/grid/Grid.js",
+      "example": "https://github.com/googlecreativelab/chrome-music-lab/blob/e54bb414908da2b6286a6ad6431a5fcf8b68dc3f/melodymaker/app/sound/Player.js",
+      "use": "Melody Maker arranges notes by time and pitch. Our four-note exercise aligns each motif number with its start and pitch, then plays the changed frequency through the Week 11 oscillator."
+    },
+    {
       "name": "Perspective",
       "source": "https://github.com/perspective-dev/perspective/blob/d235a268bc424b7d4d2da9b12aa287650e5103a7/docs/md/explanation/view/config/grouping_and_pivots.md",
       "test": "https://github.com/perspective-dev/perspective/blob/d235a268bc424b7d4d2da9b12aa287650e5103a7/rust/perspective-js/test/js/group_by.spec.js",
@@ -52,7 +60,7 @@
       "demo": "listen.html#rhythm/together",
       "source": "https://github.com/cathrynlavery/diagram-design/blob/f6db0decea96de66b901331a0f79a8d4b147ebae/skills/diagram-design/references/type-swimlane.md",
       "example": "https://github.com/cathrynlavery/diagram-design/blob/f6db0decea96de66b901331a0f79a8d4b147ebae/skills/diagram-design/assets/example-swimlane.html",
-      "use": "Each voice has a named row. The rows share one time scale so simultaneous notes line up."
+      "use": "Each voice has a named row. The rows share one time scale so simultaneous notes line up. The four-note illustration also lines up each number, tone and start time in one column."
     },
     {
       "name": "wavesurfer.js",
