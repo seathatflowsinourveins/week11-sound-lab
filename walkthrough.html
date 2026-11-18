@@ -11,12 +11,18 @@
 <script defer src="note-inspector.js"></script>
 <script defer src="practice-clips.js"></script>
 <script defer src="practice.js"></script>
+<script defer src="live-notes.js"></script>
 <script defer src="walkthrough.js"></script>
 </head>
 <body><a class="skip" href="#main">Skip to the walkthrough</a><header class="bar"><div class="shell"><a href="index.html">Week 11 sound lab</a><a href="design.html">Design notes and repositories</a></div></header>
 <main class="shell" id="main" tabindex="-1"><div class="hero"><h1>Read the score, line by line</h1><p class="muted">Pick a line. Try a time slot. See what the code does and what you’d hear.</p>
 <nav class="quick-start" aria-label="Listening guide and common questions"><a href="listen.html"><strong>Start the guided listen →</strong></a><a href="#pulse/add/35">Why does <code>const time</code> change?</a><a href="#pulse/rules/46">Which slots start notes?</a><a href="#rhythm/pitch/40">How does the code pick a pitch?</a></nav></div>
 <nav class="selectors" id="experiments" aria-label="Experiments"></nav>
+<section class="playback-desk" aria-label="Hear the score and follow the notes">
+  <div class="listen live-transport"><div><h2 id="listen-title">Hear the real score</h2><p id="listen-guidance"></p></div><div class="buttons"><label class="small" for="mix">Passage</label><select id="mix"></select><button type="button" class="primary" id="play">Play excerpt</button><button type="button" id="stop" disabled>Stop</button></div></div>
+  <p id="audio-status" role="status"></p><div id="live-home"></div>
+</section>
+<section class="workflow" aria-labelledby="workflow-title"><h2 id="workflow-title" tabindex="-1">From code to sound</h2><p id="workflow-caption"></p><ol id="workflow-stages"></ol><p id="workflow-related"></p></section>
 <div class="plan"><label for="chapter">Code chapter</label><select id="chapter"></select><span id="chapter-summary" class="small muted"></span></div>
 <section class="desk" aria-label="Code and side-by-side explanation">
  <div class="pane code-pane"><div class="pane-head"><h3>Source code</h3><span id="progress" class="small muted"></span></div><div id="lines" class="line-stack desktop-source" role="group" aria-label="Source lines"></div><div class="buttons"><button id="previous" type="button">Previous line</button><button class="primary" id="next" type="button">Next line</button></div><details class="mobile-source"><summary>Browse all lines in this chapter</summary><div id="mobile-lines" class="line-stack" role="group" aria-label="Source lines"></div></details></div>
@@ -28,11 +34,11 @@
 <section class="score desk-score" aria-labelledby="score-title"><header class="score-header"><h2 id="score-title">What’s sounding?</h2><p class="small muted" id="score-summary"></p></header>
 <p class="score-key small muted"><span><b class="legend-dot" aria-hidden="true"></b> Note starts</span><span><b class="legend-bar" aria-hidden="true"></b> Note keeps sounding</span></p>
 <div class="score-grid" id="grid"></div><ul class="events-list" id="events"></ul>
-<div class="note-inspector" id="note-inspector"></div></section></section>
-<section class="listen" aria-labelledby="listen-title"><div><h3 id="listen-title">Hear the real score</h3><p id="listen-guidance"></p><p id="audio-status" role="status"></p></div><div class="buttons"><label class="small" for="mix">Preview</label><select id="mix"></select><button type="button" class="primary" id="play">Play excerpt</button><button type="button" id="stop">Stop</button></div></section>
+<div class="note-inspector" id="note-inspector"></div><div id="live-solo"></div></section></section>
 <section class="listen practice" aria-labelledby="practice-title">
   <div class="comparison-intro"><h3 id="practice-title">Try one change</h3><p id="practice-text"></p></div>
   <div class="comparison" id="comparison"></div>
+  <div id="live-practice"></div>
   <div class="buttons"><a id="sketch-link" href="sketches/pulse.js" download>Download the p5 sketch</a><a href="index.html#notebook">Open the homework notebook</a></div>
   <div class="buttons"><a href="https://docs.google.com/spreadsheets/d/1TqhNlu4AAmWvD0IfCbzUodEX8H8MopFPTgSQbzteJak/edit?usp=sharing">Open the class spreadsheet</a><a href="https://github.com/ITPNYU/ICM-2026-Media/wiki/Homework-Mimi-07#week-11">Read the Week 11 instructions</a></div>
 </section>

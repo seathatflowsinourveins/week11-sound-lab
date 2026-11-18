@@ -16,6 +16,8 @@ const state = {
   slot: initial.slot ?? 0
 };
 let playback = 'excerpt';
+let followingSlot = null;
+let liveSound = [];
 const previews = createTransport(
   { makeScore: request => request.score, playScore: SoundLab.playScore },
   () => {
@@ -25,21 +27,35 @@ const previews = createTransport(
   },
   (status, detail) => {
     const playingNote = playback === 'note';
+    live.audioState(status);
     inspector.audioState(status, playingNote, detail);
     comparison.audioState(status, playback === 'practice', detail);
     $('audio-status').textContent = playback === 'practice' ? '' : status === 'playing' ? detail.label : status === 'ended' ? (playingNote ? 'Note finished.' : 'Excerpt finished.') : detail;
     $('play').disabled = status === 'pending' || status === 'playing';
+    $('stop').disabled = !$('play').disabled;
   }
 );
+const live = createLiveNotes($('live-home'), () => previews.elapsed(), slot => {
+  stopAudio('Stopped to inspect the start of slot ' + slot + '.');
+  setSlot(slot);
+  $('workflow-title').focus();
+}, (slot, sounding) => {
+  if (followingSlot === null && slot === null) return;
+  followingSlot = slot;
+  liveSound = sounding;
+  renderWorkflow(inspectSlot(score(), slot ?? state.slot));
+});
 const inspector = NoteInspector.createInspector($('note-inspector'), (solo, note) => {
   playback = 'note';
+  live.prepare({score:solo, offset:note.time, label:'One '+note.voice+' note'}, $('live-solo'));
   previews.play({ score: solo, label: 'Playing the ' + note.voice + ' note from ' + note.time + ' seconds.' });
 }, () => {
   if (playback === 'note' && ['pending', 'playing'].includes(previews.state)) previews.stop('Stopped.');
 });
-const comparison = PracticeComparison($('comparison'), (score, label) => {
+const comparison = PracticeComparison($('comparison'), passage => {
   playback = 'practice';
-  previews.play({ score, label });
+  live.prepare(passage, $('live-practice'));
+  previews.play(passage);
 }, () => stopAudio());
 function currentPosition() {
   const position = { lesson: lesson().id, chapter: chapters[state.chapter][0], line: state.line };
@@ -318,6 +334,7 @@ function renderGrid({ slot, time, events, continuing }) {
   if (!events.length && !continuing.length) readouts.push(newElement('li', 'All voices are quiet at this moment.'));
   $('events').replaceChildren(...readouts);
   inspector.show(piece, time, rules[state.line]?.[3], barButtons);
+  live.mirror(barButtons);
 }
 function renderExtraVisual(note) {
   const root=$('focus-visual'),line=state.line,slot=state.slot;
@@ -406,9 +423,57 @@ function renderExtraVisual(note) {
   }
 }
 
+function renderWorkflow({slot,time,events,continuing}) {
+  const section = Math.floor(slot / 60);
+  const candidates = Object.entries(rules).filter(([,rule]) =>
+    rule[0] === lesson().id && (rule[4] === undefined || rule[4] === section));
+  const lineFor = voice => lesson().id === 'composition' && slot === 236 && voice === 'melody' ? 67
+    : Number(candidates.find(([,entry])=>entry[3]===voice)[0]);
+  const voice = events.find(note=>note.voice==='melody')?.voice || events[0]?.voice || 'melody';
+  const rule = lineFor(voice);
+  const heard = followingSlot === null ? [...events,...continuing] : liveSound;
+  const sound = heard.length ? heard.map(note=>note.voice+' '+WalkthroughModel.nearestPitch(note.frequency)).join(' + ') : 'Rest';
+  const stages = [
+    ['Find the slot', 'Slot '+slot+' × 0.25s', 44],
+    ['Test the rule', events.length ? voice+' starts' : 'No new note', rule],
+    ['Store the start', events.length ? 'time = '+format(time)+'s' : 'No call to add()', 35],
+    ['Play the sound', sound, 203]
+  ];
+  $('workflow-caption').textContent = followingSlot === null
+    ? 'Inspecting slot '+slot+' at '+format(time)+'s. Select a stage to read its code.'
+    : 'Following playback · slot '+slot+' begins at '+format(time)+'s. Select a stage to stop and read its code.';
+  function openStage(control) {
+    const line = Number(control.dataset.line), inspected = Number(control.dataset.slot);
+    if (followingSlot !== null) stopAudio('Stopped to inspect slot '+inspected+'.');
+    state.slot=inspected;
+    state.chapter=chapters.findIndex(chapter=>chapter[2].includes(line));
+    $('chapter').value=String(state.chapter);
+    jumpLine(line);
+    $('meaning').focus();
+  }
+  const list=$('workflow-stages');
+  // Keep focused stage buttons in the document while the score clock advances.
+  if (!list.children.length) for (const [index,[name]] of stages.entries()) {
+    const item = newElement('li');
+    const control = button('',()=>openStage(control));
+    control.append(newElement('span',(index+1)+'. '+name),newElement('small'),newElement('small'));
+    item.append(control);list.append(item);
+  }
+  stages.forEach(([,value,line],index)=>{
+    const control=list.children[index].firstElementChild;
+    control.dataset.line=line;control.dataset.slot=slot;
+    control.children[1].textContent=value;
+    control.children[2].textContent='Line '+line+' ↗';
+    if(state.line===line) control.setAttribute('aria-current','step');
+    else control.removeAttribute('aria-current');
+  });
+  const related = events.filter(note=>note.voice!==voice);
+  $('workflow-related').textContent = related.length ? 'This slot also starts ' + related.map(note=>note.voice+' on line '+lineFor(note.voice)).join(' and ')+'.' : '';
+}
 function renderDetail() {
   const line=state.line,i=state.slot,entry=rows[line];
   const info = inspectSlot(score(), i);
+  renderWorkflow(followingSlot === null ? info : inspectSlot(score(),followingSlot));
   const notesHere = info.events;
   const result = notesHere.length ? 'Starts now: ' + notesHere.map(note => note.voice).join(', ') + '.' : 'No new note starts.';
   const tails = info.continuing.map(note => note.voice + ' from ' + format(note.time) + 's until ' + format(note.time + note.duration) + 's');
@@ -490,6 +555,9 @@ function renderLesson() {
       ? [['Seed · 0–8s','0'],['Growth · 15–23s','15'],['Density · 30–38s','30'],['Return · 45–53s','45'],['Ending · 58–60s','58']]
       : [['Opening · 0–8s','all']];
   $('mix').replaceChildren(...options.map(([label,value])=>{const option=newElement('option',label);option.value=value;return option;}));
+  $('mix').add(new Option('Full score · 0–60s','full'));
+  $('play').textContent = 'Play excerpt';
+  live.prepare(selectedPassage());
   $('listen-guidance').textContent = lesson().guide;
   $('practice-text').textContent = WEEK11_PRACTICES[lesson().id].homework;
   comparison.render(lesson().id);
@@ -500,14 +568,22 @@ function renderLesson() {
 function stopAudio(message = 'Stopped.') {
   previews.stop(message);
 }
+function selectedPassage() {
+  const option = $('mix').value;
+  const full = option === 'full';
+  const start = state.lesson === 2 && !full ? Number(option) : 0;
+  const end = full ? score().duration : Math.min(score().duration, start + 8);
+  const voice = state.lesson === 1 && !['all','full'].includes(option) ? option : null;
+  const traceWorkflow = voice === null && voiceAt(score(),null,start).continuing.length === 0;
+  return {score:makeExcerpt(score(),start,end,voice), offset:start, label:full?'Full score':voice?voice+' only':'Score excerpt', traceWorkflow};
+}
 function playAudio() {
   playback = 'excerpt';
-  const option = $('mix').value;
-  const start = state.lesson === 2 ? Number(option) : 0;
-  const end = Math.min(60, start + 8);
-  const voice = state.lesson === 1 && option !== 'all' ? option : null;
-  const label = 'Playing ' + (voice ? voice + ' only, ' : '') + start + '–' + end + ' seconds of the score.';
-  return previews.play({ score: makeExcerpt(score(), start, end, voice), label });
+  const passage = selectedPassage();
+  live.prepare(passage);
+  const start = passage.offset, end = start + passage.score.duration;
+  const label = 'Playing ' + passage.label.toLowerCase() + ', ' + start + '–' + end + ' seconds of the score.';
+  return previews.play({ score: passage.score, label });
 }
 $('chapter').replaceChildren(...chapters.map((chapter,index)=>{
   const option=newElement('option',chapter[1]);
@@ -528,7 +604,10 @@ $('play').onclick=playAudio;
 $('stop').onclick=()=>stopAudio();
 $('mix').addEventListener('change',()=>{
   stopAudio('Preview selected');
-  $('listen-guidance').textContent = state.lesson === 2 && $('mix').value === '45'
+  live.prepare(selectedPassage());
+  $('play').textContent = $('mix').value === 'full' ? 'Play full score' : 'Play excerpt';
+  $('listen-guidance').textContent = $('mix').value === 'full' ? 'Follow every note across the full minute. Open Note schedule to see all '+score().events.length+' starts.'
+    : state.lesson === 2 && $('mix').value === '45'
     ? 'This excerpt plays notes that start in Return. The first starts at 46s. In the full piece, the previous melody rings from 44.75s to 45.05s.'
     : lesson().guide;
 });

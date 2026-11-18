@@ -137,6 +137,8 @@
       button.tabIndex = -1; // The labeled select exposes the same notes in time order for keyboard users.
       button.className = className;
       button.setAttribute('aria-label', 'Inspect ' + note.voice + ' at ' + seconds(note.time) + ' seconds');
+      button.title = note.voice + ' · ' + seconds(note.time) + '–' + seconds(note.time + note.duration) + 's · '
+        + seconds(note.frequency) + ' Hz · ' + note.wave;
       button.addEventListener('click', () => choose(note));
       return button;
     }

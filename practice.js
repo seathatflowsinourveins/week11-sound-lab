@@ -64,7 +64,7 @@
         hear.addEventListener('click', () => {
           if (busy && active === i) { stop(); return; }
           active = i;
-          play(clip, name + ' version · ' + from + '–' + until + 's');
+          play({score:clip, offset:from, label:name+' version', edited:i === 1});
         });
         buttons.push(hear);
         card.append(label, change, melodyView(clip, from, id === 'composition'), hear);

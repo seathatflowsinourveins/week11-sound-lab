@@ -15,6 +15,7 @@
   <script defer src="note-inspector.js"></script>
   <script defer src="practice-clips.js"></script>
   <script defer src="practice.js"></script>
+  <script defer src="live-notes.js"></script>
   <script defer src="listen.js"></script>
 </head>
 <body>
@@ -39,10 +40,11 @@
           <div class="key"><span><i class="key-note" aria-hidden="true"></i>Note length</span><span><i class="key-time" aria-hidden="true"></i>Time in this step</span></div>
           <p id="marked" class="marked"></p>
           <div class="transport"><button id="play" type="button">Play excerpt</button><button id="stop" type="button" disabled>Stop</button><span id="status" role="status"></span></div>
+          <div id="live-home"></div>
           <div class="note-inspector" id="note-inspector"></div>
         </figure>
       </div>
-      <details class="practice"><summary>Try a change in this experiment</summary><p id="practice"></p><div class="comparison" id="comparison"></div><a id="sketch" href="sketches/pulse.js" download>Download this sketch</a></details>
+      <details class="practice"><summary>Try a change in this experiment</summary><p id="practice"></p><div class="comparison" id="comparison"></div><div id="live-practice"></div><a id="sketch" href="sketches/pulse.js" download>Download this sketch</a></details>
       <aside class="homework-handoff" id="homework-handoff" hidden><h3>Take it into your homework</h3><p>With your partner, save two revisions and choose one to present. Play your saved sketch from start to finish three times. For each listen, write the second and what you heard in the notebook. Its built-in player plays the class example.</p></aside>
       <nav class="pager" aria-label="Move through listening steps"><a id="previous" href="#">← Previous step</a><a id="next" href="#">Next step →</a></nav>
     </section>

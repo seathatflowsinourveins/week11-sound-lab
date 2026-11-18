@@ -110,5 +110,21 @@
     return { id: score.id, bpm: score.bpm, duration: note.duration, events: [{ ...note, time: 0 }] };
   }
 
-  return { resolvePosition, positionHash, moveLine, inspectSlot, voiceAt, pitchAt, layoutVoice, makeExcerpt, noteAtMarker, isolateNote };
+  function playbackMoment(clip, elapsed, offset = 0) {
+    const local = Math.max(0, Math.min(clip.duration, elapsed));
+    const time = offset + local;
+    const sounding = clip.events.filter(note => note.time <= local && local < note.time + note.duration);
+    const next = clip.events.find(note => note.time > local);
+    return {
+      time, slot: Math.min(239, Math.floor(time * 4)), sounding,
+      next: next ? clip.events.filter(note => note.time === next.time) : []
+    };
+  }
+
+  function nearestPitch(frequency) {
+    const midi = Math.round(69 + 12 * Math.log2(frequency / 440));
+    return ['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'][midi % 12] + (Math.floor(midi / 12) - 1);
+  }
+
+  return { resolvePosition, positionHash, moveLine, inspectSlot, voiceAt, pitchAt, layoutVoice, makeExcerpt, noteAtMarker, isolateNote, playbackMoment, nearestPitch };
 });

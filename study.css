@@ -3,6 +3,49 @@
   --voice-bass: #75cccc;
   --voice-pulse: #e9aa8f;
 }
+.live-manifest { --live-text: #edf2ed; --live-muted: #b5c4c1; --live-border: #435353; --live-mark: #ffcf82; --gutter: 4rem; padding: .9rem 1rem; color: var(--live-text); background: #11191c; border: 1px solid var(--live-border); border-radius: .45rem; min-width: 0; font-variant-numeric: tabular-nums; }
+.live-heading, .live-actions { display: flex; align-items: center; justify-content: space-between; gap: .5rem 1rem; flex-wrap: wrap; }
+.live-heading h3, .live-readout h4 { margin: 0; line-height: 1.3; }
+.live-heading h3 { font: 650 1.06rem var(--sans,system-ui); }
+.live-heading p, .live-time span, .live-readout h4 { font: .8rem/1.5 var(--sans,system-ui); color: var(--live-muted); }
+.live-heading p { margin: .18rem 0 0; }
+.live-time { text-align: right; }
+.live-time strong { display: block; color: var(--live-mark); font: 550 1.35rem/1.2 var(--mono,monospace); }
+.live-roll { display: grid; grid-template-columns: var(--gutter) 1fr; gap: 2px 0; margin-top: .65rem; align-items: center; }
+.live-roll > span { color: var(--live-muted); font: .75rem var(--mono,monospace); }
+.live-lane { position: relative; background: #192428; border-block: 1px solid #2a3a3d; overflow: hidden; }
+.live-lane i { position: absolute; transform: translateY(-50%); height: .45rem; background: var(--live-ink); border-radius: 1px; min-width: 1px; opacity: .67; }
+.live-lane i.live-on { opacity: 1; outline: 2px solid #fff; outline-offset: 1px; }
+.live-lane::after { content: ''; position: absolute; top: 0; bottom: 0; left: var(--live-position); border-left: 2px solid var(--live-mark); }
+.live-axis { display: flex; margin-left: var(--gutter); justify-content: space-between; color: var(--live-muted); font: .7rem/1.6 var(--mono,monospace); }
+.live-readout { display: grid; grid-template-columns: 3fr 2fr; gap: 1rem; margin: .65rem 0; padding-top: .55rem; border-top: 1px solid var(--live-border); }
+.live-readout ul { list-style: none; padding: 0; margin: 0; }
+.live-readout li, .live-readout .live-next { margin: .18rem 0; color: var(--live-text); font-size: .89rem; line-height: 1.5; }
+.live-readout li small { margin-left: .45rem; white-space: nowrap; color: var(--live-muted); }
+.live-readout li b, .live-manifest td:first-child { text-transform: capitalize; }
+.live-actions { justify-content: start; align-items: start; }
+.live-actions details { flex: 1 1 12rem; min-width: 0; }
+.live-actions summary, .live-trace { cursor: pointer; font: .8rem/1.4 var(--sans,system-ui); color: #d7e9cc; padding: .45rem 0; }
+.live-trace { border: 1px solid var(--live-border); border-radius: .25rem; background: #1c2c29; padding-inline: .65rem; min-height: 36px; }
+.live-trace[hidden] { display: none; }
+.live-table-wrap { max-height: 15rem; overflow: auto; }
+.live-record h4 { color: var(--live-muted); font: .8rem var(--sans,system-ui); margin: .45rem 0 .25rem; }
+.live-record pre { margin: 0 0 .4rem; padding: .45rem .65rem; background: #0b1114; border-left: 2px solid var(--live-mark); height: 8rem; overflow: auto; font: .78rem/1.45 var(--mono,monospace); }
+.manifest-download { display: inline-block; margin: .5rem 0; font-size: .82rem; }
+.live-manifest table { width: 100%; border-collapse: collapse; font: .75rem/1.4 var(--mono,monospace); }
+.live-manifest caption { text-align: left; color: var(--live-muted); padding: .35rem 0; }
+.live-manifest th, .live-manifest td { text-align: left; padding: .3rem .4rem .3rem 0; border-bottom: 1px solid var(--live-border); }
+.live-manifest tr.live-on { background: #344535; color: #fff; }
+.note-bar.live-on, .bar-note.live-on { box-shadow: 0 0 0 2px #fff; z-index: 2; }
+#live-practice { grid-column: 1 / -1; }
+.live-manifest.use-guide-plot .live-roll, .live-manifest.use-guide-plot .live-axis { display: none; }
+#live-home:not(:empty), #live-practice:not(:empty), #live-solo:not(:empty) { margin-top: .55rem; }
+@media (max-width: 560px) {
+  .live-manifest { padding: .7rem; --gutter: 3.15rem; }
+  .live-readout { grid-template-columns: 1fr; gap: .35rem; }
+  .live-trace, .live-actions summary { min-height: 44px; }
+}
+@media (prefers-reduced-motion: reduce) { .live-lane::after { display: none; } }
 .comparison-intro, .comparison { grid-column: 1 / -1; }
 .comparison { width: 100%; margin: .3rem 0 .85rem; }
 .comparison .comparison-question { font-weight: 650; color: #e4ede7; font-size: 1rem; }

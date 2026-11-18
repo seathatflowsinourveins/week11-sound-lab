@@ -11,6 +11,8 @@
     "scoreOverview": "The guided listen shows all 60 seconds on each experiment card. Read the rows as melody, bass and pulse. Each mark spans an actual note.",
     "selection": "The dashed line marks the guided step. Click a note bar or choose a note from the labeled list. An outline marks the selected note.",
     "audition": "Hear this note plays its original frequency, duration, gain and waveform through the lab transport.",
+    "liveNotes": "The playback clock highlights sounding notes in the passage and its note schedule. Expand the schedule to read the sounding note objects or download all events in that passage as JSON. Times are seconds in the full score, including during isolated notes and practice edits. Pitch names are the nearest equal-tempered notes.",
+    "workflow": "Inspect a slot to follow its timing rule, the start stored by add(), and the scheduled sound. Each stage opens the matching composer line.",
     "waveform": {"renderer": "SoundLab.renderPCM", "sampleRateHz": 22050, "detailMilliseconds": 20, "amplitudeLimits": [-0.12, 0.12], "fullView": "Sample extrema per pixel for the full duration. The trace shows the ideal PCM export for this isolated note."}
   },
   "references": [
@@ -93,6 +95,7 @@
       "title": "Teaching and accessibility",
       "items": [
         {"name":"Learnable Programming","use":"Bret Victor’s essay informed the worked values beside each selected line. Line 35 shows how a slot becomes a start time.","source":"https://worrydream.com/LearnableProgramming/"},
+        {"name":"Visual diagram craft and interface design skills","use":"sota-visual-diagram-craft informed the four-stage code trace and labeled voice lanes. sota-taste-anti-slop informed the shared time scale, aligned timestamps and readable note schedule.","links":[["Follow a note from line 35","walkthrough.html#pulse/add/35"],["Live note display","live-notes.js"]]},
         {"name":"Python Tutor","use":"The JavaScript visualizer informed the previous-line and next-line controls.","source":"https://pythontutor.com/javascript.html"},
         {"name":"W3C reflow guidance","use":"The desktop code-and-score view stacks on small screens. Browser checks exercise both study pages at 320 and 390 pixels.","source":"https://www.w3.org/WAI/WCAG22/Understanding/reflow.html"}
       ]

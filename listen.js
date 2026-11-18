@@ -50,6 +50,7 @@
     },
     (state, detail) => {
       cancelAnimationFrame(frame);
+      live.audioState(state);
       const playingNote = playback === 'note';
       inspector.audioState(state, playingNote, detail);
       comparison.audioState(state, playback === 'practice', detail);
@@ -63,15 +64,21 @@
       if (trackCursor) drawCursor();
     }
   );
-  const inspector = NoteInspector.createInspector(element('note-inspector'), solo => {
+  const live = createLiveNotes(element('live-home'), () => player.elapsed(), slot => {
+    player.stop('Stopped to inspect the slot.');
+    location.href = 'walkthrough.html' + positionHash({lesson:current.experiment.id, chapter:'add', line:35, slot});
+  });
+  const inspector = NoteInspector.createInspector(element('note-inspector'), (solo, note) => {
     playback = 'note';
+    live.prepare({score:solo, offset:note.time, label:'One '+note.voice+' note'});
     player.play(solo);
   }, () => {
     if (playback === 'note' && ['pending', 'playing'].includes(player.state)) player.stop('Stopped.');
   });
-  const comparison = PracticeComparison(element('comparison'), clip => {
+  const comparison = PracticeComparison(element('comparison'), passage => {
     playback = 'practice';
-    player.play(clip);
+    live.prepare(passage, element('live-practice'));
+    player.play(passage.score);
   }, () => player.stop('Stopped.'));
 
   function drawScore(score, stop) {
@@ -117,6 +124,7 @@
     element('marked').textContent = summary;
     element('plot').setAttribute('aria-label', 'Score from ' + from + ' to ' + until + ' seconds. ' + summary);
     inspector.show(score, time, WalkthroughData.rules[stop.line]?.[3], barButtons);
+    live.mirror(barButtons);
   }
 
   const experimentLinks = experiments.map((experiment, index) => {
@@ -161,6 +169,7 @@
     element('sketch').href = 'sketches/' + experiment.id + '.js';
     element('play').textContent = '▶ Play ' + stop.window[0] + '–' + stop.window[1] + 's';
     element('clip-title').textContent = 'Score · ' + stop.window[0] + '–' + stop.window[1] + ' s';
+    live.prepare(guidePassage());
     drawScore(scores.get(experiment.id), stop);
     element('previous').hidden = index === 0;
     element('previous').href = itinerary[Math.max(0, index - 1)].hash;
@@ -172,14 +181,22 @@
     if (moveFocus) element('title').focus();
   }
 
+  function guidePassage() {
+    const [from, until] = current.stop.window;
+    return {score:makeExcerpt(scores.get(current.experiment.id),from,until), offset:from, label:'Guided excerpt', useGuidePlot:true};
+  }
   element('play').addEventListener('click', () => {
     playback = 'excerpt';
-    const score = scores.get(current.experiment.id);
-    player.play(makeExcerpt(score, ...current.stop.window));
+    const passage = guidePassage();
+    live.prepare(passage);
+    player.play(passage.score);
   });
   element('stop').addEventListener('click', () => player.stop('Stopped.'));
   document.querySelector('details.practice').addEventListener('toggle', event => {
-    if (!event.currentTarget.open && playback === 'practice' && ['playing','pending'].includes(player.state)) player.stop('Stopped.');
+    if (!event.currentTarget.open && playback === 'practice') {
+      if (['playing','pending'].includes(player.state)) player.stop('Stopped.');
+      live.prepare(guidePassage());
+    }
   });
   window.addEventListener('hashchange', () => { if (location.hash !== '#work') render(true); });
   window.addEventListener('pagehide', () => player.stop(''));

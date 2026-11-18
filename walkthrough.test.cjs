@@ -5,6 +5,22 @@ const fs = require('node:fs');
 const SoundLab = require('./composer.js');
 const load = () => require('./walkthrough-model.js');
 
+test('live notes follow the clip clock through holds, silence, overlaps and the last release', () => {
+  const { playbackMoment, makeExcerpt, nearestPitch } = load();
+  const piece = SoundLab.makeScore('pulse');
+  assert.equal(playbackMoment(piece,.25).sounding[0].time,0);
+  assert.equal(playbackMoment(piece,.6).sounding.length,0);
+  assert.equal(playbackMoment(piece,.75).next[0].time,2);
+  assert.deepEqual([262,327.5,131,65.5].map(nearestPitch),['C4','E4','C3','C2']);
+  const density = makeExcerpt(SoundLab.makeScore('composition'),30,34);
+  const overlap = playbackMoment(density,1.01,30);
+  assert.equal(overlap.time,31.01);
+  assert.equal(overlap.slot,124);
+  assert.equal(overlap.sounding.filter(note => note.voice === 'melody').length,2);
+  const ending = makeExcerpt(SoundLab.makeScore('composition'),58,60);
+  assert.deepEqual(playbackMoment(ending,3,58),{time:60,slot:239,sounding:[],next:[]});
+});
+
 test('the note inspector follows starts, held notes, silence and overlapping voices', () => {
   const { noteAtMarker } = load();
   const pulse = SoundLab.makeScore('pulse');
