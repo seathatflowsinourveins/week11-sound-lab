@@ -3,8 +3,12 @@ const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypt
 const root=path.resolve(__dirname,'..'),out=path.join(root,'dist'),engine=require('../composer.js'),{zip}=require('./archive.cjs');
 const read=name=>fs.readFileSync(path.join(root,name));
 const hash=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
-const publicFiles=['index.html','lab.css','lab.js','performance.html','performance.js','p5.html','composer.js','transport.js','README.md','SOURCES.md','LICENSE','vendor/p5.min.js','vendor/p5-LICENSE.txt'];
+const publicFiles=['index.html','lab.css','lab.js','performance.html','performance.js','p5.html','composer.js','transport.js','README.md','SOURCES.md','LICENSE','vendor/p5.min.js','vendor/p5-LICENSE.txt','walkthrough.html','walkthrough.css','walkthrough-data.js','walkthrough-model.js','walkthrough.js'];
 const entries=new Map(publicFiles.map(name=>[name,read(name)]));
+const composer=entries.get('composer.js');
+const {composerSHA256}=require('../walkthrough-data.js');
+if(hash(composer)!==composerSHA256)throw Error('The composer changed. Review the walkthrough line explanations before updating its source checksum.');
+entries.set('walkthrough-source.js',Buffer.from('globalThis.WALKTHROUGH_SOURCE = '+JSON.stringify(composer.toString('utf8'))+';\n'));
 const results={schema:1,checked:'2026-11-16',sampleRate:22050,format:'Mono 16-bit PCM WAV; ideal sine/triangle rendering',experiments:[]};
 const p5Controls=`\n// p5 bridge: native Web Audio makes the sound; p5 creates the controls.\nlet scorePlayer;\nfunction setup() {\n  noCanvas();\n  noLoop();\n  const target = document.getElementById('p5-controls');\n  const mount = element => { if (target) element.parent(target); return element; };\n  const message = mount(createP('Ready. Press Play to hear 60 seconds.'));\n  scorePlayer = createTransport(SoundLab, () => new (window.AudioContext || window.webkitAudioContext)(), (state, detail) => {\n    message.elt.textContent = state === 'playing' ? 'Playing the 60-second composition.' : detail;\n  });\n  mount(createButton('Play 60 seconds')).mouseClicked(() => scorePlayer.play(EXPERIMENT));\n  mount(createButton('Stop')).mouseClicked(() => scorePlayer.stop());\n  document.addEventListener('visibilitychange', () => { if (document.hidden) scorePlayer.stop(); });\n  window.addEventListener('pagehide', () => scorePlayer.stop());\n}\n`;
 for(const experiment of engine.experiments){
@@ -29,7 +33,7 @@ for(const [name,data]of entries)if(/^(audio|scores)\//.test(name))kit.push([name
 for(const e of engine.experiments)kit.push(['experiments/'+e.id+'.js',entries.get('sketches/'+e.id+'.js')]);
 entries.set('week11-project-kit.zip',zip(kit));
 const release=hash(Buffer.concat([...entries].sort(([a],[b])=>a.localeCompare(b)).flatMap(([name,data])=>[Buffer.from(name+'\0'),data]))).slice(0,16);
-for(const file of ['index.html','performance.html','p5.html']){let html=entries.get(file).toString();for(const asset of ['lab.css','lab.js','performance.js','composer.js','transport.js','results.js','sketches/composition.js'])html=html.replaceAll('"'+asset+'"','"'+asset+'?v='+release+'"');entries.set(file,Buffer.from(html));}
+for(const file of ['index.html','performance.html','p5.html','walkthrough.html']){let html=entries.get(file).toString();for(const asset of ['lab.css','lab.js','performance.js','composer.js','transport.js','results.js','sketches/composition.js','walkthrough.css','walkthrough-source.js','walkthrough-data.js','walkthrough-model.js','walkthrough.js'])html=html.replaceAll('"'+asset+'"','"'+asset+'?v='+release+'"');entries.set(file,Buffer.from(html));}
 const manifest={release,checked:'2026-11-16',p5:'2.3.4',files:[...entries].map(([name,data])=>({path:name,bytes:data.length,sha256:hash(data)})).sort((a,b)=>a.path.localeCompare(b.path))};
 entries.set('release.json',Buffer.from(JSON.stringify(manifest,null,2)+'\n'));
 fs.mkdirSync(out,{recursive:true});

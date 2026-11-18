@@ -86,7 +86,7 @@ test('Three delivered WAV files and score records have verified duration, conten
 
 test('Every local HTML asset and navigation destination resolves inside the delivered site', () => {
   assert.equal(built.status, 0, built.stderr);
-  for (const filename of ['index.html', 'performance.html']) {
+  for (const filename of ['index.html', 'performance.html', 'walkthrough.html']) {
     const html = read(filename).toString('utf8');
     const references = [...html.matchAll(/\b(?:src|href)\s*=\s*["']([^"']+)["']/gi)].map(match => match[1]);
     assert.ok(references.length > 0);
@@ -103,6 +103,17 @@ test('Every local HTML asset and navigation destination resolves inside the deli
       }
     }
   }
+});
+
+test('the walkthrough joins the existing landing and publishes exact composer source', () => {
+  assert.equal(built.status, 0, built.stderr);
+  assert.match(read('index.html').toString('utf8'), /href="walkthrough\.html"/);
+  const page = read('walkthrough.html').toString('utf8');
+  assert.match(page, /id="lines"/);
+  assert.match(page, /id="focus-visual"/);
+  assert.match(page, /href="index\.html#notebook"/);
+  const source = vm.runInNewContext(read('walkthrough-source.js').toString('utf8') + '\nWALKTHROUGH_SOURCE');
+  assert.equal(source, fs.readFileSync(path.join(root, 'composer.js'), 'utf8'));
 });
 
 // An independent table-based checksum validates the stored archive's local and central headers.

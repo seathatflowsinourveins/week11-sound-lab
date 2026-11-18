@@ -2,6 +2,8 @@
 
 [Open the lab](https://seathatflowsinourveins.github.io/week11-sound-lab/) · [Audio-only performance](https://seathatflowsinourveins.github.io/week11-sound-lab/performance.html)
 
+[Open the line-by-line walkthrough](https://seathatflowsinourveins.github.io/week11-sound-lab/walkthrough.html). The separate study page pairs 80 real source lines with interactive score illustrations and short audio excerpts. It remembers the last lesson and line in this browser. A link to a specific line takes priority over that saved position.
+
 A continuation of the Week 10 sound studio: three playable experiments, an original 60-second algorithmic composition, six plain-language code explanations, measured score/audio results, and a browser-local homework notebook. The class performance has no canvas or animated visualization.
 
 ## Acceptance
