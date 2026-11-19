@@ -2,6 +2,8 @@
 
 [Open the lab](https://seathatflowsinourveins.github.io/week11-sound-lab/) · [Audio-only performance](https://seathatflowsinourveins.github.io/week11-sound-lab/performance.html)
 
+[Notes and quiet noise](https://seathatflowsinourveins.github.io/week11-sound-lab/solo.html) is a 60-second solo revision with four pitches in a seeded random order and soft noise in some gaps. [Hear the melody alone](https://seathatflowsinourveins.github.io/week11-sound-lab/solo.html?melody-only) to compare the same notes and timing. The performance page also offers the complete p5 sketch.
+
 [Open the line-by-line walkthrough](https://seathatflowsinourveins.github.io/week11-sound-lab/walkthrough.html). The separate study page pairs 80 real source lines with interactive score illustrations and short audio excerpts. It remembers the last lesson and line in this browser. A link to a specific line takes priority over that saved position.
 
 Use **Try one change** to compare the original sound with one edited line. Play the same passage twice, inspect the melody starts or waveform, then open **Check what changed**. Both the reader and the guided listen use clips built from the displayed edit to the original composer.
