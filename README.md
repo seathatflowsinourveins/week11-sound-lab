@@ -1,5 +1,16 @@
 # Week 11 · A minute, made by rules
 
+## Darkened Brass (Solo Week 11 Submission)
+
+- **[Darkened Brass Showcase Page](https://seathatflowsinourveins.github.io/week11-sound-lab/darkened-brass.html)** — 60.0s `chaos` curve inspector, 3 iterations, pentatonic & overtone visuals, 8 core lines, and timed listens
+- **[60s 3-Iteration Timer Player](https://seathatflowsinourveins.github.io/week11-sound-lab/timer-manifest.html)** — Play all 3 iterations using real `p5@2.3.4` + `p5.sound@0.4.2`
+- **[Architecture & Critique Study Guide](https://seathatflowsinourveins.github.io/week11-sound-lab/study-guide.html)** — Real simulated 60s event score, Markov rest automaton, noise vs random lab, and 10 Q&As
+- **[106-Line Verbatim Walkthrough](https://seathatflowsinourveins.github.io/week11-sound-lab/line-by-line.html)** — Interactive line-by-line explainer with vector diagrams for `W7y7amaHg`
+- Live p5.js Web Editor sketches: [01 · Lydian bus (`wVJAtbxKP`)](https://editor.p5js.org/monadlnomad/sketches/wVJAtbxKP) · [02 · Bolder fig (`w9vW455uc`)](https://editor.p5js.org/monadlnomad/sketches/w9vW455uc) · [03 · Darkened brass Code (`W7y7amaHg`)](https://editor.p5js.org/monadlnomad/sketches/W7y7amaHg) · [Fullscreen (`W7y7amaHg`)](https://editor.p5js.org/monadlnomad/full/W7y7amaHg)
+- Source folders: [`iterations/`](iterations/) (3 standalone `p5.sound` sketches) · [`notes/`](notes/) (blog draft, observations 1–3, iteration notes, critique guide, spreadsheet CSV)
+
+---
+
 [Open the lab](https://seathatflowsinourveins.github.io/week11-sound-lab/) · [Audio-only performance](https://seathatflowsinourveins.github.io/week11-sound-lab/performance.html)
 
 [Notes and quiet noise](https://seathatflowsinourveins.github.io/week11-sound-lab/solo.html) is a 60-second solo revision with four pitches in a seeded random order and soft noise in some gaps. [Hear the melody alone](https://seathatflowsinourveins.github.io/week11-sound-lab/solo.html?melody-only) to compare the same notes and timing. The performance page also offers the complete p5 sketch.

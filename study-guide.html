@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ICM Week 11 — Algorithmic Sound Architecture & Critique Study Guide</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --background: #fafafa;
+      --card: #ffffff;
+      --card-border: #e4e4e7;
+      --border: #d4d4d8;
+      --foreground: #18181b;
+      --muted-foreground: #52525b;
+      --primary: #2563eb;
+      --primary-foreground: #ffffff;
+      --secondary: #f4f4f5;
+      --secondary-foreground: #18181b;
+      --chart-1: #0ea5e9;
+      --chart-2: #f97316;
+      --chart-3: #10b981;
+      --chart-4: #eab308;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --background: #09090b;
+        --card: #18181b;
+        --card-border: #27272a;
+        --border: #3f3f46;
+        --foreground: #f4f4f5;
+        --muted-foreground: #a1a1aa;
+        --primary: #3b82f6;
+        --primary-foreground: #ffffff;
+        --secondary: #27272a;
+        --secondary-foreground: #f4f4f5;
+        --chart-1: #38bdf8;
+        --chart-2: #fb923c;
+        --chart-3: #34d399;
+        --chart-4: #facc15;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 24px 16px;
+      background: var(--background);
+      color: var(--foreground);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+    .container { max-width: 1024px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-variant-numeric: tabular-nums; }
+    .xs { font-size: 12px; }
+    .muted { color: var(--muted-foreground); }
+    .row-between { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .divider-b { padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+    .divider-t { padding-top: 12px; border-top: 1px solid var(--border); }
+    h1 { margin: 4px 0; font-size: 20px; font-weight: 600; }
+    h2 { margin: 0; font-size: 15px; font-weight: 600; }
+    p { margin: 0; }
+    .btn {
+      font-size: 12px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      padding: 6px 10px;
+      border-radius: 5px;
+      border: 1px solid var(--border);
+      background: var(--secondary);
+      color: var(--secondary-foreground);
+      text-decoration: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-primary { background: var(--primary); color: var(--primary-foreground); border-color: var(--primary); }
+    .btn:hover { opacity: 0.88; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+    .kpi { padding: 10px; border: 1px solid var(--card-border); background: var(--background); border-radius: 6px; }
+    .kpi-val { font-size: 14px; font-weight: 600; margin-top: 2px; }
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 16px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
+    .grid-12 { display: grid; grid-template-columns: 7fr 5fr; gap: 16px; }
+    @media (max-width: 860px) { .grid-12 { grid-template-columns: 1fr; } }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; text-align: left; }
+    th { padding: 8px 10px 8px 0; border-bottom: 1px solid var(--border); color: var(--muted-foreground); }
+    td { padding: 8px 10px 8px 0; border-bottom: 1px solid var(--card-border); vertical-align: top; }
+    .dot { width: 10px; height: 10px; display: inline-block; }
+    .circle { border-radius: 999px; }
+    .diamond { transform: rotate(45deg); }
+    .qa-card { border: 1px solid var(--card-border); background: var(--background); border-radius: 6px; }
+    .qa-card summary { padding: 10px 14px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 12px; list-style: none; font-size: 12px; font-weight: 600; }
+    .qa-body { padding: 10px 14px 12px; border-top: 1px solid var(--card-border); font-size: 12px; display: flex; flex-direction: column; gap: 8px; }
+    .proof { padding: 6px 10px; border-radius: 4px; background: var(--card); border: 1px solid var(--card-border); overflow-x: auto; }
+    input[type="range"] { accent-color: var(--primary); cursor: pointer; }
+  </style>
+<style>
+  .week11-subnav {
+    --wn-bg: rgba(255, 255, 255, 0.9);
+    --wn-border: #d4d4d8;
+    --wn-text: #18181b;
+    --wn-muted: #52525b;
+    --wn-accent: #2563eb;
+    --wn-accent-fg: #ffffff;
+    --wn-pill: #f4f4f5;
+    margin: 0 auto 14px;
+    padding: 8px 12px;
+    border: 1px solid var(--wn-border);
+    border-radius: 8px;
+    background: var(--wn-bg);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    font-size: 12px;
+  }
+  @media (prefers-color-scheme: dark) {
+    .week11-subnav {
+      --wn-bg: rgba(24, 24, 27, 0.92);
+      --wn-border: #3f3f46;
+      --wn-text: #f4f4f5;
+      --wn-muted: #a1a1aa;
+      --wn-accent: #3b82f6;
+      --wn-accent-fg: #ffffff;
+      --wn-pill: #27272a;
+    }
+  }
+  .week11-subnav-brand {
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--wn-text);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .week11-subnav-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+  }
+  .week11-subnav a.wn-link {
+    padding: 4px 9px;
+    border-radius: 5px;
+    border: 1px solid var(--wn-border);
+    background: var(--wn-pill);
+    color: var(--wn-muted);
+    text-decoration: none;
+    font-weight: 500;
+    line-height: 1.35;
+  }
+  .week11-subnav a.wn-link:hover { color: var(--wn-text); border-color: var(--wn-accent); }
+  .week11-subnav a.wn-link[aria-current="page"] {
+    background: var(--wn-accent);
+    border-color: var(--wn-accent);
+    color: var(--wn-accent-fg);
+    font-weight: 600;
+  }
+  .week11-subnav a.wn-link:focus-visible { outline: 2px solid var(--wn-accent); outline-offset: 2px; }
+</style>
+</head>
+<body>
+  <nav class="week11-subnav" aria-label="Darkened Brass suite" style="max-width: 1024px;"><a class="week11-subnav-brand" href="darkened-brass.html">ICM / DARKENED BRASS</a><div class="week11-subnav-links"><a class="wn-link" href="index.html">← Week 11 Lab</a><a class="wn-link" href="darkened-brass.html">Darkened Brass</a><a class="wn-link" href="timer-manifest.html">60s Timer Player</a><a class="wn-link" href="study-guide.html" aria-current="page">Study Guide</a><a class="wn-link" href="line-by-line.html">106-Line Walkthrough</a><a class="wn-link" href="https://editor.p5js.org/monadlnomad/full/W7y7amaHg" target="_blank" rel="noopener">Live p5 Fullscreen ↗</a></div></nav>
+  <div class="container">
+
+    <!-- 1. Masthead & BLUF Metrics -->
+    <header class="panel">
+      <div class="row-between">
+        <div style="max-width: 640px;">
+          <div class="mono xs muted" style="text-transform: uppercase; letter-spacing: 0.05em;">ICM Week 11 &middot; Algorithmic Sound Composition</div>
+          <h1>Shaped Randomness: Philosophy, Logic &amp; Critique Guide</h1>
+          <p class="xs muted">
+            Offline study &amp; critique guide for <span class="mono">wVJAtbxKP &rarr; w9vW455uc &rarr; W7y7amaHg</span>: deterministic seeds, Perlin noise, 1-bit Markov rest bounds, and pentatonic ratio harmony across exact 60.0s wall-clock timing.
+          </p>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+          <a href="https://editor.p5js.org/monadlnomad/sketches/wVJAtbxKP" target="_blank" rel="noopener" class="btn">Iter 1: wVJAtbxKP</a>
+          <a href="https://editor.p5js.org/monadlnomad/sketches/w9vW455uc" target="_blank" rel="noopener" class="btn">Iter 2: w9vW455uc</a>
+          <a href="https://editor.p5js.org/monadlnomad/sketches/W7y7amaHg" target="_blank" rel="noopener" class="btn btn-primary">Final: W7y7amaHg</a>
+        </div>
+      </div>
+      <div class="kpi-grid divider-t mono">
+        <div class="kpi"><div class="xs muted">Clock Duration</div><div class="kpi-val">60.0s exact</div></div>
+        <div class="kpi"><div class="xs muted">Repeatability</div><div class="kpi-val">Seed = 0</div></div>
+        <div class="kpi"><div class="xs muted">Scale System</div><div class="kpi-val">6 Pentatonic</div></div>
+        <div class="kpi"><div class="xs muted">Max Lead Gap</div><div class="kpi-val">&lt;= 0.72s (1 rest)</div></div>
+        <div class="kpi"><div class="xs muted">Voices &amp; DSP</div><div class="kpi-val">2 Osc + Reverb</div></div>
+      </div>
+    </header>
+
+    <!-- 2. Real-Data 60s Score -->
+    <section class="panel">
+      <div class="row-between divider-b">
+        <div>
+          <h2>1. Exact 60-Second Composition Score (Simulated Output of W7y7amaHg)</h2>
+          <p class="xs muted">Real deterministic output computed from <span class="mono">randomSeed(0)</span> and <span class="mono">noiseSeed(0)</span>.</p>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+          <button type="button" data-layer="noise" class="btn layer-btn"><span class="dot circle" style="background: var(--chart-1)"></span>noise()</button>
+          <button type="button" data-layer="random" class="btn layer-btn"><span class="dot circle" style="background: var(--chart-2)"></span>random()</button>
+          <button type="button" data-layer="bass" class="btn layer-btn"><span class="dot" style="background: var(--chart-3)"></span>bass</button>
+          <button type="button" data-layer="chime" class="btn layer-btn"><span class="dot diamond" style="background: var(--chart-4)"></span>chime</button>
+          <button type="button" data-layer="rest" class="btn layer-btn"><span class="dot" style="height: 2px; background: var(--muted-foreground)"></span>rests</button>
+        </div>
+      </div>
+      <svg id="main-score-svg" viewBox="0 0 920 260" style="width: 100%; display: block; overflow: visible;" role="img" aria-label="60-second note score and chaos curve"></svg>
+      <div class="row-between divider-t" style="align-items: center;">
+        <label class="xs" style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 240px;">
+          <span class="muted">Time Inspector</span>
+          <input id="main-sec-slider" type="range" min="0" max="60" step="0.25" value="24" style="width: 100%;" />
+        </label>
+        <div id="main-telemetry" class="mono xs" style="display: flex; flex-wrap: wrap; gap: 12px;"></div>
+      </div>
+    </section>
+
+    <!-- 3. DSP Routing & Markov Automaton -->
+    <section class="grid-2">
+      <div class="panel">
+        <div>
+          <h2>2A. Audio Routing &amp; Wall-Clock Lifecycle</h2>
+          <p class="xs muted">Why <span class="mono">disconnect()</span> precedes <span class="mono">connect(reverb)</span> and <span class="mono">millis()</span> gates <span class="mono">draw()</span>.</p>
+        </div>
+        <svg viewBox="0 0 460 270" style="width: 100%; display: block;" role="img" aria-label="DSP signal flow and millis clock lifecycle">
+          <defs>
+            <marker id="arrow-dsp" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--muted-foreground)" />
+            </marker>
+          </defs>
+          <g font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11">
+            <rect x="10" y="10" width="205" height="58" rx="6" fill="var(--background)" stroke="var(--border)" />
+            <text x="20" y="29" font-weight="700" fill="var(--foreground)">setup() &middot; Init Once</text>
+            <text x="20" y="45" font-size="10" fill="var(--muted-foreground)">randomSeed(0) &amp; noiseSeed(0)</text>
+            <text x="20" y="59" font-size="10" fill="var(--muted-foreground)">createCanvas + start osc/bass</text>
+
+            <rect x="245" y="10" width="205" height="58" rx="6" fill="var(--background)" stroke="var(--border)" />
+            <text x="255" y="29" font-weight="700" fill="var(--foreground)">Browser Autoplay Gate</text>
+            <text x="255" y="45" font-size="10" fill="var(--muted-foreground)">wait: AudioContext === 'running'</text>
+            <text x="255" y="59" font-size="10" fill="var(--muted-foreground)">mousePressed() -&gt; userStartAudio()</text>
+            <line x1="215" y1="39" x2="241" y2="39" stroke="var(--muted-foreground)" stroke-width="1.2" marker-end="url(#arrow-dsp)" />
+
+            <rect x="10" y="88" width="440" height="46" rx="6" fill="var(--background)" stroke="var(--primary)" />
+            <text x="20" y="107" font-weight="700" fill="var(--foreground)">draw() Wall-Clock Gate: sec = (millis() - startTime) / 1000</text>
+            <text x="20" y="123" font-size="10" fill="var(--muted-foreground)">sec &gt;= 58s: amp(0.0001, 1.9)  |  sec &gt;= 60s: stop() + noLoop()</text>
+            <line x1="347" y1="68" x2="347" y2="84" stroke="var(--muted-foreground)" stroke-width="1.2" marker-end="url(#arrow-dsp)" />
+
+            <rect x="10" y="154" width="190" height="46" rx="6" fill="var(--background)" stroke="var(--chart-1)" />
+            <text x="20" y="172" font-weight="700" fill="var(--foreground)">Lead: Oscillator('triangle')</text>
+            <text x="20" y="189" font-size="10" fill="var(--muted-foreground)">disconnect() -&gt; odd harmonics</text>
+
+            <rect x="10" y="212" width="190" height="46" rx="6" fill="var(--background)" stroke="var(--chart-3)" />
+            <text x="20" y="230" font-weight="700" fill="var(--foreground)">Bass/Chime: Oscillator('sine')</text>
+            <text x="20" y="247" font-size="10" fill="var(--muted-foreground)">disconnect() -&gt; 0.5x or 2.0x</text>
+
+            <line x1="105" y1="134" x2="105" y2="150" stroke="var(--muted-foreground)" stroke-width="1.2" marker-end="url(#arrow-dsp)" />
+            <line x1="215" y1="134" x2="215" y2="235" stroke="var(--muted-foreground)" stroke-width="1" stroke-dasharray="3 2" />
+            <line x1="215" y1="235" x2="204" y2="235" stroke="var(--muted-foreground)" stroke-width="1" marker-end="url(#arrow-dsp)" />
+
+            <rect x="235" y="166" width="128" height="78" rx="6" fill="var(--background)" stroke="var(--primary)" />
+            <text x="299" y="191" text-anchor="middle" font-weight="700" fill="var(--foreground)">p5.Reverb(3)</text>
+            <text x="299" y="208" text-anchor="middle" font-size="10" fill="var(--muted-foreground)">wet(0.5) blend</text>
+            <text x="299" y="224" text-anchor="middle" font-size="10" fill="var(--muted-foreground)">50% dry / 50% 3s</text>
+
+            <line x1="200" y1="177" x2="231" y2="195" stroke="var(--muted-foreground)" stroke-width="1.2" marker-end="url(#arrow-dsp)" />
+            <line x1="200" y1="235" x2="231" y2="216" stroke="var(--muted-foreground)" stroke-width="1.2" marker-end="url(#arrow-dsp)" />
+
+            <rect x="385" y="184" width="65" height="42" rx="6" fill="var(--background)" stroke="var(--border)" />
+            <text x="417" y="209" text-anchor="middle" font-weight="700" fill="var(--foreground)">Out</text>
+            <line x1="363" y1="205" x2="381" y2="205" stroke="var(--muted-foreground)" stroke-width="1.2" marker-end="url(#arrow-dsp)" />
+          </g>
+        </svg>
+      </div>
+
+      <div class="panel">
+        <div>
+          <h2>2B. 1-Bit Markov Anti-Pause &amp; Pitch Selector</h2>
+          <p class="xs muted">How <span class="mono">!wasRest</span> enforces <span class="mono">P(REST | REST) = 0</span> so pauses stay under <span class="mono">0.4s</span>.</p>
+        </div>
+        <svg viewBox="0 0 460 270" style="width: 100%; display: block;" role="img" aria-label="Markov rest state machine and pitch decision tree">
+          <defs>
+            <marker id="arrow-mk" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--muted-foreground)" />
+            </marker>
+          </defs>
+          <g font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11">
+            <text x="10" y="18" font-size="10" font-weight="700" fill="var(--muted-foreground)">1-BIT MARKOV REST AUTOMATON (NO STACKED SILENCE)</text>
+            <rect x="12" y="32" width="176" height="58" rx="6" fill="var(--background)" stroke="var(--chart-1)" />
+            <text x="100" y="54" text-anchor="middle" font-weight="700" fill="var(--foreground)">NOTE (wasRest=false)</text>
+            <text x="100" y="72" text-anchor="middle" font-size="10" fill="var(--muted-foreground)">self-loop p = 0.78</text>
+
+            <rect x="272" y="32" width="176" height="58" rx="6" fill="var(--background)" stroke="var(--chart-2)" />
+            <text x="360" y="54" text-anchor="middle" font-weight="700" fill="var(--foreground)">REST (wasRest=true)</text>
+            <text x="360" y="72" text-anchor="middle" font-size="10" fill="var(--muted-foreground)">amp(0.0001, 0.15) = -80dB</text>
+
+            <path d="M 188 48 Q 230 28 268 48" fill="none" stroke="var(--muted-foreground)" stroke-width="1.3" marker-end="url(#arrow-mk)" />
+            <text x="230" y="34" text-anchor="middle" font-size="9.5" fill="var(--foreground)">p = 0.22</text>
+
+            <path d="M 272 74 Q 230 94 192 74" fill="none" stroke="var(--primary)" stroke-width="1.5" marker-end="url(#arrow-mk)" />
+            <text x="230" y="99" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--primary)">p = 1.00 (forced note next)</text>
+
+            <line x1="10" y1="118" x2="450" y2="118" stroke="var(--border)" stroke-dasharray="3 3" />
+            <text x="10" y="138" font-size="10" font-weight="700" fill="var(--muted-foreground)">PITCH &amp; TIMING STEP WHEN NOTE FIRES</text>
+
+            <rect x="10" y="150" width="132" height="48" rx="6" fill="var(--background)" stroke="var(--border)" />
+            <text x="76" y="170" text-anchor="middle" font-weight="700" fill="var(--foreground)">step = lerp(0.36,</text>
+            <text x="76" y="186" text-anchor="middle" font-size="10" fill="var(--muted-foreground)">0.14, chaos)+shift</text>
+
+            <rect x="164" y="150" width="128" height="48" rx="6" fill="var(--background)" stroke="var(--border)" />
+            <text x="228" y="170" text-anchor="middle" font-weight="700" fill="var(--foreground)">random(1) &lt; chaos?</text>
+            <text x="228" y="186" text-anchor="middle" font-size="10" fill="var(--muted-foreground)">Source blend gate</text>
+            <line x1="142" y1="174" x2="160" y2="174" stroke="var(--muted-foreground)" stroke-width="1.2" marker-end="url(#arrow-mk)" />
+
+            <rect x="314" y="142" width="136" height="30" rx="5" fill="var(--background)" stroke="var(--chart-2)" />
+            <text x="382" y="161" text-anchor="middle" font-size="10" fill="var(--foreground)">TRUE: random(ratios)</text>
+
+            <rect x="314" y="180" width="136" height="30" rx="5" fill="var(--background)" stroke="var(--chart-1)" />
+            <text x="382" y="199" text-anchor="middle" font-size="10" fill="var(--foreground)">FALSE: noise(t+=0.3)</text>
+
+            <line x1="292" y1="166" x2="310" y2="157" stroke="var(--muted-foreground)" stroke-width="1.2" marker-end="url(#arrow-mk)" />
+            <line x1="292" y1="182" x2="310" y2="195" stroke="var(--muted-foreground)" stroke-width="1.2" marker-end="url(#arrow-mk)" />
+
+            <rect x="10" y="220" width="212" height="40" rx="6" fill="var(--background)" stroke="var(--border)" />
+            <text x="116" y="237" text-anchor="middle" font-size="10" font-weight="700" fill="var(--foreground)">Lead Octave Jump Gate</text>
+            <text x="116" y="252" text-anchor="middle" font-size="9.5" fill="var(--muted-foreground)">p = chaos * 0.35 -&gt; [0.5x, 2x]</text>
+
+            <rect x="238" y="220" width="212" height="40" rx="6" fill="var(--background)" stroke="var(--chart-4)" />
+            <text x="344" y="237" text-anchor="middle" font-size="10" font-weight="700" fill="var(--foreground)">Bass -&gt; Chime Flip Gate</text>
+            <text x="344" y="252" text-anchor="middle" font-size="9.5" fill="var(--muted-foreground)">if chaos &gt; 0.65 &amp; p=0.35 -&gt; 2x</text>
+          </g>
+        </svg>
+      </div>
+    </section>
+
+    <!-- 4. Philosophy & Interactive Lab -->
+    <section class="panel">
+      <div class="row-between divider-b">
+        <div>
+          <h2>3. Core Philosophy &amp; Interactive <span class="mono">noise()</span> vs. <span class="mono">random()</span> Lab</h2>
+          <p class="xs muted">Drag <span class="mono">chaos</span> (<span class="mono">0%</span> to <span class="mono">100%</span>) to compare step-wise <span class="mono">noise()</span> lines against jagged <span class="mono">random()</span> leaps.</p>
+        </div>
+        <label class="mono xs" style="display: flex; align-items: center; gap: 10px;">
+          <span class="muted">chaos =</span>
+          <input id="lab-chaos-slider" type="range" min="0" max="100" step="5" value="25" />
+          <span id="lab-chaos-val" style="font-weight: 600; min-width: 36px; text-align: right;">25%</span>
+        </label>
+      </div>
+      <svg id="lab-svg" viewBox="0 0 920 155" style="width: 100%; display: block;" role="img" aria-label="32-step melodic contour across pentatonic ratios"></svg>
+      <div class="grid-3">
+        <div class="kpi">
+          <div class="mono xs" style="color: var(--primary); font-weight: 600;">01. Shaped Entropy</div>
+          <div class="xs" style="font-weight: 600; margin: 4px 0;">Why pure random() gets boring</div>
+          <p class="xs muted">Iteration 1 has zero memory between notes: if everything is unpredictable, nothing surprises. Blending <span class="mono">noise()</span> and <span class="mono">random()</span> creates expectation first, then breaks it.</p>
+        </div>
+        <div class="kpi">
+          <div class="mono xs" style="color: var(--primary); font-weight: 600;">02. Deterministic Indeterminacy</div>
+          <div class="xs" style="font-weight: 600; margin: 4px 0;">Chance at design time, fixed in playback</div>
+          <p class="xs muted">Randomness chooses the notes while writing the algorithm, then <span class="mono">randomSeed(0)</span> and <span class="mono">noiseSeed(0)</span> freeze that exact run so both class playbacks sound identical.</p>
+        </div>
+        <div class="kpi">
+          <div class="mono xs" style="color: var(--primary); font-weight: 600;">03. Harmonic Safety Net</div>
+          <div class="xs" style="font-weight: 600; margin: 4px 0;">Just-intonation pentatonic ratios</div>
+          <p class="xs muted"><span class="mono">[1, 1.125, 1.25, 1.5, 1.67, 2]</span> drops dissonant semitones and tritones, so overlapping reverb chords stay musical even at 100% chaos.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. Evolution Matrix & Constants -->
+    <section class="grid-12">
+      <div class="panel">
+        <h2>4A. How the 3 Iterations Evolved (Problem &rarr; Fix)</h2>
+        <table>
+          <thead>
+            <tr class="mono"><th>Layer</th><th>Iter 1 (wVJAtbxKP)</th><th>Iter 2 (w9vW455uc)</th><th>Final (W7y7amaHg)</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Pitch Source</strong></td><td class="mono">100% random()</td><td class="mono">noise() &harr; random()</td><td class="mono">noise() &harr; random() + oct</td></tr>
+            <tr><td><strong>Rhythm</strong></td><td class="mono">fixed 0.25s</td><td class="mono">0.36s &harr; 0.14s</td><td class="mono">lerp + jitter + !wasRest</td></tr>
+            <tr><td><strong>Voices</strong></td><td class="mono">1 sine</td><td class="mono">1 sine</td><td class="mono">triangle lead + sine bass</td></tr>
+            <tr><td><strong>Space / DSP</strong></td><td class="mono">dry</td><td class="mono">dry + fades</td><td class="mono">p5.Reverb(3) &middot; 50% wet</td></tr>
+            <tr><td><strong>Critique Fix</strong></td><td class="muted">Too flat after 10s</td><td class="muted">Dry &amp; single-voiced</td><td class="muted">Exact 60s + short pauses</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="panel">
+        <h2>4B. Essential Code Constants</h2>
+        <table>
+          <thead>
+            <tr class="mono"><th>Value</th><th>Exact Role in Code</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="mono">261.63 Hz</td><td class="muted">Middle C (C4) root; <span class="mono">0.5x</span> = C3, <span class="mono">2x</span> = C5.</td></tr>
+            <tr><td class="mono">0.0001</td><td class="muted">Silent floor (<span class="mono">-80 dB</span>). Avoids <span class="mono">log10(0) = -Infinity</span> in <span class="mono">p5.sound</span>.</td></tr>
+            <tr><td class="mono">millis()</td><td class="muted">Wall-clock timer; immune to 144Hz monitor FPS drift.</td></tr>
+            <tr><td class="mono">!wasRest</td><td class="muted">1-bit guard banning back-to-back rests (max gap &lt;= 0.72s).</td></tr>
+            <tr><td class="mono">chaos &gt; 0.65</td><td class="muted">Opens high chime flips (~18.6s–41.4s middle climax).</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 6. Critique Q&A -->
+    <section class="panel">
+      <div class="row-between divider-b">
+        <div>
+          <h2>5. Questions You May Be Asked in Class (Critique Defense)</h2>
+          <p class="xs muted">Filter by topic and expand any card for a concise spoken answer + code proof.</p>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+          <button type="button" data-cat="All" class="btn btn-primary qa-filter">All (10)</button>
+          <button type="button" data-cat="Philosophy" class="btn qa-filter">Philosophy</button>
+          <button type="button" data-cat="Logic & Math" class="btn qa-filter">Logic &amp; Math</button>
+          <button type="button" data-cat="Audio & Timing" class="btn qa-filter">Audio &amp; Timing</button>
+          <button type="button" data-cat="Process" class="btn qa-filter">Process</button>
+        </div>
+      </div>
+      <div id="qa-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
+    </section>
+
+  </div>
+
+  <script>
+    (function () {
+      const RATIOS = [1, 1.125, 1.25, 1.5, 1.67, 2];
+      const BASE = 261.63;
+      const LCG_M = 4294967296, LCG_A = 1664525, LCG_C = 1013904223;
+      let rngState = 0, perlin = null;
+
+      function setRandomSeed(v) { rngState = (v >>> 0) % LCG_M; }
+      function nextLcg() { rngState = (LCG_A * rngState + LCG_C) % LCG_M; return rngState / LCG_M; }
+      function p5Random(min, max) {
+        if (Array.isArray(min)) return min[Math.floor(nextLcg() * min.length)];
+        if (min === undefined && max === undefined) return nextLcg();
+        if (max === undefined) return nextLcg() * min;
+        return nextLcg() * (max - min) + min;
+      }
+      function setNoiseSeed(v) {
+        let s = (v >>> 0) % LCG_M;
+        perlin = new Array(4096);
+        for (let i = 0; i < 4096; i++) { s = (LCG_A * s + LCG_C) % LCG_M; perlin[i] = s / LCG_M; }
+      }
+      function p5Noise(x) {
+        if (!perlin) setNoiseSeed(0);
+        if (x < 0) x = -x;
+        let xi = Math.floor(x), xf = x - xi, r = 0, ampl = 0.5;
+        for (let o = 0; o < 4; o++) {
+          let of = xi & 4095, rxf = 0.5 * (1 - Math.cos(xf * Math.PI));
+          r += (perlin[of] + rxf * (perlin[(of + 1) & 4095] - perlin[of])) * ampl;
+          ampl *= 0.5; xi <<= 1; xf *= 2;
+          if (xf >= 1) { xi++; xf--; }
+        }
+        return r;
+      }
+      function lerp(a, b, t) { return a + (b - a) * t; }
+      function mapVal(n, s1, e1, s2, e2) { return ((n - s1) / (e1 - s1)) * (e2 - s2) + s2; }
+      function getChaos(sec) {
+        if (sec < 10) return mapVal(sec, 0, 10, 0, 0.35);
+        if (sec < 30) return mapVal(sec, 10, 30, 0.35, 1);
+        if (sec < 50) return mapVal(sec, 30, 50, 1, 0.35);
+        return mapVal(sec, 50, 60, 0.35, 0);
+      }
+
+      function el(tag, attrs, text) {
+        const node = document.createElementNS('http://www.w3.org/2000/svg', tag);
+        for (const [k, v] of Object.entries(attrs || {})) node.setAttribute(k, v);
+        if (text !== undefined) node.textContent = text;
+        return node;
+      }
+
+      function simulateScore() {
+        setRandomSeed(0);
+        setNoiseSeed(0);
+        let nextNote = 0, nextBass = 1.5, wasRest = false, bassRest = false, t = 0;
+        const events = [];
+        for (let ms = 0; ms <= 60000; ms += 1000 / 60) {
+          const sec = ms / 1000, chaos = getChaos(Math.min(60, sec));
+          if (sec >= nextNote && sec < 58) {
+            const shift = p5Random(-0.05, 0.06) * chaos;
+            nextNote += Math.max(0.09, lerp(0.36, 0.14, chaos) + shift);
+            if (!wasRest && p5Random(1) < 0.22) {
+              wasRest = true;
+              events.push({ sec, kind: 'rest', hz: 120 });
+            } else {
+              wasRest = false;
+              let r, kind;
+              if (p5Random(1) < chaos) { r = p5Random(RATIOS); kind = 'random'; }
+              else { t += 0.3; r = RATIOS[Math.floor(p5Noise(t) * RATIOS.length)]; kind = 'noise'; }
+              const oct = p5Random(1) < chaos * 0.35 ? p5Random([0.5, 2]) : 1;
+              const vol = p5Random(0.12, 0.22);
+              events.push({ sec, kind, hz: BASE * r * oct, oct, vol });
+            }
+          }
+          if (sec >= nextBass && sec < 56) {
+            nextBass += p5Random(0.8, 1.5);
+            if (!bassRest && p5Random(1) < 0.25) {
+              bassRest = true;
+            } else {
+              bassRest = false;
+              const oct = (chaos > 0.65 && p5Random(1) < 0.35) ? 2 : 0.5;
+              const r = p5Random(RATIOS);
+              events.push({ sec, kind: oct === 2 ? 'chime' : 'bass', hz: BASE * r * oct, oct });
+            }
+          }
+        }
+        return events;
+      }
+
+      const events = simulateScore();
+      const visible = { noise: true, random: true, bass: true, chime: true, rest: true };
+      const scoreSvg = document.getElementById('main-score-svg');
+      const secSlider = document.getElementById('main-sec-slider');
+      const telemetryEl = document.getElementById('main-telemetry');
+      let scoreCursor = null;
+
+      const PAD_L = 58, PAD_R = 38, PAD_T = 18, PAD_B = 28;
+      const SW = 920 - PAD_L - PAD_R, SH = 260 - PAD_T - PAD_B;
+      const MIN_L = Math.log2(115), MAX_L = Math.log2(1180);
+      const sx = (s) => PAD_L + (s / 60) * SW;
+      const syHz = (hz) => PAD_T + SH - ((Math.log2(hz) - MIN_L) / (MAX_L - MIN_L)) * SH;
+      const syC = (c) => PAD_T + SH - c * SH;
+
+      function renderScoreSvg() {
+        scoreSvg.innerHTML = '';
+        const gx1 = sx(18.57), gx2 = sx(41.43);
+        scoreSvg.appendChild(el('rect', { x: gx1, y: PAD_T, width: gx2 - gx1, height: SH, fill: 'var(--background)', opacity: '0.65' }));
+        scoreSvg.appendChild(el('text', {
+          x: (gx1 + gx2) / 2, y: PAD_T + 14, 'text-anchor': 'middle',
+          'font-family': 'ui-monospace, monospace', 'font-size': '10.5', fill: 'var(--muted-foreground)'
+        }, 'Chime Gate Active (chaos > 0.65)'));
+
+        [[5, '10s Intro'], [20, 'Build (10-30s)'], [40, 'Release (30-50s)'], [55, '10s Outro']].forEach(([m, lbl]) => {
+          scoreSvg.appendChild(el('text', {
+            x: sx(m), y: PAD_T - 5, 'text-anchor': 'middle',
+            'font-family': 'ui-monospace, monospace', 'font-size': '10', fill: 'var(--muted-foreground)'
+          }, lbl));
+        });
+
+        [130.8, 261.6, 523.3, 1046.5].forEach((hz, i) => {
+          const labels = ['C3 · 131Hz', 'C4 · 262Hz', 'C5 · 523Hz', 'C6 · 1047Hz'];
+          const y = syHz(hz);
+          scoreSvg.appendChild(el('line', { x1: PAD_L, y1: y, x2: PAD_L + SW, y2: y, stroke: 'var(--border)', 'stroke-width': '1', 'stroke-opacity': '0.55' }));
+          scoreSvg.appendChild(el('text', {
+            x: PAD_L - 6, y: y + 3, 'text-anchor': 'end',
+            'font-family': 'ui-monospace, monospace', 'font-size': '10', fill: 'var(--muted-foreground)'
+          }, labels[i]));
+        });
+
+        [0, 10, 20, 30, 40, 50, 58, 60].forEach((s) => {
+          const x = sx(s), major = (s === 10 || s === 30 || s === 50 || s === 58);
+          scoreSvg.appendChild(el('line', {
+            x1: x, y1: PAD_T, x2: x, y2: PAD_T + SH,
+            stroke: 'var(--border)', 'stroke-width': major ? '1.1' : '0.7',
+            'stroke-dasharray': major ? '3 3' : 'none'
+          }));
+          scoreSvg.appendChild(el('text', {
+            x, y: PAD_T + SH + 16, 'text-anchor': 'middle',
+            'font-family': 'ui-monospace, monospace', 'font-size': '10.5', fill: 'var(--muted-foreground)'
+          }, s + 's'));
+        });
+
+        const cPts = [0, 10, 30, 50, 60].map((s) => `${sx(s).toFixed(1)},${syC(getChaos(s)).toFixed(1)}`).join(' ');
+        scoreSvg.appendChild(el('polyline', { points: cPts, fill: 'none', stroke: 'var(--primary)', 'stroke-width': '1.8', 'stroke-dasharray': '5 3' }));
+        [0, 0.35, 0.65, 1].forEach((c) => {
+          scoreSvg.appendChild(el('text', {
+            x: PAD_L + SW + 5, y: syC(c) + 3,
+            'font-family': 'ui-monospace, monospace', 'font-size': '9.5', fill: 'var(--primary)'
+          }, Math.round(c * 100) + '%'));
+        });
+
+        events.forEach((ev) => {
+          if (!visible[ev.kind]) return;
+          const cx = sx(ev.sec);
+          if (ev.kind === 'rest') {
+            scoreSvg.appendChild(el('line', { x1: cx, y1: PAD_T + SH - 5, x2: cx, y2: PAD_T + SH, stroke: 'var(--muted-foreground)', 'stroke-width': '1.2', opacity: '0.75' }));
+            return;
+          }
+          const cy = syHz(ev.hz);
+          if (ev.kind === 'noise') scoreSvg.appendChild(el('circle', { cx, cy, r: '2.9', fill: 'var(--chart-1)', opacity: '0.9' }));
+          else if (ev.kind === 'random') scoreSvg.appendChild(el('circle', { cx, cy, r: '2.9', fill: 'var(--chart-2)', opacity: '0.9' }));
+          else if (ev.kind === 'bass') scoreSvg.appendChild(el('rect', { x: cx - 2.6, y: cy - 2.6, width: '5.2', height: '5.2', fill: 'var(--chart-3)', opacity: '0.9' }));
+          else if (ev.kind === 'chime') scoreSvg.appendChild(el('polygon', { points: `${cx},${cy - 5} ${cx + 5},${cy} ${cx},${cy + 5} ${cx - 5},${cy}`, fill: 'var(--chart-4)', stroke: 'var(--foreground)', 'stroke-width': '0.6' }));
+        });
+
+        scoreCursor = el('line', { x1: sx(Number(secSlider.value)), y1: PAD_T, x2: sx(Number(secSlider.value)), y2: PAD_T + SH, stroke: 'var(--foreground)', 'stroke-width': '1.5' });
+        scoreSvg.appendChild(scoreCursor);
+      }
+
+      function updateMainTelemetry() {
+        const sec = Number(secSlider.value), chaos = getChaos(sec);
+        const stepMs = Math.round(lerp(0.36, 0.14, chaos) * 1000);
+        const phase = sec < 10 ? '10s Intro' : sec < 30 ? 'Build' : sec < 50 ? 'Release' : sec < 58 ? '10s Outro' : 'Fade Out';
+        if (scoreCursor) {
+          const x = sx(sec);
+          scoreCursor.setAttribute('x1', x);
+          scoreCursor.setAttribute('x2', x);
+        }
+        let nearest = null, minD = 999;
+        events.forEach((ev) => {
+          if (ev.kind !== 'rest') {
+            const d = Math.abs(ev.sec - sec);
+            if (d < minD) { minD = d; nearest = ev; }
+          }
+        });
+        const nearTxt = nearest ? `${nearest.kind} ${Math.round(nearest.hz)}Hz` : '-';
+        telemetryEl.innerHTML = `<span>t=<strong>${sec.toFixed(2)}s</strong> (${phase})</span><span>chaos=<strong>${Math.round(chaos * 100)}%</strong></span><span>step~<strong>${stepMs}ms</strong></span><span>P(rand)=<strong>${Math.round(chaos * 100)}%</strong></span><span>chime=<strong>${chaos > 0.65 && sec < 56 ? 'ON' : 'OFF'}</strong></span><span>nearest=<strong>${nearTxt}</strong></span>`;
+      }
+
+      document.querySelectorAll('.layer-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const k = btn.dataset.layer;
+          visible[k] = !visible[k];
+          btn.style.opacity = visible[k] ? '1' : '0.45';
+          renderScoreSvg();
+        });
+      });
+      secSlider.addEventListener('input', updateMainTelemetry);
+      renderScoreSvg();
+      updateMainTelemetry();
+
+      const labSlider = document.getElementById('lab-chaos-slider');
+      const labVal = document.getElementById('lab-chaos-val');
+      const labSvg = document.getElementById('lab-svg');
+      const ratioNames = ['1:1 C4 (262Hz)', '9:8 D4 (294Hz)', '5:4 E4 (327Hz)', '3:2 G4 (392Hz)', '5:3 A4 (437Hz)', '2:1 C5 (523Hz)'];
+
+      function renderLab() {
+        const chaos = Number(labSlider.value) / 100;
+        labVal.textContent = Math.round(chaos * 100) + '%';
+        setRandomSeed(0);
+        setNoiseSeed(0);
+        let t = 0;
+        const steps = [];
+        for (let i = 0; i < 32; i++) {
+          let idx, pitchSrc;
+          if (p5Random(1) < chaos) { idx = Math.floor(p5Random(RATIOS.length)); pitchSrc = 'random'; }
+          else { t += 0.3; idx = Math.floor(p5Noise(t) * RATIOS.length); pitchSrc = 'noise'; }
+          steps.push({ i, idx, pitchSrc });
+        }
+
+        labSvg.innerHTML = '';
+        const PL = 116, PR = 20, PT = 16, PB = 22;
+        const LW = 920 - PL - PR, LH = 155 - PT - PB;
+        const lx = (i) => PL + (i / 31) * LW;
+        const ly = (idx) => PT + LH - (idx / 5) * LH;
+
+        ratioNames.forEach((name, idx) => {
+          const y = ly(idx);
+          labSvg.appendChild(el('line', { x1: PL, y1: y, x2: PL + LW, y2: y, stroke: 'var(--border)', 'stroke-width': '1', 'stroke-opacity': '0.55' }));
+          labSvg.appendChild(el('text', { x: PL - 8, y: y + 3.5, 'text-anchor': 'end', 'font-family': 'ui-monospace, monospace', 'font-size': '10', fill: 'var(--muted-foreground)' }, name));
+        });
+
+        labSvg.appendChild(el('polyline', { points: steps.map((s) => `${lx(s.i).toFixed(1)},${ly(s.idx).toFixed(1)}`).join(' '), fill: 'none', stroke: 'var(--border)', 'stroke-width': '1.6' }));
+
+        steps.forEach((s) => {
+          labSvg.appendChild(el('circle', { cx: lx(s.i), cy: ly(s.idx), r: '4.5', fill: s.pitchSrc === 'random' ? 'var(--chart-2)' : 'var(--chart-1)', stroke: 'var(--card)', 'stroke-width': '1' }));
+          if (s.i % 4 === 0 || s.i === 31) {
+            labSvg.appendChild(el('text', { x: lx(s.i), y: PT + LH + 15, 'text-anchor': 'middle', 'font-family': 'ui-monospace, monospace', 'font-size': '9.5', fill: 'var(--muted-foreground)' }, '#' + (s.i + 1)));
+          }
+        });
+      }
+      labSlider.addEventListener('input', renderLab);
+      renderLab();
+
+      const QAS = [
+        { cat: 'Philosophy', q: '1. Why focus on randomness, and why did you combine noise() and random() instead of using just one?', a: 'Pure random() (my First Iteration) has zero memory between notes, so after about 10 seconds it feels flat and aimless. Perlin noise() moves smoothly along adjacent scale notes like a real melody. Blending them with a 60-second chaos curve lets the piece start predictable, build tension when random jumps take over in the middle, and return to calm.', proof: 'if (random(1) < chaos) r = random(ratios); else r = ratios[floor(noise(t) * ratios.length)];' },
+        { cat: 'Philosophy', q: '2. If it uses randomness, how do we know both playbacks in class will be the same?', a: 'I locked both generators with randomSeed(0) and noiseSeed(0) in setup(), so the exact sequence of numbers is 100% deterministic. Like John Cage fixing a chance score before performance, randomness shaped the composition during coding, while the seeds guarantee repeatable playback.', proof: 'randomSeed(0); noiseSeed(0);' },
+        { cat: 'Logic & Math', q: '3. Why did you choose these exact scale ratios instead of random frequencies in Hz?', a: 'Those 6 numbers [1, 1.125, 1.25, 1.5, 1.67, 2] are just-intonation major pentatonic ratios relative to Middle C (261.63 Hz). Dropping the half-step and tritone acts as a harmonic safety net: even when multiple notes overlap inside the reverb at peak chaos, they never clash harshly.', proof: 'let ratios = [1, 1.125, 1.25, 1.5, 1.67, 2]; let BASE = 261.63;' },
+        { cat: 'Audio & Timing', q: '4. How do you guarantee it lasts exactly 60 seconds? Why millis() instead of frameCount?', a: 'I originally used frame counting (3600 frames at frameRate(60)), but p5 v2.3.4 has a 5ms timing tolerance that lets high-refresh monitors (144Hz+) run around 75-82 FPS and finish 10+ seconds early. Switching to real wall-clock millis() locks the fade at 58s and hard stop at 60.0s on any laptop.', proof: 'let sec = (millis() - startTime) / 1000; if (sec >= 60) { osc.stop(); bass.stop(); noLoop(); }' },
+        { cat: 'Logic & Math', q: '5. How did you keep random rests from creating awkward long silences?', a: 'In Iteration 2, independent coin flips could stack 2 or 3 rests in a row and leave 1.5-second dead gaps. I added a 1-bit state flag (!wasRest and !bassRest): once a rest happens, the very next step is forced to play a note. Every pause stays under 0.4 seconds.', proof: 'if (!wasRest && random(1) < 0.22) { wasRest = true; ... } else { wasRest = false; ... }' },
+        { cat: 'Audio & Timing', q: '6. Why do you fade to 0.0001 instead of 0 in osc.amp(0.0001, ...)?', a: 'In p5.sound v0.4.2, amp() converts linear gain to decibels using Math.log(amp). Passing 0 produces -Infinity, which can break ramps or cause clicks. 0.0001 equals -80 dB — practically silent to the ear while staying mathematically finite.', proof: 'osc.amp(0.0001, 1.9);' },
+        { cat: 'Audio & Timing', q: '7. Why did you call osc.disconnect() before osc.connect(reverb), and why triangle + sine?', a: 'A new p5.Oscillator starts connected directly to the main output. Calling disconnect() prevents doubling the dry signal so reverb.wet(0.5) handles the true 50/50 dry-wet mix cleanly. Triangle gives the lead warm odd harmonics, while sine keeps the low bass pure and non-muddy.', proof: 'osc.disconnect(); osc.connect(reverb); reverb.wet(0.5);' },
+        { cat: 'Logic & Math', q: '8. Why do those sudden high chime notes only appear during the middle of the piece?', a: 'The second voice normally anchors an octave below (0.5x). Only when chaos rises above 0.65 (roughly 18.6s to 41.4s) does a 35% gate allow it to jump two octaves higher (2x) at softer volume (0.1), creating contrast right at the climax.', proof: 'let oct = chaos > 0.65 && random(1) < 0.35 ? 2 : 0.5;' },
+        { cat: 'Process', q: '9. Why is the canvas blank white, and what if the browser pauses audio?', a: 'The assignment required "No visuals. Just sound." So setup() draws a plain white background and draw() waits until getAudioContext().state === "running", with mousePressed() and keyPressed() calling userStartAudio() as a one-click unlock if browser autoplay blocks it.', proof: 'if (getAudioContext().state !== "running") return;' },
+        { cat: 'Process', q: '10. How did the project change across your 3 iterations, and how did you handle working solo?', a: 'My partner left the group, so I focused on keeping the architecture small (~106 lines) and disciplined: Iteration 1 tested raw uniform random(), Iteration 2 introduced the 60s chaos curve and noise() + rests, and the Final version added triangle/sine contrast, timing shifts, high chimes, and reverb.', proof: 'wVJAtbxKP (47 lines) -> w9vW455uc (73 lines) -> W7y7amaHg (106 lines)' }
+      ];
+
+      const qaList = document.getElementById('qa-list');
+      let currentCat = 'All';
+
+      function renderQa() {
+        qaList.innerHTML = '';
+        QAS.filter((item) => currentCat === 'All' || item.cat === currentCat).forEach((item, idx) => {
+          const card = document.createElement('details');
+          if (idx < 2) card.open = true;
+          card.className = 'qa-card';
+          card.innerHTML = `<summary><span>${item.q}</span><span class="btn" style="padding: 2px 6px;">${item.cat}</span></summary><div class="qa-body"><p class="muted">${item.a}</p><div class="mono proof">${item.proof}</div></div>`;
+          qaList.appendChild(card);
+        });
+      }
+
+      document.querySelectorAll('.qa-filter').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          currentCat = btn.dataset.cat;
+          document.querySelectorAll('.qa-filter').forEach((b) => {
+            b.className = b.dataset.cat === currentCat ? 'btn btn-primary qa-filter' : 'btn qa-filter';
+          });
+          renderQa();
+        });
+      });
+      renderQa();
+    })();
+  </script>
+</body>
+</html>

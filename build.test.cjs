@@ -149,7 +149,7 @@ test('Every local HTML asset and navigation destination resolves inside the deli
   assert.equal(built.status, 0, built.stderr);
   const guide = JSON.parse(read('listening-manifest.json'));
   const { resolvePosition, positionHash } = require('./walkthrough-model.js');
-  for (const filename of ['index.html', 'performance.html', 'walkthrough.html', 'listen.html', 'design.html']) {
+  for (const filename of ['index.html', 'performance.html', 'walkthrough.html', 'listen.html', 'design.html', 'darkened-brass.html', 'timer-manifest.html', 'study-guide.html', 'line-by-line.html']) {
     const html = read(filename).toString('utf8');
     const references = [...html.matchAll(/\b(?:src|href)\s*=\s*["']([^"']+)["']/gi)].map(match => match[1]);
     assert.ok(references.length > 0);
@@ -290,5 +290,30 @@ test('All complete p5 sketches parse, reproduce the scores and set up audio-only
     assert.deepEqual(mounted, [target, target, target]);
     assert.deepEqual(lifecycle.map(item => item.event), ['visibilitychange', 'pagehide']);
     assert.equal(vm.runInContext('JSON.stringify(SoundLab.makeScore(EXPERIMENT))', context), JSON.stringify(engine.makeScore(id)));
+  }
+});
+
+test('Darkened Brass showcase, three iterations, interactive guides and notes ship cleanly in dist', () => {
+  assert.equal(built.status, 0, built.stderr);
+  assert.match(read('index.html').toString('utf8'), /href="darkened-brass\.html"/);
+
+  const pages = ['darkened-brass.html', 'timer-manifest.html', 'study-guide.html', 'line-by-line.html'];
+  const iterations = ['iteration-1', 'iteration-2', 'iteration-3-final'];
+  const noteFiles = ['blog-draft.md', 'critique-guide.md', 'iteration-notes.md', 'observation-1.md', 'observation-2.md', 'observation-3.md', 'spreadsheet.csv'];
+
+  for (const page of pages) {
+    assert.ok(fs.existsSync(path.join(dist, page)), 'Missing dist page: ' + page);
+  }
+  for (const dir of iterations) {
+    for (const file of ['index.html', 'style.css', 'sketch.js']) {
+      assert.ok(fs.existsSync(path.join(dist, 'iterations', dir, file)), 'Missing dist file: iterations/' + dir + '/' + file);
+    }
+    const sketchSrc = read(path.join('iterations', dir, 'sketch.js')).toString('utf8');
+    new vm.Script(sketchSrc, { filename: dir + '/sketch.js' });
+    assert.match(sketchSrc, /randomSeed\(0\)/);
+    assert.match(sketchSrc, /sec >= 60/);
+  }
+  for (const note of noteFiles) {
+    assert.ok(fs.existsSync(path.join(dist, 'notes', note)), 'Missing dist note: notes/' + note);
   }
 });

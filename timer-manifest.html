@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ICM Week 11 — 3-Iteration Timer Manifest (Real p5.sound)</title>
+  <script src="https://cdn.jsdelivr.net/npm/p5@2.3.4/lib/p5.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/p5.sound@0.4.2/dist/p5.sound.min.js"></script>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #fafafa;
+      --card: #ffffff;
+      --border: #e4e4e7;
+      --text: #18181b;
+      --muted: #71717a;
+      --accent: #2563eb;
+      --accent-text: #ffffff;
+      --chip-bg: #f4f4f5;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #09090b;
+        --card: #18181b;
+        --border: #27272a;
+        --text: #f4f4f5;
+        --muted: #a1a1aa;
+        --accent: #3b82f6;
+        --accent-text: #ffffff;
+        --chip-bg: #27272a;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 24px 16px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+    .wrap {
+      max-width: 760px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .topbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    .title { font-size: 16px; font-weight: 600; }
+    .readout {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .card-head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    button {
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 6px;
+      padding: 6px 12px;
+      cursor: pointer;
+      border: 1px solid transparent;
+    }
+    .play-btn {
+      background: var(--accent);
+      color: var(--accent-text);
+    }
+    .reset-btn {
+      background: var(--chip-bg);
+      color: var(--text);
+      border-color: var(--border);
+    }
+    .timer {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 13px;
+      font-variant-numeric: tabular-nums;
+    }
+    .bar-track {
+      width: 100%;
+      height: 7px;
+      border-radius: 999px;
+      background: var(--chip-bg);
+      overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+    }
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .chip {
+      font-size: 12px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--chip-bg);
+      color: var(--muted);
+      transition: background-color 120ms, color 120ms, border-color 120ms;
+    }
+    .chip.active {
+      background: var(--accent);
+      color: var(--accent-text);
+      border-color: var(--accent);
+      font-weight: 600;
+    }
+    .links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+  </style>
+<style>
+  .week11-subnav {
+    --wn-bg: rgba(255, 255, 255, 0.9);
+    --wn-border: #d4d4d8;
+    --wn-text: #18181b;
+    --wn-muted: #52525b;
+    --wn-accent: #2563eb;
+    --wn-accent-fg: #ffffff;
+    --wn-pill: #f4f4f5;
+    margin: 0 auto 14px;
+    padding: 8px 12px;
+    border: 1px solid var(--wn-border);
+    border-radius: 8px;
+    background: var(--wn-bg);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    font-size: 12px;
+  }
+  @media (prefers-color-scheme: dark) {
+    .week11-subnav {
+      --wn-bg: rgba(24, 24, 27, 0.92);
+      --wn-border: #3f3f46;
+      --wn-text: #f4f4f5;
+      --wn-muted: #a1a1aa;
+      --wn-accent: #3b82f6;
+      --wn-accent-fg: #ffffff;
+      --wn-pill: #27272a;
+    }
+  }
+  .week11-subnav-brand {
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--wn-text);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .week11-subnav-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+  }
+  .week11-subnav a.wn-link {
+    padding: 4px 9px;
+    border-radius: 5px;
+    border: 1px solid var(--wn-border);
+    background: var(--wn-pill);
+    color: var(--wn-muted);
+    text-decoration: none;
+    font-weight: 500;
+    line-height: 1.35;
+  }
+  .week11-subnav a.wn-link:hover { color: var(--wn-text); border-color: var(--wn-accent); }
+  .week11-subnav a.wn-link[aria-current="page"] {
+    background: var(--wn-accent);
+    border-color: var(--wn-accent);
+    color: var(--wn-accent-fg);
+    font-weight: 600;
+  }
+  .week11-subnav a.wn-link:focus-visible { outline: 2px solid var(--wn-accent); outline-offset: 2px; }
+</style>
+</head>
+<body>
+  <nav class="week11-subnav" aria-label="Darkened Brass suite" style="max-width: 760px;"><a class="week11-subnav-brand" href="darkened-brass.html">ICM / DARKENED BRASS</a><div class="week11-subnav-links"><a class="wn-link" href="index.html">← Week 11 Lab</a><a class="wn-link" href="darkened-brass.html">Darkened Brass</a><a class="wn-link" href="timer-manifest.html" aria-current="page">60s Timer Player</a><a class="wn-link" href="study-guide.html">Study Guide</a><a class="wn-link" href="line-by-line.html">106-Line Walkthrough</a><a class="wn-link" href="https://editor.p5js.org/monadlnomad/full/W7y7amaHg" target="_blank" rel="noopener">Live p5 Fullscreen ↗</a></div></nav>
+  <div class="wrap">
+    <div class="topbar">
+      <div>
+        <div class="title">ICM Week 11 — Exact 60s Timer Manifest (p5@2.3.4 + p5.sound@0.4.2)</div>
+        <div id="live-readout" class="readout">Click Play on any row — uses the exact same p5.sound engine as your live links.</div>
+      </div>
+    </div>
+
+    <!-- Iteration 1 -->
+    <div class="card">
+      <div class="card-head">
+        <div class="controls">
+          <button type="button" class="play-btn" data-play="1">Play</button>
+          <button type="button" class="reset-btn" data-reset="1">Reset</button>
+          <strong>1. First Iteration &mdash; Steady random()</strong>
+        </div>
+        <span class="timer" data-timer="1">00.0s / 60.0s</span>
+      </div>
+      <div class="bar-track"><div class="bar-fill" data-bar="1"></div></div>
+      <div class="chips" data-chips="1">
+        <span class="chip" data-start="0" data-end="10">0-10s steady beat</span>
+        <span class="chip" data-start="10" data-end="58.5">10-58s flat, samey</span>
+        <span class="chip" data-start="58.5" data-end="60.1">58.5-60s fade out</span>
+      </div>
+      <div class="links">
+        <a href="https://editor.p5js.org/monadlnomad/sketches/wVJAtbxKP" target="_blank" rel="noopener">Open wVJAtbxKP in p5.js</a>
+      </div>
+    </div>
+
+    <!-- Iteration 2 -->
+    <div class="card">
+      <div class="card-head">
+        <div class="controls">
+          <button type="button" class="play-btn" data-play="2">Play</button>
+          <button type="button" class="reset-btn" data-reset="2">Reset</button>
+          <strong>2. Second Iteration &mdash; 10s intro/outro &amp; noise()</strong>
+        </div>
+        <span class="timer" data-timer="2">00.0s / 60.0s</span>
+      </div>
+      <div class="bar-track"><div class="bar-fill" data-bar="2"></div></div>
+      <div class="chips" data-chips="2">
+        <span class="chip" data-start="0" data-end="10">0-10s 10s calm intro</span>
+        <span class="chip" data-start="10" data-end="29">10-30s builds up</span>
+        <span class="chip" data-start="29" data-end="35">30s peak chaos</span>
+        <span class="chip" data-start="35" data-end="50">30-50s eases down</span>
+        <span class="chip" data-start="50" data-end="60.1">50-60s 10s calm outro</span>
+      </div>
+      <div class="links">
+        <a href="https://editor.p5js.org/monadlnomad/sketches/w9vW455uc" target="_blank" rel="noopener">Open w9vW455uc in p5.js</a>
+      </div>
+    </div>
+
+    <!-- Final Iteration -->
+    <div class="card">
+      <div class="card-head">
+        <div class="controls">
+          <button type="button" class="play-btn" data-play="3">Play</button>
+          <button type="button" class="reset-btn" data-reset="3">Reset</button>
+          <strong>3. Final Iteration &mdash; Bass, chimes &amp; reverb</strong>
+        </div>
+        <span class="timer" data-timer="3">00.0s / 60.0s</span>
+      </div>
+      <div class="bar-track"><div class="bar-fill" data-bar="3"></div></div>
+      <div class="chips" data-chips="3">
+        <span class="chip" data-start="0.5" data-end="2">1s starts slow</span>
+        <span class="chip" data-start="2" data-end="5">2s bass in</span>
+        <span class="chip" data-start="10" data-end="15">10s speeds up</span>
+        <span class="chip" data-start="20" data-end="25">20s first chime</span>
+        <span class="chip" data-start="25" data-end="40">25-40s fast &amp; off-beat</span>
+        <span class="chip" data-start="31" data-end="42">31-41s reverb chimes</span>
+        <span class="chip" data-start="50" data-end="58">50s 10s calm outro</span>
+        <span class="chip" data-start="58" data-end="60.1">58-60s fade out</span>
+      </div>
+      <div class="links">
+        <a href="https://editor.p5js.org/monadlnomad/sketches/W7y7amaHg" target="_blank" rel="noopener">Open W7y7amaHg Code</a>
+        <a href="https://editor.p5js.org/monadlnomad/full/W7y7amaHg" target="_blank" rel="noopener">Open W7y7amaHg Fullscreen</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const RATIOS = [1, 1.125, 1.25, 1.5, 1.67, 2];
+      const BASE = 261.63;
+      const liveReadout = document.getElementById('live-readout');
+
+      let activeId = null;
+      let secs = { 1: 0, 2: 0, 3: 0 };
+
+      let osc = null;
+      let bass = null;
+      let reverb = null;
+
+      let startTime = -1;
+      let nextNote = 0;
+      let nextBass = 1.5;
+      let wasRest = false;
+      let bassRest = false;
+      let fading = false;
+      let t = 0;
+
+      function renderRow(id) {
+        const sec = Math.min(60, secs[id]);
+        const timerEl = document.querySelector(`[data-timer="${id}"]`);
+        const barEl = document.querySelector(`[data-bar="${id}"]`);
+        const playEl = document.querySelector(`[data-play="${id}"]`);
+        const chips = document.querySelectorAll(`[data-chips="${id}"] .chip`);
+
+        timerEl.textContent = sec.toFixed(1).padStart(4, '0') + 's / 60.0s';
+        barEl.style.width = ((sec / 60) * 100).toFixed(2) + '%';
+        playEl.textContent = activeId === id ? 'Stop' : 'Play';
+
+        chips.forEach((chip) => {
+          const s = Number(chip.dataset.start);
+          const e = Number(chip.dataset.end);
+          chip.classList.toggle('active', sec > 0 && sec >= s && sec < e);
+        });
+      }
+
+      function cleanupVoices() {
+        [osc, bass].forEach((node) => {
+          if (node) {
+            try { node.stop(); } catch (_) {}
+            try { node.disconnect(); } catch (_) {}
+          }
+        });
+        if (reverb) {
+          try { reverb.disconnect(); } catch (_) {}
+        }
+        osc = null;
+        bass = null;
+        reverb = null;
+      }
+
+      function stopActive(msg) {
+        const prev = activeId;
+        activeId = null;
+        cleanupVoices();
+        if (prev) renderRow(prev);
+        if (msg) liveReadout.textContent = msg;
+      }
+
+      const sketch = new p5((p) => {
+        p.setup = () => {
+          p.noCanvas();
+        };
+
+        p.draw = () => {
+          if (!activeId) return;
+          if (p.getAudioContext().state !== 'running') return;
+          if (startTime < 0) startTime = p.millis();
+
+          const id = activeId;
+          const sec = (p.millis() - startTime) / 1000;
+          secs[id] = Math.min(60, sec);
+
+          if (id === 1) {
+            if (!fading && sec >= 58.5) {
+              fading = true;
+              osc.amp(0.0001, 1.4);
+            }
+            if (sec >= 60) {
+              secs[id] = 60;
+              renderRow(id);
+              stopActive('Iteration 1 finished (60.0s)');
+              return;
+            }
+            if (sec >= nextNote && sec < 58.5) {
+              nextNote += 0.25;
+              const f = BASE * p.random(RATIOS);
+              osc.freq(f);
+              liveReadout.textContent = `Iter 1: ${f.toFixed(0)} Hz`;
+            }
+            renderRow(id);
+            return;
+          }
+
+          let chaos = 0;
+          if (sec < 10) chaos = p.map(sec, 0, 10, 0, 0.35);
+          else if (sec < 30) chaos = p.map(sec, 10, 30, 0.35, 1);
+          else if (sec < 50) chaos = p.map(sec, 30, 50, 1, 0.35);
+          else chaos = p.map(sec, 50, 60, 0.35, 0);
+
+          if (id === 2) {
+            if (!fading && sec >= 58) {
+              fading = true;
+              osc.amp(0.0001, 1.8);
+            }
+            if (sec >= 60) {
+              secs[id] = 60;
+              renderRow(id);
+              stopActive('Iteration 2 finished (60.0s)');
+              return;
+            }
+            if (sec >= nextNote && sec < 58) {
+              nextNote += p.lerp(0.36, 0.14, chaos);
+              if (!wasRest && p.random(1) < 0.22) {
+                wasRest = true;
+                osc.amp(0.0001, 0.15);
+                liveReadout.textContent = 'Iter 2: quick rest';
+              } else {
+                wasRest = false;
+                let r, pitchSrc;
+                if (p.random(1) < chaos) { r = p.random(RATIOS); pitchSrc = 'random()'; }
+                else { t += 0.3; r = RATIOS[p.floor(p.noise(t) * RATIOS.length)]; pitchSrc = 'noise()'; }
+                const oct = p.random(1) < chaos * 0.35 ? p.random([0.5, 2]) : 1;
+                const f = BASE * r * oct;
+                osc.freq(f, 0.03);
+                osc.amp(0.2, 0.04);
+                liveReadout.textContent = `Iter 2: ${f.toFixed(0)} Hz (${pitchSrc})`;
+              }
+            }
+            renderRow(id);
+            return;
+          }
+
+          // Final Iteration (id === 3)
+          if (!fading && sec >= 58) {
+            fading = true;
+            osc.amp(0.0001, 1.9);
+            bass.amp(0.0001, 1.9);
+          }
+          if (sec >= 60) {
+            secs[id] = 60;
+            renderRow(id);
+            stopActive('Final Iteration finished (60.0s)');
+            return;
+          }
+
+          if (sec >= nextNote && sec < 58) {
+            const shift = p.random(-0.05, 0.06) * chaos;
+            nextNote += p.max(0.09, p.lerp(0.36, 0.14, chaos) + shift);
+            if (!wasRest && p.random(1) < 0.22) {
+              wasRest = true;
+              osc.amp(0.0001, 0.15);
+              liveReadout.textContent = 'Final: brief rest';
+            } else {
+              wasRest = false;
+              let r, pitchSrc;
+              if (p.random(1) < chaos) { r = p.random(RATIOS); pitchSrc = 'random()'; }
+              else { t += 0.3; r = RATIOS[p.floor(p.noise(t) * RATIOS.length)]; pitchSrc = 'noise()'; }
+              const oct = p.random(1) < chaos * 0.35 ? p.random([0.5, 2]) : 1;
+              const f = BASE * r * oct;
+              osc.freq(f, 0.03);
+              osc.amp(p.random(0.12, 0.22), 0.04);
+              liveReadout.textContent = `Final lead: ${f.toFixed(0)} Hz (${pitchSrc})`;
+            }
+          }
+
+          if (sec >= nextBass && sec < 56) {
+            nextBass += p.random(0.8, 1.5);
+            if (!bassRest && p.random(1) < 0.25) {
+              bassRest = true;
+              bass.amp(0.0001, 0.3);
+            } else {
+              bassRest = false;
+              const oct = chaos > 0.65 && p.random(1) < 0.35 ? 2 : 0.5;
+              const f = BASE * p.random(RATIOS) * oct;
+              bass.freq(f, 0.05);
+              bass.amp(oct === 2 ? 0.1 : 0.18, 0.08);
+              liveReadout.textContent = oct === 2 ? `Final chime: ${f.toFixed(0)} Hz` : `Final bass: ${f.toFixed(0)} Hz`;
+            }
+          }
+
+          renderRow(id);
+        };
+
+        async function playRow(id) {
+          if (activeId === id) {
+            stopActive(`Stopped Iteration ${id}`);
+            return;
+          }
+          stopActive();
+
+          p.randomSeed(0);
+          p.noiseSeed(0);
+          secs[id] = 0;
+          startTime = -1;
+          nextNote = 0;
+          nextBass = 1.5;
+          wasRest = false;
+          bassRest = false;
+          fading = false;
+          t = 0;
+
+          if (id === 1) {
+            osc = new p5.Oscillator('sine');
+            osc.freq(BASE);
+            osc.amp(0.2);
+          } else if (id === 2) {
+            osc = new p5.Oscillator('sine');
+            osc.freq(BASE);
+            osc.amp(0.0001, 0.01);
+          } else {
+            reverb = new p5.Reverb(3);
+            reverb.wet(0.5);
+
+            osc = new p5.Oscillator('triangle');
+            osc.freq(BASE);
+            osc.amp(0.0001, 0.01);
+            osc.disconnect();
+            osc.connect(reverb);
+
+            bass = new p5.Oscillator('sine');
+            bass.freq(BASE * 0.5);
+            bass.amp(0.0001, 0.01);
+            bass.disconnect();
+            bass.connect(reverb);
+          }
+
+          try {
+            await p.userStartAudio();
+            await p.getAudioContext().resume();
+          } catch (_) {}
+
+          if (p.getAudioContext().state !== 'running') {
+            cleanupVoices();
+            liveReadout.textContent = 'Click Play again to allow browser audio.';
+            return;
+          }
+
+          osc.start();
+          if (bass) bass.start();
+          activeId = id;
+          startTime = p.millis();
+          liveReadout.textContent = `Playing Iteration ${id} (exact 60s p5.sound)...`;
+          renderRow(id);
+        }
+
+        document.querySelectorAll('.play-btn').forEach((btn) => {
+          btn.addEventListener('click', () => playRow(Number(btn.dataset.play)));
+        });
+
+        document.querySelectorAll('.reset-btn').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const id = Number(btn.dataset.reset);
+            if (activeId === id) stopActive(`Reset Iteration ${id}`);
+            secs[id] = 0;
+            renderRow(id);
+          });
+        });
+
+        [1, 2, 3].forEach(renderRow);
+      });
+    })();
+  </script>
+</body>
+</html>

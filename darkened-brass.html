@@ -1,0 +1,1038 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101614">
+  <meta name="description" content="Darkened Brass — Week 11 solo 60-second algorithmic sound project: iterations, chaos curve, pentatonic and overtone visuals, core code mechanics, and timed observations.">
+  <title>Darkened Brass · Week 11 Final Piece</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #101614;
+      --panel: #18201c;
+      --panel2: #202a23;
+      --ink: #edf2e9;
+      --muted: #b2bdb0;
+      --line: #344136;
+      --green: #cae9ad;
+      --amber: #e3ba88;
+      --sky: #7dd3fc;
+      --rose: #fca5a5;
+      --radius: 14px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 84px; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font: 15px/1.65 'DM Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--green); text-underline-offset: 4px; }
+    a:hover { color: #e2f6cf; }
+    :focus-visible { outline: 3px solid var(--amber); outline-offset: 3px; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-variant-numeric: tabular-nums; }
+    .skip { position: fixed; top: -80px; left: 16px; background: var(--green); color: #101614; padding: 8px 12px; border-radius: 6px; font-weight: 700; z-index: 50; }
+    .skip:focus { top: 12px; }
+
+    /* Sticky masthead */
+    .masthead {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      background: rgba(16, 22, 20, 0.92);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--line);
+    }
+    .mast-inner {
+      width: min(1160px, 92%);
+      margin: auto;
+      padding: 14px 0;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px 20px;
+    }
+    .wordmark {
+      font-family: 'Manrope', system-ui, sans-serif;
+      font-weight: 800;
+      font-size: 18px;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .wordmark span {
+      font: 600 11px ui-monospace, monospace;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin-left: 8px;
+    }
+    .nav-links {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px 14px;
+    }
+    .nav-links a {
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--muted);
+      text-decoration: none;
+      padding: 5px 10px;
+      border-radius: 6px;
+      border: 1px solid transparent;
+    }
+    .nav-links a:hover { color: var(--ink); background: var(--panel); border-color: var(--line); }
+    .nav-links a[aria-current="page"] {
+      color: #101614;
+      background: var(--green);
+      border-color: var(--green);
+      font-weight: 700;
+    }
+    .nav-links a.ext { border-color: var(--line); color: var(--amber); }
+    .nav-links a.ext:hover { background: var(--panel2); border-color: var(--amber); }
+
+    main, footer { width: min(1160px, 92%); margin: auto; }
+    .eyebrow {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--green);
+      margin: 0 0 10px;
+    }
+    h1, h2, h3 {
+      font-family: 'Manrope', system-ui, -apple-system, sans-serif;
+      margin: 0;
+      line-height: 1.14;
+      letter-spacing: -0.03em;
+    }
+    h1 { font-size: clamp(38px, 5vw, 62px); font-weight: 600; }
+    h1 em { font-style: normal; color: var(--green); }
+    h2 { font-size: clamp(24px, 2.8vw, 34px); font-weight: 650; }
+    h3 { font-size: 18px; font-weight: 650; letter-spacing: -0.015em; }
+    p { margin: 0 0 12px; }
+    p:last-child { margin-bottom: 0; }
+    .muted { color: var(--muted); }
+    .small { font-size: 12.5px; line-height: 1.55; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 40px;
+      padding: 8px 15px;
+      border-radius: 8px;
+      border: 1px solid #4c5b48;
+      background: var(--panel);
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .btn:hover { background: var(--panel2); border-color: var(--green); color: var(--ink); }
+    .btn.primary { background: var(--green); color: #121a13; border-color: var(--green); }
+    .btn.primary:hover { background: #dbf3c4; color: #121a13; }
+    .btn-sm { min-height: 30px; padding: 4px 10px; font-size: 12px; border-radius: 6px; }
+    .btn-sm.active { background: var(--green); color: #121a13; border-color: var(--green); }
+
+    section.band { padding: 54px 0; border-bottom: 1px solid var(--line); }
+    .sec-head {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 16px 40px;
+      margin-bottom: 24px;
+    }
+    .sec-head p.lead { max-width: 440px; font-size: 13.5px; color: var(--muted); }
+
+    /* Hero */
+    .hero {
+      padding: 48px 0 54px;
+      border-bottom: 1px solid var(--line);
+      display: grid;
+      grid-template-columns: 1.05fr 1.15fr;
+      gap: 36px;
+      align-items: center;
+    }
+    @media (max-width: 960px) { .hero { grid-template-columns: 1fr; } }
+    .philosophy-box {
+      margin: 18px 0 22px;
+      padding: 14px 16px;
+      border-left: 3px solid var(--green);
+      background: var(--panel);
+      border-radius: 0 10px 10px 0;
+      font-size: 14.5px;
+      color: var(--ink);
+    }
+    .philosophy-box code { color: var(--amber); font-family: ui-monospace, monospace; font-size: 13px; }
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
+    .hero-meta { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 12px; color: var(--muted); }
+    .hero-meta span strong { color: var(--ink); font-weight: 600; }
+
+    /* Card + Inspector */
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+    .inspector-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .badge-live { color: var(--green); display: inline-flex; align-items: center; gap: 6px; font-weight: 700; }
+    .badge-live::before { content: ""; width: 7px; height: 7px; border-radius: 99px; background: var(--green); }
+    .svg-frame {
+      background: #131a16;
+      border: 1px solid #2b382e;
+      border-radius: 10px;
+      padding: 10px;
+    }
+    svg.diagram { width: 100%; height: auto; display: block; overflow: visible; }
+    .scrubber-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      margin: 12px 0 10px;
+    }
+    .scrubber-row input[type="range"] {
+      flex: 1;
+      min-width: 180px;
+      accent-color: var(--green);
+      cursor: pointer;
+    }
+    .preset-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+    .telemetry-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    @media (max-width: 560px) { .telemetry-grid { grid-template-columns: repeat(2, 1fr); } }
+    .tel-cell {
+      background: #131a16;
+      border: 1px solid #2c382f;
+      border-radius: 8px;
+      padding: 8px 10px;
+    }
+    .tel-cell .k { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+    .tel-cell .v { font-size: 13px; font-weight: 700; color: var(--ink); margin-top: 2px; }
+
+    /* Grids */
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+    .grid-5 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+    @media (max-width: 960px) {
+      .grid-3, .grid-2, .grid-4 { grid-template-columns: 1fr; }
+    }
+
+    /* Iterations */
+    .iter-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 14px;
+    }
+    .iter-card.final { border-color: var(--green); background: linear-gradient(160deg, #1d2820, #161d19); }
+    .iter-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+    .iter-num { font-size: 11px; letter-spacing: 0.12em; color: var(--green); font-weight: 700; }
+    .iter-lines { font-size: 11px; color: var(--muted); border: 1px solid var(--line); padding: 2px 7px; border-radius: 99px; }
+    .tag-row { display: flex; flex-wrap: wrap; gap: 6px; }
+    .tag { font-size: 11.5px; background: #131a16; border: 1px solid #2e3b31; padding: 2px 8px; border-radius: 6px; color: var(--muted); }
+    .link-row { display: flex; flex-wrap: wrap; gap: 8px 14px; font-size: 12.5px; padding-top: 10px; border-top: 1px solid var(--line); }
+
+    /* Tables */
+    table.data-table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
+    table.data-table th {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: var(--muted);
+      padding: 8px 10px 8px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    table.data-table td {
+      padding: 9px 10px 9px 0;
+      border-bottom: 1px solid #263128;
+      vertical-align: top;
+    }
+    table.data-table tr:last-child td { border-bottom: none; }
+    code.inline {
+      background: #121814;
+      border: 1px solid #2e3c31;
+      padding: 1px 6px;
+      border-radius: 5px;
+      font-family: ui-monospace, monospace;
+      font-size: 12px;
+      color: var(--amber);
+    }
+
+    /* Callouts & Observation cards */
+    .mech-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .mech-code {
+      font-family: ui-monospace, monospace;
+      font-size: 11.5px;
+      line-height: 1.45;
+      background: #121814;
+      border: 1px solid #2a362c;
+      padding: 8px 10px;
+      border-radius: 7px;
+      color: var(--green);
+      overflow-x: auto;
+    }
+    .obs-list { list-style: none; padding: 0; margin: 10px 0 0; display: flex; flex-direction: column; gap: 8px; }
+    .obs-list li {
+      display: flex;
+      gap: 12px;
+      align-items: baseline;
+      padding: 7px 10px;
+      background: #131a16;
+      border: 1px solid #2a362c;
+      border-radius: 8px;
+      font-size: 13px;
+    }
+    .obs-sec {
+      min-width: 58px;
+      font-family: ui-monospace, monospace;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--amber);
+    }
+
+    .suite-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 18px;
+      text-decoration: none;
+      color: var(--ink);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 10px;
+      transition: border-color 140ms, background-color 140ms;
+    }
+    .suite-card:hover { border-color: var(--green); background: var(--panel2); color: var(--ink); }
+    .suite-card span.go { font-size: 12.5px; font-weight: 600; color: var(--green); }
+
+    footer {
+      padding: 28px 0 42px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to Darkened Brass overview</a>
+
+  <header class="masthead">
+    <div class="mast-inner">
+      <a class="wordmark" href="index.html">ICM <span>/ WEEK 11</span></a>
+      <nav class="nav-links" aria-label="Week 11 pages">
+        <a href="index.html">Week 11 Lab</a>
+        <a href="darkened-brass.html" aria-current="page">Darkened Brass</a>
+        <a href="timer-manifest.html">60s Timer Player</a>
+        <a href="study-guide.html">Study Guide</a>
+        <a href="line-by-line.html">106-Line Walkthrough</a>
+        <a class="ext" href="https://editor.p5js.org/monadlnomad/full/W7y7amaHg" target="_blank" rel="noopener">Fullscreen ↗</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- Hero + Interactive Chaos Curve -->
+    <section class="hero">
+      <div>
+        <p class="eyebrow">WEEK 11 SOLO SUBMISSION · 60.0s ALGORITHMIC SOUND</p>
+        <h1>Darkened <em>Brass.</em></h1>
+        <p class="muted" style="margin-top: 12px; font-size: 16px; max-width: 50ch;">
+          An audio-only p5.sound composition where one deterministic 60-second arc shapes speed, octave spread, and randomness without visuals or samples.
+        </p>
+
+        <div class="philosophy-box">
+          <strong>Controlled chaos inside a safe garden:</strong> one <code>chaos</code> curve (<code>0 → 0.35 → 1 → 0.35 → 0</code>) drives speed, octaves, and randomness over 60 exact seconds, while a 5-note pentatonic scale and 3-second reverb keep every moment musical.
+        </div>
+
+        <div class="actions">
+          <a class="btn primary" href="timer-manifest.html">Open 60s 3-Iteration Player →</a>
+          <a class="btn" href="line-by-line.html">106-Line Walkthrough</a>
+          <a class="btn" href="study-guide.html">Architecture &amp; Critique Guide</a>
+          <a class="btn" href="https://editor.p5js.org/monadlnomad/full/W7y7amaHg" target="_blank" rel="noopener">Live p5 Fullscreen ↗</a>
+        </div>
+
+        <div class="hero-meta mono">
+          <span><strong>Seed:</strong> randomSeed(0) + noiseSeed(0)</span>
+          <span><strong>Scale:</strong> C4 Pentatonic (261.63 Hz)</span>
+          <span><strong>Clock:</strong> Wall-clock millis() · 60.0s</span>
+        </div>
+      </div>
+
+      <div class="panel" aria-label="Interactive 60-second chaos curve inspector">
+        <div class="inspector-top">
+          <span>CHAOS CURVE · W7y7amaHg (L64–L68)</span>
+          <span class="badge-live">INTERACTIVE SCRUBBER</span>
+        </div>
+
+        <div class="svg-frame">
+          <svg id="chaos-svg" class="diagram" viewBox="0 0 560 220" role="img" aria-label="60-second chaos curve from 0 to 1 and back with chime threshold at 0.65 and verified chime markers">
+            <!-- Axes & Grid -->
+            <line x1="48" y1="24" x2="48" y2="176" stroke="#344136" stroke-width="1" />
+            <line x1="48" y1="176" x2="536" y2="176" stroke="#344136" stroke-width="1" />
+            <line x1="48" y1="126.2" x2="536" y2="126.2" stroke="#263128" stroke-width="1" stroke-dasharray="3 4" />
+            <line x1="48" y1="34" x2="536" y2="34" stroke="#263128" stroke-width="1" stroke-dasharray="3 4" />
+
+            <!-- Chime window (18.57s to 41.43s) -->
+            <rect x="199.0" y="34" width="186.0" height="142" fill="#e3ba88" fill-opacity="0.08" />
+            <line x1="48" y1="83.6" x2="536" y2="83.6" stroke="#e3ba88" stroke-width="1.2" stroke-dasharray="5 4" />
+            <text x="532" y="78" text-anchor="end" fill="#e3ba88" font-size="10" font-family="ui-monospace, monospace">chaos = 0.65 chime threshold (18.6s–41.4s)</text>
+
+            <!-- Vertical landmark dashed lines: 10s, 30s, 50s, 58s -->
+            <line x1="129.3" y1="34" x2="129.3" y2="176" stroke="#344136" stroke-dasharray="2 3" />
+            <line x1="292.0" y1="34" x2="292.0" y2="176" stroke="#344136" stroke-dasharray="2 3" />
+            <line x1="454.7" y1="34" x2="454.7" y2="176" stroke="#344136" stroke-dasharray="2 3" />
+            <line x1="519.7" y1="34" x2="519.7" y2="176" stroke="#fca5a5" stroke-width="1.2" stroke-dasharray="3 3" />
+            <text x="516" y="46" text-anchor="end" fill="#fca5a5" font-size="9.5" font-family="ui-monospace, monospace">58s fade</text>
+
+            <!-- Area & Line for chaos(sec) -->
+            <polygon points="48,176 129.3,126.2 292.0,34 454.7,126.2 536,176" fill="#cae9ad" fill-opacity="0.14" />
+            <polyline points="48,176 129.3,126.2 292.0,34 454.7,126.2 536,176" fill="none" stroke="#cae9ad" stroke-width="2.5" stroke-linejoin="round" />
+
+            <!-- Verified chime markers (20.2, 24.4, 31.5, 32.3, 37.1, 38.6, 40.7) -->
+            <g fill="#e3ba88" stroke="#131a16" stroke-width="1.2">
+              <circle cx="212.3" cy="72.1" r="4" /><title>20.2s chime</title>
+              <circle cx="246.5" cy="59.4" r="4" /><title>24.4s chime</title>
+              <circle cx="304.2" cy="41.4" r="4" /><title>31.5s chime</title>
+              <circle cx="310.7" cy="45.4" r="4" /><title>32.3s chime</title>
+              <circle cx="349.8" cy="69.7" r="4" /><title>37.1s chime</title>
+              <circle cx="362.0" cy="77.2" r="4" /><title>38.6s chime</title>
+              <circle cx="379.0" cy="77.8" r="4" /><title>40.7s chime</title>
+            </g>
+
+            <!-- Y axis labels -->
+            <g fill="#b2bdb0" font-size="10" font-family="ui-monospace, monospace" text-anchor="end">
+              <text x="42" y="38">1.00</text>
+              <text x="42" y="87">0.65</text>
+              <text x="42" y="130">0.35</text>
+              <text x="42" y="179">0.00</text>
+            </g>
+
+            <!-- X axis labels -->
+            <g fill="#b2bdb0" font-size="10" font-family="ui-monospace, monospace" text-anchor="middle">
+              <text x="48" y="194">0s</text>
+              <text x="129.3" y="194">10s</text>
+              <text x="292.0" y="194">30s</text>
+              <text x="454.7" y="194">50s</text>
+              <text x="536" y="194">60s</text>
+              <text x="88" y="210" fill="#8ea18a">~10s intro</text>
+              <text x="292" y="210" fill="#cae9ad">active middle (10–50s)</text>
+              <text x="495" y="210" fill="#8ea18a">~10s outro</text>
+            </g>
+
+            <!-- Interactive playhead -->
+            <line id="svg-playhead" x1="292" y1="24" x2="292" y2="176" stroke="#7dd3fc" stroke-width="1.6" />
+            <circle id="svg-dot" cx="292" cy="34" r="6" fill="#7dd3fc" stroke="#101614" stroke-width="2" />
+          </svg>
+        </div>
+
+        <div class="scrubber-row">
+          <label for="sec-slider" class="mono small" style="color: var(--muted);">Scrub 0–60s</label>
+          <input id="sec-slider" type="range" min="0" max="60" step="0.1" value="30.0">
+          <span id="sec-readout" class="mono" style="font-weight: 700; min-width: 58px; text-align: right; color: var(--sky);">30.0s</span>
+        </div>
+
+        <div class="preset-row" aria-label="Jump to key timestamp">
+          <button type="button" class="btn btn-sm preset-btn" data-sec="0">0.0s Start</button>
+          <button type="button" class="btn btn-sm preset-btn" data-sec="10">10.0s Build</button>
+          <button type="button" class="btn btn-sm preset-btn" data-sec="20.2">20.2s Chime</button>
+          <button type="button" class="btn btn-sm preset-btn active" data-sec="30">30.0s Peak</button>
+          <button type="button" class="btn btn-sm preset-btn" data-sec="40.7">40.7s Last Chime</button>
+          <button type="button" class="btn btn-sm preset-btn" data-sec="50">50.0s Calm</button>
+          <button type="button" class="btn btn-sm preset-btn" data-sec="58">58.0s Fade</button>
+        </div>
+
+        <div class="telemetry-grid mono" aria-live="polite">
+          <div class="tel-cell"><div class="k">Time</div><div class="v" id="tel-time">30.0s / 60.0s</div></div>
+          <div class="tel-cell"><div class="k">Chaos</div><div class="v" id="tel-chaos">1.00</div></div>
+          <div class="tel-cell"><div class="k">Phase</div><div class="v" id="tel-phase">30–50s Peak/Fall</div></div>
+          <div class="tel-cell"><div class="k">Lead Step (lerp)</div><div class="v" id="tel-step">0.14s</div></div>
+          <div class="tel-cell"><div class="k">Random vs Noise</div><div class="v" id="tel-blend">100% rnd / 0% nse</div></div>
+          <div class="tel-cell"><div class="k">Voice 2 Mode</div><div class="v" id="tel-voice2">Bass 0.5x + Chime 2x</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3 Iterations Side-by-Side -->
+    <section id="iterations" class="band">
+      <div class="sec-head">
+        <div>
+          <p class="eyebrow">01 / THREE LIVE ITERATIONS</p>
+          <h2>How one simple beat grew an arc.</h2>
+        </div>
+        <p class="lead">Every version runs for an exact 60.0 seconds with <code class="inline">millis()</code> and replays identically with <code class="inline">randomSeed(0)</code>.</p>
+      </div>
+
+      <div class="grid-3">
+        <article class="iter-card">
+          <div>
+            <div class="iter-head">
+              <span class="iter-num">ITERATION 01 · BASELINE</span>
+              <span class="iter-lines mono">47 lines</span>
+            </div>
+            <h3 style="margin-top: 8px;">Lydian bus</h3>
+            <p class="small muted" style="margin-top: 8px;">
+              Pure sine oscillator playing pentatonic notes picked with <code class="inline">random(ratios)</code> every 0.25s (<code class="inline">randomSeed(0)</code>). Proves the timer and scale work, though it feels flat and samey after 10 seconds.
+            </p>
+            <div class="tag-row" style="margin-top: 12px;">
+              <span class="tag">sine wave</span>
+              <span class="tag">fixed 0.25s step</span>
+              <span class="tag">1.4s fade @ 58.5s</span>
+            </div>
+          </div>
+          <div class="link-row">
+            <a href="https://editor.p5js.org/monadlnomad/sketches/wVJAtbxKP" target="_blank" rel="noopener">p5 Editor ↗</a>
+            <a href="iterations/iteration-1/index.html">Local HTML</a>
+            <a href="iterations/iteration-1/sketch.js">sketch.js</a>
+          </div>
+        </article>
+
+        <article class="iter-card">
+          <div>
+            <div class="iter-head">
+              <span class="iter-num">ITERATION 02 · CURVE &amp; RESTS</span>
+              <span class="iter-lines mono">73 lines</span>
+            </div>
+            <h3 style="margin-top: 8px;">Bolder fig</h3>
+            <p class="small muted" style="margin-top: 8px;">
+              Adds the 4-stage <code class="inline">chaos</code> curve (~10s calm intro/outro, peak at 30s), Perlin <code class="inline">noise(t)</code> blending into <code class="inline">random()</code>, octave leaps (<code class="inline">[0.5, 2]</code>), and a <code class="inline">!wasRest</code> switch keeping pauses under 0.4s.
+            </p>
+            <div class="tag-row" style="margin-top: 12px;">
+              <span class="tag">chaos 0→0.35→1→0.35→0</span>
+              <span class="tag">noiseSeed(0)</span>
+              <span class="tag">!wasRest &lt; 0.4s</span>
+            </div>
+          </div>
+          <div class="link-row">
+            <a href="https://editor.p5js.org/monadlnomad/sketches/w9vW455uc" target="_blank" rel="noopener">p5 Editor ↗</a>
+            <a href="iterations/iteration-2/index.html">Local HTML</a>
+            <a href="iterations/iteration-2/sketch.js">sketch.js</a>
+          </div>
+        </article>
+
+        <article class="iter-card final">
+          <div>
+            <div class="iter-head">
+              <span class="iter-num">ITERATION 03 · FINAL SUBMISSION</span>
+              <span class="iter-lines mono">106 lines</span>
+            </div>
+            <h3 style="margin-top: 8px;">Darkened brass</h3>
+            <p class="small muted" style="margin-top: 8px;">
+              Switches lead to a warm <code class="inline">'triangle'</code> wave with micro-jitter (<code class="inline">0.09s</code> min), adds a <code class="inline">'sine'</code> second voice that plays deep <code class="inline">0.5×</code> bass and flips 35% to <code class="inline">2×</code> chimes above <code class="inline">0.65</code> chaos, routed through <code class="inline">p5.Reverb(3)</code>.
+            </p>
+            <div class="tag-row" style="margin-top: 12px;">
+              <span class="tag">triangle + sine</span>
+              <span class="tag">Reverb(3) wet 0.5</span>
+              <span class="tag">1.9s fade @ 58s</span>
+            </div>
+          </div>
+          <div class="link-row">
+            <a href="https://editor.p5js.org/monadlnomad/sketches/W7y7amaHg" target="_blank" rel="noopener">Code ↗</a>
+            <a href="https://editor.p5js.org/monadlnomad/full/W7y7amaHg" target="_blank" rel="noopener">Fullscreen ↗</a>
+            <a href="iterations/iteration-3-final/index.html">Local HTML</a>
+            <a href="iterations/iteration-3-final/sketch.js">sketch.js</a>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- Plain-English Core Concepts -->
+    <section id="concepts" class="band">
+      <div class="sec-head">
+        <div>
+          <p class="eyebrow">02 / PLAIN-ENGLISH CONCEPTS</p>
+          <h2>Why the notes and waves never clash.</h2>
+        </div>
+        <p class="lead">Two music-math ideas behind every sound: a 5-note pentatonic garden and overtone-matched waveforms.</p>
+      </div>
+
+      <div class="grid-2" style="margin-bottom: 24px;">
+        <!-- Pentatonic Card -->
+        <div class="panel">
+          <p class="eyebrow">PENTATONIC SCALE · “PENTA” = 5 NOTES</p>
+          <h3>Removing <code class="inline">F</code> and <code class="inline">B</code> makes every random combo work.</h3>
+          <p class="small muted" style="margin-top: 8px;">
+            A regular 7-note major scale (<span class="mono">C D E F G A B</span>) has tight half-step rubs (<span class="mono">E–F</span>, <span class="mono">B–C</span>) and the tense <span class="mono">F–B</span> tritone. Dropping <strong>Fa (F)</strong> and <strong>Ti (B)</strong> leaves five open notes (<span class="mono">C, D, E, G, A</span> + <span class="mono">high C</span>) — just like only touching the black keys on a piano — so random jumps and overlapping 3-second reverb always blend cleanly.
+          </p>
+
+          <div class="svg-frame" style="margin: 14px 0;">
+            <svg class="diagram" viewBox="0 0 500 148" role="img" aria-label="Piano octave from C4 to C5 highlighting active pentatonic keys C, D, E, G, A, C and dimmed excluded keys F and B">
+              <!-- White keys: 8 keys across 24..476 (each 56.5 wide) -->
+              <!-- Active: C4(0), D4(1), E4(2), G4(4), A4(5), C5(7). Excluded: F4(3), B4(6) -->
+              <g font-family="ui-monospace, monospace" text-anchor="middle">
+                <!-- Key 0: C4 (active) -->
+                <rect x="24" y="14" width="54" height="106" rx="5" fill="#cae9ad" stroke="#101614" stroke-width="1.5" />
+                <text x="51" y="96" font-size="13" font-weight="700" fill="#101614">C4</text>
+                <text x="51" y="111" font-size="9.5" fill="#18201c">1× · 262</text>
+
+                <!-- Key 1: D4 (active) -->
+                <rect x="80" y="14" width="54" height="106" rx="5" fill="#cae9ad" stroke="#101614" stroke-width="1.5" />
+                <text x="107" y="96" font-size="13" font-weight="700" fill="#101614">D4</text>
+                <text x="107" y="111" font-size="9.5" fill="#18201c">1.125×</text>
+
+                <!-- Key 2: E4 (active) -->
+                <rect x="136" y="14" width="54" height="106" rx="5" fill="#cae9ad" stroke="#101614" stroke-width="1.5" />
+                <text x="163" y="96" font-size="13" font-weight="700" fill="#101614">E4</text>
+                <text x="163" y="111" font-size="9.5" fill="#18201c">1.25×</text>
+
+                <!-- Key 3: F4 (excluded) -->
+                <rect x="192" y="14" width="54" height="106" rx="5" fill="#202822" stroke="#344136" stroke-width="1.2" />
+                <line x1="202" y1="26" x2="236" y2="108" stroke="#fca5a5" stroke-width="1.5" stroke-opacity="0.7" />
+                <line x1="236" y1="26" x2="202" y2="108" stroke="#fca5a5" stroke-width="1.5" stroke-opacity="0.7" />
+                <text x="219" y="96" font-size="12" fill="#fca5a5">F4</text>
+                <text x="219" y="111" font-size="9" fill="#8a9688">skip Fa</text>
+
+                <!-- Key 4: G4 (active) -->
+                <rect x="248" y="14" width="54" height="106" rx="5" fill="#cae9ad" stroke="#101614" stroke-width="1.5" />
+                <text x="275" y="96" font-size="13" font-weight="700" fill="#101614">G4</text>
+                <text x="275" y="111" font-size="9.5" fill="#18201c">1.5×</text>
+
+                <!-- Key 5: A4 (active) -->
+                <rect x="304" y="14" width="54" height="106" rx="5" fill="#cae9ad" stroke="#101614" stroke-width="1.5" />
+                <text x="331" y="96" font-size="13" font-weight="700" fill="#101614">A4</text>
+                <text x="331" y="111" font-size="9.5" fill="#18201c">1.67×</text>
+
+                <!-- Key 6: B4 (excluded) -->
+                <rect x="360" y="14" width="54" height="106" rx="5" fill="#202822" stroke="#344136" stroke-width="1.2" />
+                <line x1="370" y1="26" x2="404" y2="108" stroke="#fca5a5" stroke-width="1.5" stroke-opacity="0.7" />
+                <line x1="404" y1="26" x2="370" y2="108" stroke="#fca5a5" stroke-width="1.5" stroke-opacity="0.7" />
+                <text x="387" y="96" font-size="12" fill="#fca5a5">B4</text>
+                <text x="387" y="111" font-size="9" fill="#8a9688">skip Ti</text>
+
+                <!-- Key 7: C5 (active octave close) -->
+                <rect x="416" y="14" width="54" height="106" rx="5" fill="#e3ba88" stroke="#101614" stroke-width="1.5" />
+                <text x="443" y="96" font-size="13" font-weight="700" fill="#101614">C5</text>
+                <text x="443" y="111" font-size="9.5" fill="#18201c">2× · 523</text>
+
+                <!-- Black keys (decorative muted Piano layout) -->
+                <g fill="#0c100e" stroke="#2c372e">
+                  <rect x="64" y="14" width="28" height="60" rx="3" />
+                  <rect x="120" y="14" width="28" height="60" rx="3" />
+                  <rect x="232" y="14" width="28" height="60" rx="3" />
+                  <rect x="288" y="14" width="28" height="60" rx="3" />
+                  <rect x="344" y="14" width="28" height="60" rx="3" />
+                </g>
+
+                <text x="250" y="138" font-size="10" fill="#b2bdb0">oct = 0.5× stretches down to C3 bass · oct = 2× sparkles up to C5–C6 chime</text>
+              </g>
+            </svg>
+          </div>
+
+          <table class="data-table mono">
+            <thead><tr><th>ratio</th><th>fraction</th><th>note</th><th>Hz (BASE × ratio)</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td>1 / 1</td><td>C4 (home)</td><td>261.63 Hz</td></tr>
+              <tr><td>1.125</td><td>9 / 8</td><td>D4</td><td>294.33 Hz</td></tr>
+              <tr><td>1.25</td><td>5 / 4</td><td>E4</td><td>327.04 Hz</td></tr>
+              <tr><td>1.5</td><td>3 / 2</td><td>G4</td><td>392.45 Hz</td></tr>
+              <tr><td>1.67</td><td>5 / 3</td><td>A4</td><td>436.92 Hz</td></tr>
+              <tr><td>2</td><td>2 / 1</td><td>C5 (octave)</td><td>523.26 Hz</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Overtones & Waveforms Card -->
+        <div class="panel">
+          <p class="eyebrow">OVERTONES · WHY 'TRIANGLE' + 'SINE' FIT REVERB</p>
+          <h3>Different waves carry different hidden "bonus pitches."</h3>
+          <p class="small muted" style="margin-top: 8px;">
+            Real instruments radiate a fundamental pitch plus quieter overtones (<span class="mono">2×, 3×, 4×, 5×…</span>). Pairing a soft <code class="inline">'triangle'</code> lead with a pure <code class="inline">'sine'</code> bass separates both voices clearly without muddying the 3-second reverb. Even the pentatonic ratios (<span class="mono">2:1, 3:2, 5:4</span>) come from simple overtone fractions.
+          </p>
+
+          <div class="svg-frame" style="margin: 14px 0;">
+            <svg class="diagram" viewBox="0 0 500 264" role="img" aria-label="Waveform shapes and overtone harmonic bars for sine, triangle, and unused square and sawtooth waves">
+              <g font-family="ui-monospace, monospace">
+                <!-- Row 1: SINE (used by bass & chimes) -->
+                <rect x="10" y="10" width="480" height="72" rx="8" fill="#18201c" stroke="#cae9ad" stroke-width="1.2" />
+                <text x="22" y="30" font-size="11.5" font-weight="700" fill="#cae9ad">'sine' · Voice 2 (bass + 2× chimes)</text>
+                <text x="22" y="46" font-size="10" fill="#b2bdb0">0 overtones (pure 1× only) → clean low anchor, zero reverb mud</text>
+                <!-- Sine wave path -->
+                <path d="M 22 68 Q 37 54 52 68 T 82 68 T 112 68 T 142 68" fill="none" stroke="#cae9ad" stroke-width="2" />
+                <!-- Harmonic bars (1x only) -->
+                <line x1="330" y1="70" x2="472" y2="70" stroke="#344136" />
+                <rect x="342" y="24" width="12" height="46" rx="2" fill="#cae9ad" />
+                <text x="348" y="79" font-size="8.5" fill="#b2bdb0" text-anchor="middle">1×</text>
+                <text x="372" y="79" font-size="8.5" fill="#5b685a" text-anchor="middle">2×</text>
+                <text x="396" y="79" font-size="8.5" fill="#5b685a" text-anchor="middle">3×</text>
+                <text x="420" y="79" font-size="8.5" fill="#5b685a" text-anchor="middle">4×</text>
+                <text x="444" y="79" font-size="8.5" fill="#5b685a" text-anchor="middle">5×</text>
+
+                <!-- Row 2: TRIANGLE (used by lead osc) -->
+                <rect x="10" y="92" width="480" height="76" rx="8" fill="#18201c" stroke="#7dd3fc" stroke-width="1.2" />
+                <text x="22" y="112" font-size="11.5" font-weight="700" fill="#7dd3fc">'triangle' · Main Lead (osc)</text>
+                <text x="22" y="128" font-size="10" fill="#b2bdb0">Quiet odd overtones (3× = 1/9, 5× = 1/25) → flute-warm clarity</text>
+                <polyline points="22,150 37,138 52,162 67,138 82,162 97,138 112,162 127,138 142,150" fill="none" stroke="#7dd3fc" stroke-width="2" />
+                <line x1="330" y1="154" x2="472" y2="154" stroke="#344136" />
+                <rect x="342" y="108" width="12" height="46" rx="2" fill="#7dd3fc" />
+                <rect x="390" y="141" width="12" height="13" rx="2" fill="#7dd3fc" fill-opacity="0.75" />
+                <rect x="438" y="148" width="12" height="6" rx="2" fill="#7dd3fc" fill-opacity="0.55" />
+                <text x="348" y="163" font-size="8.5" fill="#b2bdb0" text-anchor="middle">1×</text>
+                <text x="396" y="163" font-size="8.5" fill="#b2bdb0" text-anchor="middle">3×</text>
+                <text x="444" y="163" font-size="8.5" fill="#b2bdb0" text-anchor="middle">5×</text>
+
+                <!-- Row 3: UNUSED SQUARE / SAWTOOTH -->
+                <rect x="10" y="178" width="480" height="74" rx="8" fill="#131915" stroke="#344136" stroke-dasharray="4 3" />
+                <text x="22" y="198" font-size="11" font-weight="700" fill="#9aa798">'square' &amp; 'sawtooth' · Unused</text>
+                <text x="22" y="214" font-size="10" fill="#829080">Loud upper overtones smear &amp; sound harsh inside 3s reverb</text>
+                <polyline points="22,238 22,226 38,226 38,244 54,244 54,226 70,226 70,244 86,244" fill="none" stroke="#788477" stroke-width="1.6" />
+                <polyline points="100,244 120,226 120,244 140,226 140,244" fill="none" stroke="#788477" stroke-width="1.6" />
+                <line x1="330" y1="240" x2="472" y2="240" stroke="#344136" />
+                <rect x="342" y="196" width="12" height="44" rx="2" fill="#6f7c6e" />
+                <rect x="366" y="212" width="12" height="28" rx="2" fill="#6f7c6e" />
+                <rect x="390" y="218" width="12" height="22" rx="2" fill="#6f7c6e" />
+                <rect x="414" y="224" width="12" height="16" rx="2" fill="#6f7c6e" />
+                <rect x="438" y="227" width="12" height="13" rx="2" fill="#6f7c6e" />
+              </g>
+            </svg>
+          </div>
+
+          <p class="small muted">
+            In one sentence: <em><code class="inline">triangle</code> overtones make the melody step forward warmly, while zero-overtone <code class="inline">sine</code> keeps the bass underneath clean and glass-bell chimes clear.</em>
+          </p>
+        </div>
+      </div>
+
+      <!-- 8 Most Important Lines Table -->
+      <div class="panel" style="margin-bottom: 24px;">
+        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px;">
+          <div>
+            <p class="eyebrow" style="margin-bottom: 4px;">THE 8 ESSENTIAL LINES (W7y7amaHg)</p>
+            <h3>Everything powering the 106-line sketch</h3>
+          </div>
+          <a class="btn btn-sm" href="line-by-line.html">Inspect all 106 lines →</a>
+        </div>
+        <div style="overflow-x: auto;">
+          <table class="data-table">
+            <thead><tr><th style="width: 90px;">Lines</th><th style="width: 340px;">Code</th><th>In Plain English</th></tr></thead>
+            <tbody>
+              <tr>
+                <td class="mono" style="color: var(--amber);">L1</td>
+                <td><code class="inline">ratios = [1, 1.125, 1.25, 1.5, 1.67, 2]</code></td>
+                <td>Safe 5-note pentatonic scale — no wrong or clashing notes.</td>
+              </tr>
+              <tr>
+                <td class="mono" style="color: var(--amber);">L15–16</td>
+                <td><code class="inline">randomSeed(0); noiseSeed(0);</code></td>
+                <td>Exact same playback on every listen (required by assignment).</td>
+              </tr>
+              <tr>
+                <td class="mono" style="color: var(--amber);">L18–27</td>
+                <td><code class="inline">Reverb(3)</code> + <code class="inline">'triangle'</code> + <code class="inline">'sine'</code></td>
+                <td>Warm lead voice over clean bass voice inside a shared 3s room echo.</td>
+              </tr>
+              <tr>
+                <td class="mono" style="color: var(--amber);">L49</td>
+                <td><code class="inline">sec = (millis() - startTime) / 1000</code></td>
+                <td>Real-clock timer so 60s never drifts early on 120Hz/144Hz monitors.</td>
+              </tr>
+              <tr>
+                <td class="mono" style="color: var(--amber);">L64–68</td>
+                <td><code class="inline">chaos</code> (<code class="inline">0 → 0.35 → 1 → 0.35 → 0</code>)</td>
+                <td>The 60s story arc: ~10s calm intro, 30s peak, ~10s calm outro.</td>
+              </tr>
+              <tr>
+                <td class="mono" style="color: var(--amber);">L73–75</td>
+                <td><code class="inline">lerp(0.36, 0.14, chaos)</code> + <code class="inline">!wasRest</code></td>
+                <td>Speeds up as chaos rises; keeps breaths short with no stacked gaps.</td>
+              </tr>
+              <tr>
+                <td class="mono" style="color: var(--amber);">L81–85</td>
+                <td><code class="inline">random(1) &lt; chaos ? random : noise</code></td>
+                <td><strong>The core trick:</strong> drifting <code class="inline">noise()</code> when calm, wild <code class="inline">random()</code> at peak.</td>
+              </tr>
+              <tr>
+                <td class="mono" style="color: var(--amber);">L101</td>
+                <td><code class="inline">chaos &gt; 0.65 &amp;&amp; random(1) &lt; 0.35 ? 2 : 0.5</code></td>
+                <td>Bass (<code class="inline">0.5×</code>) flips into high chimes (<code class="inline">2×</code>) only in the middle climax.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 5 Mechanics Grid -->
+      <div class="grid-5">
+        <div class="mech-card">
+          <span class="eyebrow" style="margin: 0;">1 · REVERB</span>
+          <div class="mech-code">reverb = new p5.Reverb(3);
+reverb.wet(0.5);</div>
+          <p class="small muted">3-second hall echo at a 50% dry / 50% echo mix. Disconnect dry wires first so raw beeps don't bypass the room.</p>
+        </div>
+
+        <div class="mech-card">
+          <span class="eyebrow" style="margin: 0;">2 · LERP() SPEED</span>
+          <div class="mech-code">lerp(0.36, 0.14, chaos)</div>
+          <p class="small muted">Smooth wait-time slider between notes: 0.36s per note when calm (<code class="inline">chaos=0</code>), speeding down to 0.14s at peak (<code class="inline">chaos=1</code>).</p>
+        </div>
+
+        <div class="mech-card">
+          <span class="eyebrow" style="margin: 0;">3 · !wasRest GUARD</span>
+          <div class="mech-code">if (!wasRest &amp;&amp; random(1) &lt; 0.22)</div>
+          <p class="small muted">1-bit switch (“did we just pause?”). <code class="inline">!wasRest</code> prevents two rests in a row, capping silences under 0.4s.</p>
+        </div>
+
+        <div class="mech-card">
+          <span class="eyebrow" style="margin: 0;">4 · CHAOS BLEND</span>
+          <div class="mech-code">if (random(1) &lt; chaos) r = random(ratios);
+else { t += 0.3; r = noise(t); }</div>
+          <p class="small muted">Turns <code class="inline">chaos</code> into a percentage chance: gentle stepwise <code class="inline">noise()</code> early/late, unpredictable jumps at 30s.</p>
+        </div>
+
+        <div class="mech-card">
+          <span class="eyebrow" style="margin: 0;">5 · CHIME FLIP</span>
+          <div class="mech-code">chaos &gt; 0.65 &amp;&amp; random(1) &lt; 0.35 ? 2 : 0.5</div>
+          <p class="small muted">IF inside 18.6s–41.4s peak AND 35% roll hits → high <code class="inline">2×</code> glass chime; ELSE stay deep <code class="inline">0.5×</code> bass.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3 Timed Listens & Process Reflection -->
+    <section id="listening" class="band">
+      <div class="sec-head">
+        <div>
+          <p class="eyebrow">03 / THREE TIMED LISTENS &amp; PROCESS</p>
+          <h2>What changes in the room when you press Play.</h2>
+        </div>
+        <p class="lead">Three full 60-second solo listening passes on the final build (<code class="inline">W7y7amaHg</code>), focusing on Flow, Rhythm, and Layers.</p>
+      </div>
+
+      <div class="grid-3" style="margin-bottom: 20px;">
+        <div class="panel">
+          <p class="eyebrow">LISTEN 01 · FLOW</p>
+          <h3>Overall shape over 60s</h3>
+          <ul class="obs-list">
+            <li><span class="obs-sec">1s</span><span>starts slow</span></li>
+            <li><span class="obs-sec">25–35s</span><span>gets really fast and jumpy</span></li>
+            <li><span class="obs-sec">50s</span><span>calms back down and fades out</span></li>
+          </ul>
+        </div>
+
+        <div class="panel">
+          <p class="eyebrow">LISTEN 02 · RHYTHM</p>
+          <h3>Pulse, rests &amp; jitter</h3>
+          <ul class="obs-list">
+            <li><span class="obs-sec">2s</span><span>quick pause</span></li>
+            <li><span class="obs-sec">10s</span><span>speeds up</span></li>
+            <li><span class="obs-sec">30s</span><span>feels off-beat</span></li>
+            <li><span class="obs-sec">50s</span><span>slows back down</span></li>
+          </ul>
+        </div>
+
+        <div class="panel">
+          <p class="eyebrow">LISTEN 03 · LAYERS</p>
+          <h3>Bass, chimes &amp; reverb</h3>
+          <ul class="obs-list">
+            <li><span class="obs-sec">2s</span><span>low bass comes in</span></li>
+            <li><span class="obs-sec">20s</span><span>high chime pops out</span></li>
+            <li><span class="obs-sec">31–41s</span><span>high notes overlap with reverb</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="panel">
+          <p class="eyebrow">CLASS INSPIRATIONS &amp; SOLO WORK</p>
+          <h3>How I worked &amp; what I listened to</h3>
+          <p class="small muted" style="margin-top: 8px;">
+            I completed this piece solo after my partner left the group, keeping the code minimal and legible so each rule is audible:
+          </p>
+          <ul class="obs-list">
+            <li><span class="obs-sec" style="min-width: 112px;">Melody Maker</span><span>Pure <code class="inline">random()</code> jumps around, while <code class="inline">noise()</code> feels smoother like a real phrase.</span></li>
+            <li><span class="obs-sec" style="min-width: 112px;">Harmony Maker</span><span>Simple tones feel richer when they overlap and tail off slowly.</span></li>
+            <li><span class="obs-sec" style="min-width: 112px;">Steve Reich</span><span>Gradual timing shifts keep one small scale interesting across 60 seconds.</span></li>
+          </ul>
+        </div>
+
+        <div class="panel" style="display: flex; flex-direction: column; justify-content: space-between; gap: 14px;">
+          <div>
+            <p class="eyebrow">PROCESS ARTIFACTS</p>
+            <h3>Notes, critique prep &amp; spreadsheet data</h3>
+            <p class="small muted" style="margin-top: 8px;">
+              All observations, iteration logs, blog draft, and critique Q&amp;As live directly alongside the sketches in <span class="mono">notes/</span>.
+            </p>
+          </div>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+            <a class="btn btn-sm" href="notes/spreadsheet.csv" download>spreadsheet.csv ↓</a>
+            <a class="btn btn-sm" href="notes/blog-draft.md">blog-draft.md</a>
+            <a class="btn btn-sm" href="notes/iteration-notes.md">iteration-notes.md</a>
+            <a class="btn btn-sm" href="notes/critique-guide.md">critique-guide.md</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Suite Footer Cards -->
+    <section id="suite" class="band" style="border-bottom: none;">
+      <div class="sec-head">
+        <div>
+          <p class="eyebrow">04 / INTERACTIVE STUDY SUITE</p>
+          <h2>Explore every layer in detail.</h2>
+        </div>
+        <p class="lead">Listen with real p5.sound timers, test random vs noise live, or step through all 106 lines.</p>
+      </div>
+
+      <div class="grid-4">
+        <a class="suite-card" href="timer-manifest.html">
+          <div>
+            <p class="eyebrow">REAL P5.SOUND PLAYER</p>
+            <h3>60s 3-Iteration Player</h3>
+            <p class="small muted" style="margin-top: 6px;">Play all 3 iterations with synced 60.0s timers, live phase chips, and direct editor links.</p>
+          </div>
+          <span class="go">Open Player →</span>
+        </a>
+
+        <a class="suite-card" href="study-guide.html">
+          <div>
+            <p class="eyebrow">CRITIQUE &amp; DSP LAB</p>
+            <h3>Architecture &amp; Critique Guide</h3>
+            <p class="small muted" style="margin-top: 6px;">Full simulated 60s event score, Markov rest automaton, noise vs random lab, and 10 Q&amp;As.</p>
+          </div>
+          <span class="go">Open Study Guide →</span>
+        </a>
+
+        <a class="suite-card" href="line-by-line.html">
+          <div>
+            <p class="eyebrow">VERBATIM CODE TOUR</p>
+            <h3>106-Line Walkthrough</h3>
+            <p class="small muted" style="margin-top: 6px;">Click or arrow-key through every single line of W7y7amaHg paired with vector diagrams.</p>
+          </div>
+          <span class="go">Open Walkthrough →</span>
+        </a>
+
+        <a class="suite-card" href="index.html">
+          <div>
+            <p class="eyebrow">COURSE REPOSITORY</p>
+            <h3>Week 11 Main Lab</h3>
+            <p class="small muted" style="margin-top: 6px;">Return to the main Week 11 Sound Lab experiments, WAV synthesis engine, and project kit.</p>
+          </div>
+          <span class="go">← Back to Lab</span>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span>ICM-2026 · Week 11 Solo Project · Darkened Brass (<span class="mono">W7y7amaHg</span>)</span>
+    <span>Audio-only composition · Zero visuals · Deterministic <span class="mono">seed(0)</span> · Exact 60.0s</span>
+  </footer>
+
+  <script>
+    (function () {
+      const slider = document.getElementById('sec-slider');
+      const secReadout = document.getElementById('sec-readout');
+      const svg = document.getElementById('chaos-svg');
+      const playhead = document.getElementById('svg-playhead');
+      const dot = document.getElementById('svg-dot');
+      const presetBtns = Array.from(document.querySelectorAll('.preset-btn'));
+
+      const telTime = document.getElementById('tel-time');
+      const telChaos = document.getElementById('tel-chaos');
+      const telPhase = document.getElementById('tel-phase');
+      const telStep = document.getElementById('tel-step');
+      const telBlend = document.getElementById('tel-blend');
+      const telVoice2 = document.getElementById('tel-voice2');
+
+      function computeChaos(sec) {
+        if (sec < 10) return (sec / 10) * 0.35;
+        if (sec < 30) return 0.35 + ((sec - 10) / 20) * 0.65;
+        if (sec < 50) return 1 - ((sec - 30) / 20) * 0.65;
+        return Math.max(0, 0.35 * (1 - (sec - 50) / 10));
+      }
+
+      function update(rawSec) {
+        const sec = Math.min(60, Math.max(0, Number(rawSec)));
+        const chaos = computeChaos(sec);
+        const x = 48 + (sec / 60) * 488;
+        const y = 176 - chaos * 142;
+
+        slider.value = sec.toFixed(1);
+        secReadout.textContent = sec.toFixed(1) + 's';
+        playhead.setAttribute('x1', x.toFixed(1));
+        playhead.setAttribute('x2', x.toFixed(1));
+        dot.setAttribute('cx', x.toFixed(1));
+        dot.setAttribute('cy', y.toFixed(1));
+
+        let phase = '50–58s Calm Outro';
+        if (sec < 10) phase = '0–10s Calm Intro';
+        else if (sec < 18.6) phase = '10–18.6s Rising';
+        else if (sec < 41.4) phase = '18.6–41.4s Climax';
+        else if (sec < 50) phase = '41.4–50s Wind Down';
+        else if (sec >= 60) phase = '60.0s Hard Stop';
+        else if (sec >= 58) phase = '58–60s Fade Out';
+
+        const stepSec = 0.36 + (0.14 - 0.36) * chaos;
+        const rndPct = Math.round(chaos * 100);
+        const nsePct = 100 - rndPct;
+
+        let voice2 = 'Low Bass (0.5×)';
+        if (sec >= 60) voice2 = 'Stopped (0 Hz)';
+        else if (sec >= 56) voice2 = 'Retired (sec >= 56s)';
+        else if (chaos > 0.65) voice2 = 'Bass 0.5× + 35% Chime 2×';
+
+        telTime.textContent = sec.toFixed(1) + 's / 60.0s';
+        telChaos.textContent = chaos.toFixed(2);
+        telPhase.textContent = phase;
+        telStep.textContent = sec >= 58 ? 'Stopped @ 58s' : stepSec.toFixed(2) + 's base';
+        telBlend.textContent = rndPct + '% rnd / ' + nsePct + '% nse';
+        telVoice2.textContent = voice2;
+
+        presetBtns.forEach(btn => {
+          btn.classList.toggle('active', Math.abs(Number(btn.dataset.sec) - sec) < 0.06);
+        });
+      }
+
+      slider.addEventListener('input', () => update(slider.value));
+      presetBtns.forEach(btn => {
+        btn.addEventListener('click', () => update(btn.dataset.sec));
+      });
+      svg.addEventListener('click', evt => {
+        const rect = svg.getBoundingClientRect();
+        const svgX = ((evt.clientX - rect.left) / rect.width) * 560;
+        const sec = Math.min(60, Math.max(0, ((svgX - 48) / 488) * 60));
+        update(Math.round(sec * 10) / 10);
+      });
+
+      update(30.0);
+    })();
+  </script>
+</body>
+</html>

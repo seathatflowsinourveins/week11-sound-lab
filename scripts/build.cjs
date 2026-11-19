@@ -8,6 +8,15 @@ const entries=new Map(publicFiles.map(name=>[name,read(name)]));
 entries.set('solo.html',read('solo.html'));
 entries.set('sketches/solo.js',Buffer.concat([read('transport.js'),Buffer.from('\n'),read('solo.js')]));
 for (const name of ['listen.html','listen.css','listen.js','study.css','note-inspector.js','practice.js','live-notes.js','melody-map.js','listening-manifest.json','design.css']) entries.set(name, read(name));
+const submissionFiles = [
+  'darkened-brass.html', 'timer-manifest.html', 'study-guide.html', 'line-by-line.html',
+  'iterations/iteration-1/index.html', 'iterations/iteration-1/style.css', 'iterations/iteration-1/sketch.js',
+  'iterations/iteration-2/index.html', 'iterations/iteration-2/style.css', 'iterations/iteration-2/sketch.js',
+  'iterations/iteration-3-final/index.html', 'iterations/iteration-3-final/style.css', 'iterations/iteration-3-final/sketch.js',
+  'notes/blog-draft.md', 'notes/critique-guide.md', 'notes/iteration-notes.md',
+  'notes/observation-1.md', 'notes/observation-2.md', 'notes/observation-3.md', 'notes/spreadsheet.csv'
+];
+for (const name of submissionFiles) entries.set(name, read(name));
 const listeningManifest = JSON.parse(entries.get('listening-manifest.json'));
 const manifestElement = '<script id="guide-manifest" type="application/json">';
 const guidedPage = entries.get('listen.html').toString().replace(manifestElement,

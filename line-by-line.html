@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Darkened Brass (W7y7amaHg) — 106-Line Interactive Walkthrough</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --background: #fafafa;
+      --card: #ffffff;
+      --card-border: #e4e4e7;
+      --border: #d4d4d8;
+      --foreground: #18181b;
+      --muted-foreground: #52525b;
+      --primary: #2563eb;
+      --primary-foreground: #ffffff;
+      --secondary: #f4f4f5;
+      --secondary-foreground: #18181b;
+      --chart-1: #0ea5e9;
+      --chart-2: #f97316;
+      --chart-3: #10b981;
+      --chart-4: #eab308;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --background: #09090b;
+        --card: #18181b;
+        --card-border: #27272a;
+        --border: #3f3f46;
+        --foreground: #f4f4f5;
+        --muted-foreground: #a1a1aa;
+        --primary: #3b82f6;
+        --primary-foreground: #ffffff;
+        --secondary: #27272a;
+        --secondary-foreground: #f4f4f5;
+        --chart-1: #38bdf8;
+        --chart-2: #fb923c;
+        --chart-3: #34d399;
+        --chart-4: #facc15;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 20px 16px;
+      background: var(--background);
+      color: var(--foreground);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      font-size: 12px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+    .wrap { max-width: 1120px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-variant-numeric: tabular-nums; }
+    .muted { color: var(--muted-foreground); }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; }
+    .header { position: sticky; top: 8px; z-index: 20; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+    .row-between { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+    h1 { margin: 0; font-size: 16px; font-weight: 600; }
+    p { margin: 0; }
+    .btn {
+      font-size: 12px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      padding: 4px 9px;
+      border-radius: 5px;
+      border: 1px solid var(--border);
+      background: var(--background);
+      color: var(--muted-foreground);
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .btn:hover { color: var(--foreground); }
+    .btn-primary { background: var(--primary); color: var(--primary-foreground); border-color: var(--primary); }
+    .btn-primary:hover { color: var(--primary-foreground); opacity: 0.9; }
+    .split { display: grid; grid-template-columns: 7fr 5fr; gap: 16px; align-items: start; }
+    @media (max-width: 960px) { .split { grid-template-columns: 1fr; } }
+    .sticky-side { position: sticky; top: 118px; display: flex; flex-direction: column; gap: 12px; }
+    @media (max-width: 960px) { .sticky-side { position: static; } }
+    .sec-head { padding: 8px 14px; border-bottom: 1px solid var(--card-border); background: var(--background); display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .sec-body { padding: 8px; display: flex; flex-direction: column; gap: 2px; }
+    .line-btn {
+      width: 100%;
+      text-align: left;
+      padding: 4px 8px;
+      border-radius: 4px;
+      border: none;
+      border-left: 2px solid transparent;
+      background: transparent;
+      color: var(--muted-foreground);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+      cursor: pointer;
+    }
+    .line-btn:hover { color: var(--foreground); }
+    .line-btn.active { background: var(--secondary); border-left-color: var(--primary); color: var(--foreground); }
+    .line-left { display: flex; align-items: baseline; gap: 12px; min-width: 0; }
+    .line-num { width: 24px; text-align: right; opacity: 0.6; flex-shrink: 0; }
+    .line-code { white-space: pre; overflow-x: auto; }
+    .line-tag { opacity: 0.7; flex-shrink: 0; }
+    pre.code-box {
+      margin: 0;
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid var(--card-border);
+      background: var(--background);
+      color: var(--foreground);
+      overflow-x: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+    .lbl { text-transform: uppercase; font-size: 11px; margin-bottom: 2px; }
+  </style>
+<style>
+  .week11-subnav {
+    --wn-bg: rgba(255, 255, 255, 0.9);
+    --wn-border: #d4d4d8;
+    --wn-text: #18181b;
+    --wn-muted: #52525b;
+    --wn-accent: #2563eb;
+    --wn-accent-fg: #ffffff;
+    --wn-pill: #f4f4f5;
+    margin: 0 auto 14px;
+    padding: 8px 12px;
+    border: 1px solid var(--wn-border);
+    border-radius: 8px;
+    background: var(--wn-bg);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    font-size: 12px;
+  }
+  @media (prefers-color-scheme: dark) {
+    .week11-subnav {
+      --wn-bg: rgba(24, 24, 27, 0.92);
+      --wn-border: #3f3f46;
+      --wn-text: #f4f4f5;
+      --wn-muted: #a1a1aa;
+      --wn-accent: #3b82f6;
+      --wn-accent-fg: #ffffff;
+      --wn-pill: #27272a;
+    }
+  }
+  .week11-subnav-brand {
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--wn-text);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .week11-subnav-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+  }
+  .week11-subnav a.wn-link {
+    padding: 4px 9px;
+    border-radius: 5px;
+    border: 1px solid var(--wn-border);
+    background: var(--wn-pill);
+    color: var(--wn-muted);
+    text-decoration: none;
+    font-weight: 500;
+    line-height: 1.35;
+  }
+  .week11-subnav a.wn-link:hover { color: var(--wn-text); border-color: var(--wn-accent); }
+  .week11-subnav a.wn-link[aria-current="page"] {
+    background: var(--wn-accent);
+    border-color: var(--wn-accent);
+    color: var(--wn-accent-fg);
+    font-weight: 600;
+  }
+  .week11-subnav a.wn-link:focus-visible { outline: 2px solid var(--wn-accent); outline-offset: 2px; }
+</style>
+</head>
+<body>
+  <nav class="week11-subnav" aria-label="Darkened Brass suite" style="max-width: 1120px;"><a class="week11-subnav-brand" href="darkened-brass.html">ICM / DARKENED BRASS</a><div class="week11-subnav-links"><a class="wn-link" href="index.html">← Week 11 Lab</a><a class="wn-link" href="darkened-brass.html">Darkened Brass</a><a class="wn-link" href="timer-manifest.html">60s Timer Player</a><a class="wn-link" href="study-guide.html">Study Guide</a><a class="wn-link" href="line-by-line.html" aria-current="page">106-Line Walkthrough</a><a class="wn-link" href="https://editor.p5js.org/monadlnomad/full/W7y7amaHg" target="_blank" rel="noopener">Live p5 Fullscreen ↗</a></div></nav>
+  <div class="wrap">
+    <header class="card header">
+      <div class="row-between">
+        <div>
+          <h1>W7y7amaHg ("Darkened brass") &middot; Complete 106-Line Explainer</h1>
+          <p class="muted">Click any line or press <span class="mono">Up/Down</span> arrows to step through every line alongside its vector diagram.</p>
+        </div>
+        <a href="https://editor.p5js.org/monadlnomad/sketches/W7y7amaHg" target="_blank" rel="noopener" class="btn btn-primary">Open Live Sketch</a>
+      </div>
+      <div id="part-nav" style="display: flex; flex-wrap: wrap; gap: 6px; padding-top: 8px; border-top: 1px solid var(--card-border);"></div>
+    </header>
+
+    <div class="split">
+      <div id="code-sections" style="display: flex; flex-direction: column; gap: 12px;"></div>
+
+      <aside class="sticky-side">
+        <div class="card" style="padding: 14px; display: flex; flex-direction: column; gap: 10px;">
+          <div class="row-between" style="padding-bottom: 8px; border-bottom: 1px solid var(--card-border);">
+            <span id="insp-part-title" class="mono" style="font-weight: 600;"></span>
+            <span id="insp-svg-tag" class="mono muted"></span>
+          </div>
+          <svg id="insp-svg" viewBox="0 0 420 220" style="width: 100%; display: block;" role="img" aria-label="Part vector illustration"></svg>
+        </div>
+
+        <div class="card" style="padding: 14px; display: flex; flex-direction: column; gap: 12px;">
+          <div class="row-between" style="padding-bottom: 8px; border-bottom: 1px solid var(--card-border);">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span id="insp-line-badge" class="btn btn-primary" style="cursor: default;">L1</span>
+              <span id="insp-line-tag" class="mono muted"></span>
+            </div>
+            <div style="display: flex; gap: 6px;">
+              <button id="prev-line-btn" type="button" class="btn">Prev</button>
+              <button id="next-line-btn" type="button" class="btn btn-primary">Next Line</button>
+            </div>
+          </div>
+
+          <pre id="insp-code" class="code-box"></pre>
+
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <div>
+              <div class="mono muted lbl">What This Line Does</div>
+              <p id="insp-what"></p>
+            </div>
+            <div>
+              <div class="mono muted lbl">Why This Exact Design / Number</div>
+              <p id="insp-why" class="muted"></p>
+            </div>
+            <div>
+              <div class="mono lbl" style="color: var(--chart-2);">What Breaks Without It</div>
+              <p id="insp-risk" class="muted"></p>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const PARTS = [
+        { id: 1, nav: '1. Scale & State (L1-11)', title: 'Part 1 · Harmonic Vocabulary & State (L1–L11)', tag: 'Just-Intonation Pentatonic' },
+        { id: 2, nav: '2. Setup & Reverb (L12-36)', title: 'Part 2 · Seeds, Timbre & Reverb Wiring (L12–L36)', tag: 'DSP Bus & Harmonics' },
+        { id: 3, nav: '3. Gate & Clock (L37-62)', title: 'Part 3 · Autoplay Gate & millis() Clock (L37–L62)', tag: '60.0s Wall-Clock Safety' },
+        { id: 4, nav: '4. Chaos Arc (L63-69)', title: 'Part 4 · Piecewise Chaos Envelope (L63–L69)', tag: 'Macro Entropy Curve' },
+        { id: 5, nav: '5. Rest Guard (L70-78)', title: 'Part 5 · Accumulator & Markov Rest Guard (L70–L78)', tag: 'Zero-Drift & No Stack' },
+        { id: 6, nav: '6. Pitch Blend (L79-92)', title: 'Part 6 · noise() vs random() & Octaves (L79–L92)', tag: 'Melodic Blending' },
+        { id: 7, nav: '7. Bass & Chimes (L93-106)', title: 'Part 7 · Bass Counterpoint & Chime Flip (L93–L106)', tag: 'Register & Loudness' }
+      ];
+
+      const LINES = [
+        { p: 1, n: 1, c: "let ratios = [1, 1.125, 1.25, 1.5, 1.67, 2];", tag: "Pentatonic", what: "Defines the 6-note major pentatonic scale as frequency multipliers.", why: "Just-intonation intervals (1:1, 9:8, 5:4, 3:2, 5:3, 2:1) omit the semitone (16:15) and tritone (45:32).", risk: "Arbitrary Hz values or full chromatic scales sound harsh whenever reverb blurs adjacent notes." },
+        { p: 1, n: 2, c: "let BASE = 261.63;", tag: "Root C4", what: "Sets the root pitch to Middle C (261.63 Hz).", why: "Every ratio multiplies against BASE, and octaves scale cleanly by 0.5x (130.8 Hz) or 2x (523.3 Hz).", risk: "Omitting BASE hardcodes raw Hz everywhere and prevents effortless transposition." },
+        { p: 1, n: 3, c: "let osc, bass, reverb;", tag: "DSP handles", what: "Declares global references for Lead, Bass/Chime, and Reverb.", why: "setup() instantiates the Web Audio graph while draw() modulates and stops them.", risk: "Local variables inside setup() would be unreachable inside draw()." },
+        { p: 1, n: 4, c: "let startTime = -1;", tag: "Clock sentinel", what: "Initializes the piece clock sentinel to -1 (unstarted).", why: "Signals draw() to capture millis() on the first running audio frame rather than page load.", risk: "Setting startTime = 0 lets time tick away while browser autoplay is suspended." },
+        { p: 1, n: 5, c: "let nextNote = 0;", tag: "Lead schedule", what: "Holds the target elapsed second for the next Voice 1 event.", why: "Using an accumulator (nextNote += step) prevents floating-point rhythm drift.", risk: "Triggering via frameCount % N drifts on 144Hz+ displays and cannot vary smoothly." },
+        { p: 1, n: 6, c: "let nextBass = 1.5;", tag: "Bass delay", what: "Schedules the first Bass note at 1.5 seconds.", why: "Lets the listener hear the solo triangle melody first so the bass entrance feels clear.", risk: "Starting both voices at 0.0s hides the layering effect." },
+        { p: 1, n: 7, c: "let wasRest = false;", tag: "1-bit Markov", what: "Tracks whether the immediately preceding Lead event was a rest.", why: "Creates a 2-state Markov memory enforcing P(REST | REST) = 0.", risk: "Independent coin flips stack 2-3 rests in a row, causing 1.5s dead gaps." },
+        { p: 1, n: 8, c: "let bassRest = false;", tag: "Bass Markov", what: "Tracks the previous rest state for Voice 2 independently.", why: "Gives bass syncopated breathing room without prolonged silent gaps.", risk: "Long consecutive bass rests starve the lower register during the climax." },
+        { p: 1, n: 9, c: "let fading = false;", tag: "One-shot latch", what: "Guards the 58-second fade-out so it runs only once.", why: "draw() runs ~60 times per second after sec >= 58; calling amp(..., 1.9) repeatedly resets the ramp.", risk: "Re-triggering the 1.9s ramp every frame prevents the volume from reaching silence before 60s." },
+        { p: 1, n: 10, c: "let t = 0;", tag: "Noise cursor", what: "Stores the current position along the 1D Perlin noise curve.", why: "Incrementing t by 0.3 keeps consecutive noise(t) values correlated like gentle steps.", risk: "Passing a constant or huge jump turns noise() into uncorrelated static." },
+        { p: 1, n: 11, c: "", tag: "Spacer", what: "Blank line separating global state from setup().", why: "Improves code readability.", risk: "No runtime impact." },
+
+        { p: 2, n: 12, c: "function setup() {", tag: "Init hook", what: "p5 lifecycle function invoked once at sketch startup.", why: "Creates DOM canvas, locks deterministic seeds, and wires the Web Audio DSP graph once.", risk: "Creating oscillators inside draw() would leak hundreds of audio nodes and crash audio." },
+        { p: 2, n: 13, c: "  createCanvas(400, 400);", tag: "Click target", what: "Creates a 400x400 HTML5 canvas inside the preview iframe.", why: "Provides a clickable hit target for mousePressed() if browser autoplay pauses audio.", risk: "Without a canvas, mousePressed() clicks on empty document areas can miss." },
+        { p: 2, n: 14, c: "  background(255);", tag: "No visuals", what: "Paints a solid white background once and never draws again.", why: "Strictly follows Mimi's Week 11 constraint: 'No visuals. Just sound.'", risk: "Adding visual animations breaks the pure-listening prompt." },
+        { p: 2, n: 15, c: "  randomSeed(0);", tag: "Seed LCG", what: "Resets p5's Linear Congruential Generator to deterministic seed 0.", why: "Guarantees identical random() note leaps, velocities, and bass rhythms across both class playbacks.", risk: "Without randomSeed(0), every Run produces a different composition." },
+        { p: 2, n: 16, c: "  noiseSeed(0);", tag: "Seed Perlin", what: "Generates the 4096-entry Perlin permutation table from seed 0.", why: "Locks the smooth noise(t) melodic path across runs and machines.", risk: "Each playback would wander along a different melodic contour." },
+        { p: 2, n: 17, c: "", tag: "Spacer", what: "Blank separator before audio graph setup.", why: "Groups seed initialization separately from audio node wiring.", risk: "No runtime impact." },
+        { p: 2, n: 18, c: "  reverb = new p5.Reverb(3);", tag: "3s tail", what: "Instantiates a 3-second stereo convolution reverb effect.", why: "Suspends notes briefly in acoustic space so solo notes bloom into chords.", risk: "Dry synthesis sounds clinical and exposes sharp transitions during fast chaos." },
+        { p: 2, n: 19, c: "  reverb.wet(0.5);", tag: "50/50 mix", what: "Sets the wet/dry crossfade to 50% dry and 50% reverberated signal.", why: "Balances crisp rhythmic articulation with lush harmonic wash.", risk: "100% wet washes out rhythm; 0% wet wastes the reverb node." },
+        { p: 2, n: 20, c: "", tag: "Spacer", what: "Blank separator before Voice 1 setup.", why: "Visual grouping.", risk: "No runtime impact." },
+        { p: 2, n: 21, c: "  osc = new p5.Oscillator('triangle');", tag: "Voice 1", what: "Creates the main melody oscillator using a triangle wave.", why: "Odd harmonics roll off rapidly (1/n^2), producing a warm flute/kalimba tone.", risk: "Square/saw waves sound harsh; double sine waves blur together." },
+        { p: 2, n: 22, c: "  osc.freq(BASE);", tag: "Init 261.6Hz", what: "Sets starting pitch to C4 before calling start().", why: "Prevents an audible slide from the default 440 Hz (A4) down to C4.", risk: "Unintended A4 blip or pitch glide on note #1." },
+        { p: 2, n: 23, c: "  osc.amp(0.0001, 0.01);", tag: "-80 dB floor", what: "Sets initial amplitude to 0.0001 over 10ms.", why: "p5.sound v0.4.2 converts amplitude via 20*log10(amp); 0.0001 = -80 dB (silent and finite).", risk: "Passing 0 evaluates log10(0) = -Infinity, risking broken Web Audio ramps or clicks." },
+        { p: 2, n: 24, c: "  osc.disconnect();", tag: "Cut dry wire", what: "Detaches the oscillator's default direct route to speakers.", why: "p5.Reverb already outputs 50% dry; keeping the direct wire would double dry volume.", risk: "Unbalanced mix where dry notes overpower the reverb tail." },
+        { p: 2, n: 25, c: "  osc.connect(reverb);", tag: "Route reverb", what: "Connects Voice 1 exclusively into the shared reverb input bus.", why: "All dry/wet blending flows cleanly through one effect node.", risk: "Voice 1 would produce zero sound after disconnect()." },
+        { p: 2, n: 26, c: "", tag: "Spacer", what: "Blank separator before Voice 2 setup.", why: "Visual grouping.", risk: "No runtime impact." },
+        { p: 2, n: 27, c: "  bass = new p5.Oscillator('sine');", tag: "Voice 2", what: "Creates Voice 2 using a pure sine oscillator.", why: "Fundamental-only energy keeps low C3-C4 notes warm without upper-harmonic mud.", risk: "A triangle or square bass clashes with mid-range lead overtones." },
+        { p: 2, n: 28, c: "  bass.freq(BASE * 0.5);", tag: "Init C3", what: "Sets Voice 2 starting pitch an octave below Middle C (130.8 Hz).", why: "Prepares the bass register cleanly prior to its 1.5s entry.", risk: "Pitch starts at default 440 Hz before its first scheduled event." },
+        { p: 2, n: 29, c: "  bass.amp(0.0001, 0.01);", tag: "Silent start", what: "Silences Voice 2 at -80 dB until nextBass triggers at 1.5s.", why: "Avoids startup pops and avoids log10(0).", risk: "Voice 2 drones continuously for the first 1.5 seconds." },
+        { p: 2, n: 30, c: "  bass.disconnect();", tag: "Cut dry wire", what: "Disconnects Voice 2's direct speaker path.", why: "Prevents doubled dry bass signal.", risk: "Bass overpowers lead and bypasses reverb wet/dry balance." },
+        { p: 2, n: 31, c: "  bass.connect(reverb);", tag: "Shared room", what: "Routes Voice 2 into the same p5.Reverb bus as Lead.", why: "Places bass, lead, and high chimes inside one shared acoustic space.", risk: "Voice 2 would be completely silent after disconnect()." },
+        { p: 2, n: 32, c: "", tag: "Spacer", what: "Blank separator before starting oscillators.", why: "Visual grouping.", risk: "No runtime impact." },
+        { p: 2, n: 33, c: "  osc.start();", tag: "Arm Voice 1", what: "Starts Voice 1 oscillator processing.", why: "Note: AudioContext state controls whether sound plays immediately or waits for a click.", risk: "osc stays permanently silent even when freq/amp change in draw()." },
+        { p: 2, n: 34, c: "  bass.start();", tag: "Arm Voice 2", what: "Starts Voice 2 oscillator processing at -80 dB.", why: "Ready for zero-latency triggering once sec >= 1.5.", risk: "Bass/chimes never emit audio." },
+        { p: 2, n: 35, c: "}", tag: "End setup()", what: "Closes setup() block.", why: "Hands execution over to p5's animation loop (draw()).", risk: "Syntax error if omitted." },
+        { p: 2, n: 36, c: "", tag: "Spacer", what: "Blank separator before interaction handlers.", why: "Visual grouping.", risk: "No runtime impact." },
+
+        { p: 3, n: 37, c: "function mousePressed() {", tag: "Click unlock", what: "p5 event handler triggered on mouse click inside canvas.", why: "Provides a user gesture fallback if the browser suspends Web Audio on autoplay.", risk: "Users on strict autoplay browsers could not unlock sound by clicking." },
+        { p: 3, n: 38, c: "  userStartAudio();", tag: "p5 resume", what: "Calls p5.sound's built-in audio context unlock helper.", why: "Resumes Tone.js's wrapped context after oscillators exist.", risk: "Tone internal state may remain suspended on some browsers." },
+        { p: 3, n: 39, c: "  getAudioContext().resume();", tag: "WebAudio resume", what: "Calls native Web Audio API resume() directly on the context.", why: "Belt-and-suspenders check ensuring state transitions to 'running'.", risk: "Older/sandboxed contexts occasionally ignore one resume path." },
+        { p: 3, n: 40, c: "}", tag: "End click", what: "Closes mousePressed().", why: "Block delimiter.", risk: "Syntax error if omitted." },
+        { p: 3, n: 41, c: "", tag: "Spacer", what: "Blank separator.", why: "Visual grouping.", risk: "No runtime impact." },
+        { p: 3, n: 42, c: "function keyPressed() {", tag: "Key unlock", what: "p5 event handler triggered on any keyboard press.", why: "Accessible keyboard alternative to clicking the white canvas.", risk: "Keyboard-only users couldn't unlock suspended audio." },
+        { p: 3, n: 43, c: "  mousePressed();", tag: "Delegate", what: "Invokes the exact unlock routine inside mousePressed().", why: "Zero duplicated code.", risk: "No unlock on keypress." },
+        { p: 3, n: 44, c: "}", tag: "End key", what: "Closes keyPressed().", why: "Block delimiter.", risk: "Syntax error if omitted." },
+        { p: 3, n: 45, c: "", tag: "Spacer", what: "Blank separator before draw() loop.", why: "Visual grouping.", risk: "No runtime impact." },
+        { p: 3, n: 46, c: "function draw() {", tag: "Main loop", what: "Continuous animation/composition tick (~60 times per second).", why: "Polls wall-clock time and dispatches scheduled note events.", risk: "Without draw(), only a single static tone would play." },
+        { p: 3, n: 47, c: "  if (getAudioContext().state !== 'running') return;", tag: "Audio gate", what: "Aborts draw() immediately until browser AudioContext is running.", why: "Freezes both the 60s clock and RNG state until audio can actually be heard.", risk: "Clock runs silently during blocked autoplay, cutting off the beginning of the piece." },
+        { p: 3, n: 48, c: "  if (startTime < 0) startTime = millis();", tag: "Latch t=0", what: "Captures exact p5 millisecond clock on the first active frame.", why: "Anchors sec = 0.000 right when sound begins, regardless of setup latency.", risk: "sec would count startup/click delay against the 60s budget." },
+        { p: 3, n: 49, c: "  let sec = (millis() - startTime) / 1000;", tag: "Exact clock", what: "Computes real elapsed wall-clock seconds.", why: "Immune to monitor refresh rates (fixes 144Hz FPS drift where frame counting finished in ~45s).", risk: "Counting frames makes the composition finish too fast on high-Hz screens." },
+        { p: 3, n: 50, c: "", tag: "Spacer", what: "Blank separator before shutdown logic.", why: "Visual grouping.", risk: "No runtime impact." },
+        { p: 3, n: 51, c: "  if (!fading && sec >= 58) {", tag: "Outro trigger", what: "Triggers once when elapsed time reaches 58.0 seconds.", why: "Leaves 2 full seconds for natural decay before hard oscillator stop.", risk: "Without !fading, the ramp restarts every frame and never completes." },
+        { p: 3, n: 52, c: "    fading = true;", tag: "Set latch", what: "Latches fading flag so lines 53-54 execute exactly once.", why: "Clean one-shot state transition.", risk: "Fade ramp resets continuously from 58s to 60s." },
+        { p: 3, n: 53, c: "    osc.amp(0.0001, 1.9);", tag: "Lead fade", what: "Ramps Lead to -80 dB over 1.9s (finishes at 59.9s).", why: "Ensures gain hits silent floor 100ms before osc.stop() fires at 60.0s.", risk: "Stopping mid-note produces an audible speaker click." },
+        { p: 3, n: 54, c: "    bass.amp(0.0001, 1.9);", tag: "Bass fade", what: "Ramps Voice 2 to -80 dB over 1.9s.", why: "Silences any lingering bass or reverb feed cleanly.", risk: "Abrupt cutoff click at 60.0s." },
+        { p: 3, n: 55, c: "  }", tag: "End fade", what: "Closes the 58s fade block.", why: "Block delimiter.", risk: "Syntax error if omitted." },
+        { p: 3, n: 56, c: "  if (sec >= 60) {", tag: "60s limit", what: "Checks if the 60.0-second composition duration has completed.", why: "Hard guarantee that the piece lasts exactly 1 minute.", risk: "Composition would continue looping indefinitely." },
+        { p: 3, n: 57, c: "    osc.stop();", tag: "Stop Lead", what: "Stops Voice 1 oscillator node cleanly.", why: "Frees Web Audio processing.", risk: "Idle oscillator continues consuming audio thread CPU." },
+        { p: 3, n: 58, c: "    bass.stop();", tag: "Stop Bass", what: "Stops Voice 2 oscillator node cleanly.", why: "Ensures zero residual oscillator hum.", risk: "Residual sub-audible tone stays active." },
+        { p: 3, n: 59, c: "    noLoop();", tag: "Stop draw", what: "Halts p5's draw() execution loop.", why: "Clean program termination at 60.0s.", risk: "draw() keeps spinning needlessly forever." },
+        { p: 3, n: 60, c: "    return;", tag: "Exit frame", what: "Returns early on frame sec >= 60.", why: "Prevents lines 71-105 from firing on stopped oscillators.", risk: "Attempting to schedule stopped oscillators on the final frame." },
+        { p: 3, n: 61, c: "  }", tag: "End 60s gate", what: "Closes the 60s stop block.", why: "Block delimiter.", risk: "Syntax error if omitted." },
+        { p: 3, n: 62, c: "", tag: "Spacer", what: "Blank separator before chaos envelope.", why: "Visual grouping.", risk: "No runtime impact." },
+
+        { p: 4, n: 63, c: "  // ~10s calm intro, active middle (10-50s), ~10s calm outro", tag: "Arc comment", what: "Documents the 4-part temporal macro-shape.", why: "Signals the exact pacing structure: 10s calm intro -> 40s middle arc -> 10s calm outro.", risk: "No runtime impact." },
+        { p: 4, n: 64, c: "  let chaos = 0;", tag: "Entropy var", what: "Declares normalized chaos intensity [0.0 .. 1.0].", why: "Single source of truth governing tempo, jitter, random() probability, octaves, and chimes.", risk: "Separate unrelated curves would feel disjointed." },
+        { p: 4, n: 65, c: "  if (sec < 10) chaos = map(sec, 0, 10, 0, 0.35);", tag: "0-10s Intro", what: "Linearly raises chaos from 0% to 35% across the first 10 seconds (+3.5%/s).", why: "Short enough not to bore listeners while establishing smooth noise() patterns.", risk: "Jumping straight to 100% leaves zero sense of buildup." },
+        { p: 4, n: 66, c: "  else if (sec < 30) chaos = map(sec, 10, 30, 0.35, 1);", tag: "10-30s Build", what: "Ramps chaos from 35% to peak 100% at the exact 30s midpoint (+3.25%/s).", why: "Crosses the 0.65 chime threshold at ~18.6s and reaches peak density at 30s.", risk: "Without the ramp, the middle feels static." },
+        { p: 4, n: 67, c: "  else if (sec < 50) chaos = map(sec, 30, 50, 1, 0.35);", tag: "30-50s Release", what: "Mirrors the descent symmetrically from 100% back to 35% (-3.25%/s).", why: "Gives the climax natural tension release over 20 seconds.", risk: "Dropping instantly from 100% to 0% feels jarring." },
+        { p: 4, n: 68, c: "  else chaos = map(sec, 50, 60, 0.35, 0);", tag: "50-60s Outro", what: "Tapers chaos from 35% to 0% across the final 10 seconds (-3.5%/s).", why: "Returns to calm order symmetrically before the 58s fade.", risk: "Ending in high chaos leaves the piece unresolved." },
+        { p: 4, n: 69, c: "", tag: "Spacer", what: "Blank separator before Voice 1.", why: "Visual grouping.", risk: "No runtime impact." },
+
+        { p: 5, n: 70, c: "  // Main voice: blends noise() and random(), brief rests only (< 0.4s)", tag: "Lead header", what: "Documents Voice 1's dual pitch blend and rest limit.", why: "Explains the core mechanism at a glance.", risk: "No runtime impact." },
+        { p: 5, n: 71, c: "  if (sec >= nextNote && sec < 58) {", tag: "Lead gate", what: "Triggers a new Lead event when sec reaches nextNote, halting new notes at 58s.", why: "Stops launching fresh notes 2 seconds before 60s so existing notes decay smoothly.", risk: "Notes firing at 59.5s would get chopped mid-attack at 60.0s." },
+        { p: 5, n: 72, c: "    let shift = random(-0.05, 0.06) * chaos;", tag: "Micro-jitter", what: "Generates -50ms to +60ms timing variation scaled directly by chaos.", why: "Makes the pulse human and steady when calm, and loose/off-beat at peak chaos.", risk: "Without shift, even 100% chaos sounds like a rigid robotic metronome." },
+        { p: 5, n: 73, c: "    nextNote += max(0.09, lerp(0.36, 0.14, chaos) + shift);", tag: "Step clamp", what: "Advances target by 360ms (calm) -> 140ms (peak) + shift, clamped >= 90ms.", why: "+= maintains drift-free scheduling; max(0.09) protects 30ms/40ms ramps from overlapping into clicks.", risk: "Allowing steps < 0.09s collides with attack/freq ramps and causes distortion." },
+        { p: 5, n: 74, c: "", tag: "Spacer", what: "Blank separator before Markov branch.", why: "Visual grouping.", risk: "No runtime impact." },
+        { p: 5, n: 75, c: "    if (!wasRest && random(1) < 0.22) {", tag: "Markov gate", what: "22% probability to rest ONLY when wasRest is false.", why: "Implements a 1-bit Markov guard: P(REST | REST) = 0 guarantees rests never stack.", risk: "Removing !wasRest lets 2-4 rests chain together into dead 1.5s+ silences." },
+        { p: 5, n: 76, c: "      wasRest = true;", tag: "Enter REST", what: "Sets the 1-bit rest memory flag to true.", why: "Forces the very next scheduled step into the else branch to play a note.", risk: "State guard would never activate, allowing repeated rests." },
+        { p: 5, n: 77, c: "      osc.amp(0.0001, 0.15);", tag: "150ms breath", what: "Fades Lead softly to -80 dB over 150ms while reverb continues ringing.", why: "Creates rhythmic breath (< 0.4s) rather than an abrupt mute.", risk: "Hard jump to 0.0001 causes an audible click." },
+        { p: 5, n: 78, c: "    } else {", tag: "Note branch", what: "Runs whenever not resting (~82% steady-state rate of all events).", why: "Guaranteed to fire immediately after any rest.", risk: "Syntax error if omitted." },
+
+        { p: 6, n: 79, c: "      wasRest = false;", tag: "Reset flag", what: "Clears the rest memory flag because a note is firing now.", why: "Re-enables the 22% rest probability for the following step.", risk: "Leaving it true would permanently disable future rests after the first rest." },
+        { p: 6, n: 80, c: "      let r;", tag: "Ratio holder", what: "Declares local variable for the selected pentatonic multiplier.", why: "Assigned by either uniform random() or smooth Perlin noise().", risk: "Undefined variable error." },
+        { p: 6, n: 81, c: "      if (random(1) < chaos) {", tag: "Blend coin", what: "Stochastic selector weighted by current chaos [0..1].", why: "At chaos=0, 100% noise(); at chaos=0.5, 50/50; at chaos=1, 100% random().", risk: "Without blending, the piece lacks a continuous texture transition." },
+        { p: 6, n: 82, c: "        r = random(ratios);", tag: "Uniform leap", what: "Picks any of the 6 pentatonic ratios with equal 1/6 probability.", why: "Maximum melodic surprise — zero memory of the previous note.", risk: "No contrast against smooth Perlin contours." },
+        { p: 6, n: 83, c: "      } else {", tag: "Perlin branch", what: "Selects correlated melodic movement when random(1) >= chaos.", why: "Carries the smooth singing contour during calm intro and outro.", risk: "Syntax error if omitted." },
+        { p: 6, n: 84, c: "        t += 0.3;", tag: "Step Perlin", what: "Advances Perlin coordinate by 0.3 units.", why: "0.3 step moves smoothly across neighboring scale degrees without stalling on one pitch.", risk: "Step too small (0.01) repeats the same note; too large (5.0) behaves like random()." },
+        { p: 6, n: 85, c: "        r = ratios[floor(noise(t) * ratios.length)];", tag: "Quantize pitch", what: "Maps continuous Perlin output [0, 1) to integer index 0..5 in ratios.", why: "Quantizes organic movement cleanly onto consonant pentatonic steps.", risk: "Using unquantized noise() Hz produces sour microtonal dissonance." },
+        { p: 6, n: 86, c: "      }", tag: "End blend", what: "Closes the noise/random selection block.", why: "Block delimiter.", risk: "Syntax error if omitted." },
+        { p: 6, n: 87, c: "      let oct = random(1) < chaos * 0.35 ? random([0.5, 2]) : 1;", tag: "Octave span", what: "Shifts register down (0.5x) or up (2x) up to 35% of the time at peak chaos.", why: "Keeps calm sections tight in C4-C5 while opening a 3-octave span in the climax.", risk: "Pitch range feels narrow over a full minute." },
+        { p: 6, n: 88, c: "      osc.freq(BASE * r * oct, 0.03);", tag: "30ms glide", what: "Ramps Lead frequency to target Hz over 30ms.", why: "Smooths oscillator phase transitions so notes never click while still sounding crisp.", risk: "0ms instantaneous jumps risk subtle zipper/phase ticks." },
+        { p: 6, n: 89, c: "      osc.amp(random(0.12, 0.22), 0.04);", tag: "Human touch", what: "Varies Lead loudness randomly between 0.12 and 0.22 with a 40ms attack.", why: "Micro-dynamics imitate real acoustic phrasing instead of robotic flat volume.", risk: "Constant fixed amplitude makes every note feel mechanical." },
+        { p: 6, n: 90, c: "    }", tag: "End note branch", what: "Closes the play-note else branch.", why: "Block delimiter.", risk: "Syntax error if omitted." },
+        { p: 6, n: 91, c: "  }", tag: "End Voice 1", what: "Closes the Voice 1 scheduler block.", why: "Block delimiter.", risk: "Syntax error if omitted." },
+        { p: 6, n: 92, c: "", tag: "Spacer", what: "Blank separator before Voice 2.", why: "Visual grouping.", risk: "No runtime impact." },
+
+        { p: 7, n: 93, c: "  // Second voice: slow bass, sometimes chimes high in the middle", tag: "Voice 2 doc", what: "Documents Voice 2's dual bass/chime behavior.", why: "Clarifies that one oscillator serves both roles.", risk: "No runtime impact." },
+        { p: 7, n: 94, c: "  if (sec >= nextBass && sec < 56) {", tag: "Early retire", what: "Schedules Voice 2 up to 56.0 seconds (2s earlier than Lead).", why: "Lets the bass drop out first so the lead melody resolves solo at the end.", risk: "Low bass overlapping the final fade-out sounds heavy." },
+        { p: 7, n: 95, c: "    nextBass += random(0.8, 1.5);", tag: "Async pulse", what: "Schedules next Voice 2 hit randomly between 0.8s and 1.5s later.", why: "Incommensurate timing creates organic counterpoint against Lead's 0.14-0.36s grid.", risk: "Fixed integer multiples sound like a stiff bass drum." },
+        { p: 7, n: 96, c: "    if (!bassRest && random(1) < 0.25) {", tag: "Bass guard", what: "25% rest probability guarded by !bassRest.", why: "Allows brief bass pauses without losing harmonic grounding for 2+ cycles.", risk: "Back-to-back rests leave the piece ungrounded for 3+ seconds." },
+        { p: 7, n: 97, c: "      bassRest = true;", tag: "Enter rest", what: "Marks Voice 2 rest state true.", why: "Forces the next Voice 2 event to play a note.", risk: "Repeated rests." },
+        { p: 7, n: 98, c: "      bass.amp(0.0001, 0.3);", tag: "300ms tail", what: "Fades Voice 2 cleanly over 300ms.", why: "Longer release matches low-frequency inertia.", risk: "Fast release on low sine waves can click." },
+        { p: 7, n: 99, c: "    } else {", tag: "Play Voice 2", what: "Executes when Voice 2 plays a bass note or chime.", why: "Alternates safely with brief rests.", risk: "Syntax error if omitted." },
+        { p: 7, n: 100, c: "      bassRest = false;", tag: "Reset guard", what: "Resets Voice 2 rest memory.", why: "Re-enables future 25% rests.", risk: "No future rests after first rest." },
+        { p: 7, n: 101, c: "      let oct = chaos > 0.65 && random(1) < 0.35 ? 2 : 0.5;", tag: "Chime gate", what: "Plays low bass (0.5x), flipping 35% to high chime (2x) only when chaos > 0.65.", why: "Restricts bell-like C5-C6 chimes exclusively to the ~18.6s-41.4s climax window.", risk: "Unconditional chimes ruin the surprise and clutter calm sections." },
+        { p: 7, n: 102, c: "      bass.freq(BASE * random(ratios) * oct, 0.05);", tag: "50ms glide", what: "Glides Voice 2 to a random pentatonic pitch in 0.5x or 2x register over 50ms.", why: "Smooth pitch transitions across large 2-octave jumps.", risk: "Instantaneous 2-octave jump produces a sharp transient." },
+        { p: 7, n: 103, c: "      bass.amp(oct === 2 ? 0.1 : 0.18, 0.08);", tag: "Loudness trim", what: "Plays chimes softer (0.10 = -5.1 dB relative) than bass (0.18) with 80ms attack.", why: "Human ears are far more sensitive to 523-1047 Hz than 131-262 Hz (Fletcher-Munson compensation).", risk: "Playing high chimes at 0.18 would pierce above the lead melody." },
+        { p: 7, n: 104, c: "    }", tag: "End Voice 2", what: "Closes Voice 2 play branch.", why: "Block delimiter.", risk: "Syntax error if omitted." },
+        { p: 7, n: 105, c: "  }", tag: "End bass if", what: "Closes Voice 2 scheduler.", why: "Block delimiter.", risk: "Syntax error if omitted." },
+        { p: 7, n: 106, c: "}", tag: "End draw()", what: "Closes p5's main draw() composition loop.", why: "End of sketch.", risk: "Syntax error if omitted." }
+      ];
+
+      let activeLine = 1;
+      const partNav = document.getElementById('part-nav');
+      const sectionsEl = document.getElementById('code-sections');
+      const inspPartTitle = document.getElementById('insp-part-title');
+      const inspSvgTag = document.getElementById('insp-svg-tag');
+      const inspSvg = document.getElementById('insp-svg');
+      const inspBadge = document.getElementById('insp-line-badge');
+      const inspTag = document.getElementById('insp-line-tag');
+      const inspCode = document.getElementById('insp-code');
+      const inspWhat = document.getElementById('insp-what');
+      const inspWhy = document.getElementById('insp-why');
+      const inspRisk = document.getElementById('insp-risk');
+      const prevLineBtn = document.getElementById('prev-line-btn');
+      const nextLineBtn = document.getElementById('next-line-btn');
+
+      function el(tag, attrs, text) {
+        const node = document.createElementNS('http://www.w3.org/2000/svg', tag);
+        for (const [k, v] of Object.entries(attrs || {})) node.setAttribute(k, v);
+        if (text !== undefined) node.textContent = text;
+        return node;
+      }
+
+      function renderPartSvg(partId) {
+        inspSvg.innerHTML = '';
+        const defs = el('defs');
+        const m = el('marker', { id: 'arr-o', viewBox: '0 0 10 10', refX: '8', refY: '5', markerWidth: '5', markerHeight: '5', orient: 'auto-start-reverse' });
+        m.appendChild(el('path', { d: 'M 0 1 L 8 5 L 0 9 z', fill: 'var(--muted-foreground)' }));
+        defs.appendChild(m);
+        inspSvg.appendChild(defs);
+
+        if (partId === 1) {
+          const notes = [
+            ['1.000', 'C4 · 261.6 Hz (Root)', true], ['1.067', 'Db · semitone SKIPPED', false],
+            ['1.125', 'D4 · 294.3 Hz (9:8)', true], ['1.250', 'E4 · 327.0 Hz (5:4)', true],
+            ['1.406', 'F# · tritone SKIPPED', false], ['1.500', 'G4 · 392.4 Hz (3:2)', true],
+            ['1.670', 'A4 · 436.9 Hz (5:3)', true], ['2.000', 'C5 · 523.3 Hz (2:1)', true]
+          ];
+          notes.forEach(([rat, lbl, kept], i) => {
+            const y = 196 - i * 24;
+            inspSvg.appendChild(el('line', { x1: 76, y1: y, x2: 406, y2: y, stroke: kept ? 'var(--chart-1)' : 'var(--border)', 'stroke-width': kept ? '1.8' : '0.8', 'stroke-dasharray': kept ? 'none' : '3 3' }));
+            inspSvg.appendChild(el('text', { x: 68, y: y + 4, 'text-anchor': 'end', 'font-family': 'ui-monospace, monospace', 'font-size': '10.5', fill: kept ? 'var(--foreground)' : 'var(--muted-foreground)' }, rat + 'x'));
+            inspSvg.appendChild(el('text', { x: 404, y: y - 4, 'text-anchor': 'end', 'font-family': 'ui-monospace, monospace', 'font-size': '10', fill: kept ? 'var(--chart-1)' : 'var(--muted-foreground)' }, lbl));
+            if (kept) inspSvg.appendChild(el('circle', { cx: 118 + i * 28, cy: y, r: '4.5', fill: 'var(--chart-1)' }));
+          });
+        } else if (partId === 2) {
+          inspSvg.appendChild(el('rect', { x: 10, y: 16, width: 128, height: 82, rx: 6, fill: 'var(--background)', stroke: 'var(--chart-1)' }));
+          inspSvg.appendChild(el('text', { x: 74, y: 34, 'text-anchor': 'middle', 'font-family': 'ui-monospace, monospace', 'font-size': '10.5', 'font-weight': '700', fill: 'var(--foreground)' }, "Lead: 'triangle'"));
+          inspSvg.appendChild(el('polyline', { points: '24,72 40,46 56,72 72,46 88,72 104,46 120,72', fill: 'none', stroke: 'var(--chart-1)', 'stroke-width': '1.8' }));
+          inspSvg.appendChild(el('text', { x: 74, y: 89, 'text-anchor': 'middle', 'font-family': 'ui-monospace, monospace', 'font-size': '9.5', fill: 'var(--muted-foreground)' }, 'odd harmonics 1/n^2'));
+
+          inspSvg.appendChild(el('rect', { x: 10, y: 118, width: 128, height: 82, rx: 6, fill: 'var(--background)', stroke: 'var(--chart-3)' }));
+          inspSvg.appendChild(el('text', { x: 74, y: 136, 'text-anchor': 'middle', 'font-family': 'ui-monospace, monospace', 'font-size': '10.5', 'font-weight': '700', fill: 'var(--foreground)' }, "Bass: 'sine'"));
+          inspSvg.appendChild(el('path', { d: 'M 24 166 Q 40 144 56 166 T 88 166 T 120 166', fill: 'none', stroke: 'var(--chart-3)', 'stroke-width': '1.8' }));
+          inspSvg.appendChild(el('text', { x: 74, y: 191, 'text-anchor': 'middle', 'font-family': 'ui-monospace, monospace', 'font-size': '9.5', fill: 'var(--muted-foreground)' }, 'pure fundamental'));
+
+          inspSvg.appendChild(el('line', { x1: 138, y1: 32, x2: 346, y2: 32, stroke: 'var(--border)', 'stroke-dasharray': '3 3' }));
+          inspSvg.appendChild(el('text', { x: 242, y: 24, 'text-anchor': 'middle', 'font-family': 'ui-monospace, monospace', 'font-size': '10', fill: 'var(--chart-2)' }, 'X disconnect() removes double dry'));
+
+          inspSvg.appendChild(el('rect', { x: 184, y: 74, width: 136, height: 82, rx: 6, fill: 'var(--background)', stroke: 'var(--primary)' }));
+          inspSvg.appendChild(el('text', { x: 252, y: 104, 'text-anchor': 'middle', 'font-family': 'ui-monospace, monospace', 'font-size': '11', 'font-weight': '700', fill: 'var(--foreground)' }, 'p5.Reverb(3)'));
+          inspSvg.appendChild(el('text', { x: 252, y: 123, 'text-anchor': 'middle', 'font-family': 'ui-monospace, monospace', 'font-size': '10', fill: 'var(--muted-foreground)' }, 'wet(0.5) blend'));
+          inspSvg.appendChild(el('text', { x: 252, y: 141, 'text-anchor': 'middle', 'font-family': 'ui-monospace, monospace', 'font-size': '10', fill: 'var(--muted-foreground)' }, '50% dry / 50% 3s'));
+
+          inspSvg.appendChild(el('line', { x1: 138, y1: 60, x2: 180, y2: 100, stroke: 'var(--muted-foreground)', 'stroke-width': '1.3', 'marker-end': 'url(#arr-o)' }));
+          inspSvg.appendChild(el('line', { x1: 138, y1: 158, x2: 180, y2: 130, stroke: 'var(--muted-foreground)', 'stroke-width': '1.3', 'marker-end': 'url(#arr-o)' }));
+
+          inspSvg.appendChild(el('rect', { x: 348, y: 90, width: 62, height: 50, rx: 6, fill: 'var(--background)', stroke: 'var(--border)' }));
+          inspSvg.appendChild(el('text', { x: 379, y: 119, 'text-anchor': 'middle', 'font-family': 'ui-monospace, monospace', 'font-size': '11', 'font-weight': '700', fill: 'var(--foreground)' }, 'Out'));
+          inspSvg.appendChild(el('line', { x1: 320, y1: 115, x2: 344, y2: 115, stroke: 'var(--muted-foreground)', 'stroke-width': '1.3', 'marker-end': 'url(#arr-o)' }));
+        } else if (partId === 3) {
+          inspSvg.appendChild(el('text', { x: 12, y: 22, 'font-family': 'ui-monospace, monospace', 'font-size': '10.5', fill: 'var(--chart-2)' }, 'BROKEN frameCount (144Hz): ends ~45s early!'));
+          inspSvg.appendChild(el('rect', { x: 12, y: 32, width: 292, height: 28, rx: 5, fill: 'var(--background)', stroke: 'var(--chart-2)', 'stroke-dasharray': '4 2' }));
+          inspSvg.appendChild(el('text', { x: 314, y: 50, 'font-family': 'ui-monospace, monospace', 'font-size': '10.5', fill: 'var(--chart-2)' }, '~45s cutoff'));
+
+          inspSvg.appendChild(el('text', { x: 12, y: 88, 'font-family': 'ui-monospace, monospace', 'font-size': '10.5', fill: 'var(--chart-1)' }, 'FIXED millis(): exact 60.0s on every monitor'));
+          inspSvg.appendChild(el('rect', { x: 12, y: 98, width: 382, height: 28, rx: 5, fill: 'var(--background)', stroke: 'var(--chart-1)' }));
+          inspSvg.appendChild(el('line', { x1: 378, y1: 92, x2: 378, y2: 132, stroke: 'var(--primary)', 'stroke-width': '1.8' }));
+          inspSvg.appendChild(el('text', { x: 374, y: 144, 'text-anchor': 'end', 'font-family': 'ui-monospace, monospace', 'font-size': '10', fill: 'var(--primary)' }, '58s fade (1.9s) -> 60.0s stop()'));
+
+          inspSvg.appendChild(el('rect', { x: 12, y: 158, width: 396, height: 50, rx: 6, fill: 'var(--background)', stroke: 'var(--border)' }));
+          inspSvg.appendChild(el('text', { x: 24, y: 178, 'font-family': 'ui-monospace, monospace', 'font-size': '10.5', fill: 'var(--foreground)' }, 'Why 0.0001? p5.sound computes 20 * log10(amp):'));
+          inspSvg.appendChild(el('text', { x: 24, y: 196, 'font-family': 'ui-monospace, monospace', 'font-size': '10.5', fill: 'var(--chart-3)' }, '0 -> -Infinity (unsafe)  |  0.0001 -> -80 dB (safe)'));
+        } else if (partId === 4) {
+          const px = (s) => 36 + (s / 60) * 356;
+          const py = (c) => 176 - c * 138;
+          inspSvg.appendChild(el('rect', { x: px(18.57), y: 34, width: px(41.43) - px(18.57), height: 142, fill: 'var(--background)', opacity: '0.8' }));
+          inspSvg.appendChild(el('text', { x: px(30), y: 22, 'text-anchor': 'middle', 'font-family': 'ui-monospace, monospace', 'font-size': '10.5', fill: 'var(--chart-4)' }, 'Chime Gate Active (chaos > 0.65)'));
+          [0, 0.35, 0.65, 1].forEach((c) => {
+            inspSvg.appendChild(el('line', { x1: 36, y1: py(c), x2: 392, y2: py(c), stroke: 'var(--border)', 'stroke-width': '0.9', 'stroke-dasharray': c === 0.65 ? '3 3' : 'none' }));
+            inspSvg.appendChild(el('text', { x: 30, y: py(c) + 3.5, 'text-anchor': 'end', 'font-family': 'ui-monospace, monospace', 'font-size': '9.5', fill: 'var(--muted-foreground)' }, Math.round(c * 100) + '%'));
+          });
+          const pts = [[0,0],[10,0.35],[30,1],[50,0.35],[60,0]].map(([s,c]) => `${px(s)},${py(c)}`).join(' ');
+          inspSvg.appendChild(el('polyline', { points: pts, fill: 'none', stroke: 'var(--primary)', 'stroke-width': '2.4' }));
+          [[0,0,'0s'],[10,0.35,'10s Intro'],[30,1,'30s Peak'],[50,0.35,'50s Outro'],[60,0,'60s']].forEach(([s,c,lbl]) => {
+            inspSvg.appendChild(el('circle', { cx: px(s), cy: py(c), r: '4', fill: 'var(--primary)' }));
+            inspSvg.appendChild(el('text', { x: px(s), y: 196, 'text-anchor': 'middle', 'font-family': 'ui-monospace, monospace', 'font-size': '10', fill: 'var(--muted-foreground)' }, lbl));
+          });
+        } else if (partId === 5) {
+          inspSvg.appendChild(el('rect', { x: 16, y: 24, width: 152, height: 60, rx: 6, fill: 'var(--background)', stroke: 'var(--chart-1)' }));
+          inspSvg.appendChild(el('text', { x: 92, y: 50, 'text-anchor': 'middle', 'font-family': 'ui-monospace, monospace', 'font-size': '11.5', 'font-weight': '700', fill: 'var(--foreground)' }, 'NOTE'));
+          inspSvg.appendChild(el('text', { x: 92, y: 69, 'text-anchor': 'middle', 'font-family': 'ui-monospace, monospace', 'font-size': '10', fill: 'var(--muted-foreground)' }, 'wasRest = false'));
+
+          inspSvg.appendChild(el('rect', { x: 252, y: 24, width: 152, height: 60, rx: 6, fill: 'var(--background)', stroke: 'var(--chart-2)' }));
+          inspSvg.appendChild(el('text', { x: 328, y: 50, 'text-anchor': 'middle', 'font-family': 'ui-monospace, monospace', 'font-size': '11.5', 'font-weight': '700', fill: 'var(--foreground)' }, 'REST'));
+          inspSvg.appendChild(el('text', { x: 328, y: 69, 'text-anchor': 'middle', 'font-family': 'ui-monospace, monospace', 'font-size': '10', fill: 'var(--muted-foreground)' }, 'wasRest = true'));
+
+          inspSvg.appendChild(el('path', { d: 'M 168 40 Q 210 18 248 40', fill: 'none', stroke: 'var(--muted-foreground)', 'stroke-width': '1.4', 'marker-end': 'url(#arr-o)' }));
+          inspSvg.appendChild(el('text', { x: 210, y: 22, 'text-anchor': 'middle', 'font-family': 'ui-monospace, monospace', 'font-size': '10', fill: 'var(--foreground)' }, 'p = 0.22'));
+
+          inspSvg.appendChild(el('path', { d: 'M 252 68 Q 210 92 172 68', fill: 'none', stroke: 'var(--primary)', 'stroke-width': '1.8', 'marker-end': 'url(#arr-o)' }));
+          inspSvg.appendChild(el('text', { x: 210, y: 98, 'text-anchor': 'middle', 'font-family': 'ui-monospace, monospace', 'font-size': '10', 'font-weight': '700', fill: 'var(--primary)' }, 'p = 1.00 (P(REST|REST) = 0)'));
+
+          inspSvg.appendChild(el('rect', { x: 16, y: 122, width: 388, height: 82, rx: 6, fill: 'var(--background)', stroke: 'var(--border)' }));
+          inspSvg.appendChild(el('text', { x: 28, y: 144, 'font-family': 'ui-monospace, monospace', 'font-size': '10.5', fill: 'var(--muted-foreground)' }, 'chaos=0:  |-----|-----|-----|-----| (360ms steady)'));
+          inspSvg.appendChild(el('text', { x: 28, y: 166, 'font-family': 'ui-monospace, monospace', 'font-size': '10.5', fill: 'var(--chart-2)' }, 'chaos=1:  |--|-|---|-|--|---|---| (90-200ms jitter)'));
+          inspSvg.appendChild(el('text', { x: 28, y: 188, 'font-family': 'ui-monospace, monospace', 'font-size': '10', fill: 'var(--foreground)' }, 'max(0.09, ...) floor stops overlapping ramp clicks'));
+        } else if (partId === 6) {
+          inspSvg.appendChild(el('text', { x: 14, y: 22, 'font-family': 'ui-monospace, monospace', 'font-size': '10.5', fill: 'var(--chart-1)' }, 'noise(t+=0.3): correlated step-wise contour'));
+          inspSvg.appendChild(el('polyline', { points: '20,76 68,62 116,52 164,64 212,80 260,70 308,48 356,38 400,52', fill: 'none', stroke: 'var(--chart-1)', 'stroke-width': '2.2' }));
+          [76,62,52,64,80,70,48,38,52].forEach((y, i) => inspSvg.appendChild(el('circle', { cx: 20 + i * 47.5, cy: y, r: '3.8', fill: 'var(--chart-1)' })));
+
+          inspSvg.appendChild(el('text', { x: 14, y: 118, 'font-family': 'ui-monospace, monospace', 'font-size': '10.5', fill: 'var(--chart-2)' }, 'random(ratios): uncorrelated full-scale leaps'));
+          inspSvg.appendChild(el('polyline', { points: '20,188 68,132 116,198 164,138 212,182 260,126 308,194 356,144 400,174', fill: 'none', stroke: 'var(--chart-2)', 'stroke-width': '1.8', 'stroke-dasharray': '4 2' }));
+          [188,132,198,138,182,126,194,144,174].forEach((y, i) => inspSvg.appendChild(el('circle', { cx: 20 + i * 47.5, cy: y, r: '3.8', fill: 'var(--chart-2)' })));
+        } else {
+          inspSvg.appendChild(el('rect', { x: 14, y: 20, width: 392, height: 68, rx: 6, fill: 'var(--background)', stroke: 'var(--chart-4)' }));
+          inspSvg.appendChild(el('text', { x: 26, y: 44, 'font-family': 'ui-monospace, monospace', 'font-size': '11.5', 'font-weight': '700', fill: 'var(--chart-4)' }, 'CHIME 2x (523–1047 Hz) · amp = 0.10 (-5.1 dB)'));
+          inspSvg.appendChild(el('text', { x: 26, y: 66, 'font-family': 'ui-monospace, monospace', 'font-size': '10', fill: 'var(--muted-foreground)' }, 'Opens ONLY when chaos > 0.65 (18.6s–41.4s) at 35% odds'));
+
+          inspSvg.appendChild(el('line', { x1: 14, y1: 110, x2: 406, y2: 110, stroke: 'var(--border)', 'stroke-dasharray': '3 3' }));
+          inspSvg.appendChild(el('text', { x: 210, y: 114, 'text-anchor': 'middle', 'font-family': 'ui-monospace, monospace', 'font-size': '10', fill: 'var(--muted-foreground)' }, 'Voice 1 Triangle Lead occupies 262–523 Hz'));
+
+          inspSvg.appendChild(el('rect', { x: 14, y: 132, width: 392, height: 68, rx: 6, fill: 'var(--background)', stroke: 'var(--chart-3)' }));
+          inspSvg.appendChild(el('text', { x: 26, y: 156, 'font-family': 'ui-monospace, monospace', 'font-size': '11.5', 'font-weight': '700', fill: 'var(--chart-3)' }, 'BASS 0.5x (131–262 Hz) · amp = 0.18'));
+          inspSvg.appendChild(el('text', { x: 26, y: 178, 'font-family': 'ui-monospace, monospace', 'font-size': '10', fill: 'var(--muted-foreground)' }, 'Retires early at sec = 56s so Lead resolves solo'));
+        }
+      }
+
+      function buildSections() {
+        sectionsEl.innerHTML = '';
+        partNav.innerHTML = '';
+
+        const currentLineObj = LINES.find((l) => l.n === activeLine) || LINES[0];
+        const activePartId = currentLineObj.p;
+
+        PARTS.forEach((part) => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.textContent = part.nav;
+          btn.className = part.id === activePartId ? 'btn btn-primary' : 'btn';
+          btn.addEventListener('click', () => {
+            const first = LINES.find((l) => l.p === part.id);
+            if (first) { activeLine = first.n; syncAll(true); }
+          });
+          partNav.appendChild(btn);
+
+          const card = document.createElement('section');
+          card.id = 'part-' + part.id;
+          card.className = 'card';
+          card.style.overflow = 'hidden';
+
+          const head = document.createElement('div');
+          head.className = 'sec-head';
+          head.innerHTML = `<span style="font-weight: 600;">${part.title}</span><span class="mono muted">${part.tag}</span>`;
+          card.appendChild(head);
+
+          const body = document.createElement('div');
+          body.className = 'sec-body';
+
+          LINES.filter((l) => l.p === part.id).forEach((l) => {
+            const row = document.createElement('button');
+            row.type = 'button';
+            row.id = 'line-row-' + l.n;
+            row.className = l.n === activeLine ? 'line-btn active' : 'line-btn';
+            const esc = l.c ? l.c.replace(/</g, '&lt;') : ' ';
+            row.innerHTML = `<span class="line-left"><span class="line-num">${l.n}</span><span class="line-code">${esc}</span></span><span class="line-tag">${l.tag}</span>`;
+            row.addEventListener('click', () => { activeLine = l.n; syncAll(false); });
+            body.appendChild(row);
+          });
+
+          card.appendChild(body);
+          sectionsEl.appendChild(card);
+        });
+      }
+
+      function updateInspector() {
+        const lineObj = LINES.find((l) => l.n === activeLine) || LINES[0];
+        const part = PARTS.find((p) => p.id === lineObj.p);
+
+        inspPartTitle.textContent = part.title;
+        inspSvgTag.textContent = part.tag;
+        renderPartSvg(part.id);
+
+        inspBadge.textContent = 'L' + lineObj.n;
+        inspTag.textContent = lineObj.tag;
+        inspCode.textContent = lineObj.c || '(blank separator line)';
+        inspWhat.textContent = lineObj.what;
+        inspWhy.textContent = lineObj.why;
+        inspRisk.textContent = lineObj.risk;
+
+        prevLineBtn.disabled = activeLine <= 1;
+        nextLineBtn.disabled = activeLine >= 106;
+        prevLineBtn.style.opacity = prevLineBtn.disabled ? '0.45' : '1';
+        nextLineBtn.style.opacity = nextLineBtn.disabled ? '0.45' : '1';
+      }
+
+      function syncAll(scrollToSection) {
+        buildSections();
+        updateInspector();
+        const elRow = document.getElementById('line-row-' + activeLine);
+        if (elRow && scrollToSection) elRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+
+      prevLineBtn.addEventListener('click', () => { if (activeLine > 1) { activeLine--; syncAll(true); } });
+      nextLineBtn.addEventListener('click', () => { if (activeLine < 106) { activeLine++; syncAll(true); } });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowDown' && activeLine < 106) { e.preventDefault(); activeLine++; syncAll(true); }
+        else if (e.key === 'ArrowUp' && activeLine > 1) { e.preventDefault(); activeLine--; syncAll(true); }
+        else if (e.key === 'ArrowRight') {
+          const curP = LINES[activeLine - 1].p;
+          const next = LINES.find((l) => l.p === curP + 1);
+          if (next) { e.preventDefault(); activeLine = next.n; syncAll(true); }
+        } else if (e.key === 'ArrowLeft') {
+          const curP = LINES[activeLine - 1].p;
+          const prev = LINES.find((l) => l.p === curP - 1);
+          if (prev) { e.preventDefault(); activeLine = prev.n; syncAll(true); }
+        }
+      });
+
+      syncAll(false);
+    })();
+  </script>
+</body>
+</html>
